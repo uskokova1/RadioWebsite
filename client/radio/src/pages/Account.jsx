@@ -3,17 +3,21 @@ import { useState } from "react";
 function Account() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [isLogin, setIsLogin] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Username: ",username);
-        console.log("Password: ",password);
+        if (isLogin) {
+            console.log("Logging in: ", username, password);
+        } else {
+            console.log("Creating Account: ", username, password);
+        }
     };
 
     return(
         <>
             <div>
-                <h2>Create an Account</h2>
+                <h2>{isLogin ? "Login" : "Create an Account"}</h2>
             </div>
             <form onSubmit={handleSubmit}>
                 <div>
@@ -33,8 +37,17 @@ function Account() {
                     />
                 </div>
 
-                <button type="submit">Create Account</button>
+                <button type="submit">
+                    {isLogin ? "Login" : "Create Account"}
+                </button>
             </form>
+
+            <p>
+                {isLogin ? "Don't have an account? " : "Already have an account? "}
+                <button onClick={() => setIsLogin(!isLogin)}>
+                    {isLogin ? "Sign Up" : "Login"}
+                </button>
+            </p>
         </>
     );
 }
