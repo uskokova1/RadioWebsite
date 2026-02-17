@@ -4,12 +4,11 @@ import "../css/NavBar.css"
 function NavBar() {
     return (
         <nav className="navbar">
-            <div className="navbar-brand">
-                <Link to="/Home">WSIN Radio</Link>
-            </div>
+            <Link to="/Home" className="navbar-brand">WSIN Radio</Link>
             <div className="navbar-links">
                 <Link to="/Home" className="nav-link">Home</Link>
                 <Link to="/Account" className="nav-link">Account</Link>
+                <Link to="/Blog" className="nav-link">Blogs</Link>
             </div>
         </nav>
     );

@@ -5,14 +5,18 @@ function Account() {
     const [password, setPassword] = useState("");
     const [isLogin, setIsLogin] = useState(false);
 
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (isLogin) {
             console.log("Logging in: ", username, password);
+            alert("Logged in!");
         } else {
             console.log("Creating Account: ", username, password);
+            alert("Account Created!")
         }
     };
+
 
     return(
         <>
