@@ -1,4 +1,4 @@
-import './App.css'
+import './css/App.css'
 import Home from './pages/Home'
 import Account from './pages/Account'
 import NavBar from './components/NavBar'
