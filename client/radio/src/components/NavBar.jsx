@@ -67,7 +67,7 @@ function NavBar() {
 
     return (
         <>
-            {/* 3 LINE BUTTON */}
+
             <button
                 onClick={() => setOpen(!open)}
                 style={{
@@ -78,7 +78,7 @@ function NavBar() {
                 <span style={styles.toggleIcon}>{open ? "✕" : "☰"}</span>
             </button>
 
-            {/* LE BACKDROP */}
+
             {open && (
                 <div
                     style={styles.backdrop}
@@ -86,19 +86,19 @@ function NavBar() {
                 />
             )}
 
-            {/* LE SIDEBAR */}
+
             <nav style={{
                 ...styles.sidebar,
                 transform: open ? "translateX(0)" : "translateX(-100%)",
             }}>
-                {/* WSIN phrase and logo */}
+
                 <div style={styles.brand}>
                     <p style={styles.brandEyebrow}>TUNED INTO</p>
                     <p style={styles.brandTitle}>WSIN</p>
                     <div style={styles.brandLine} />
                 </div>
 
-                {/* NAV LINKS */}
+
                 <div style={styles.linkList}>
                     {links.map(link => {
                         const active = location.pathname === link.to;
@@ -121,7 +121,8 @@ function NavBar() {
                     })}
                 </div>
 
-                {/* profile footer */}
+
+
                 <Link
                     to="/Profile"
                     onClick={() => setOpen(false)}
@@ -239,25 +240,6 @@ const styles = {
         fontSize: "12px",
         letterSpacing: "3px",
     },
-    /*
-    sidebarFooter: {
-        padding: "20px 28px",
-        borderTop: "1px solid #2a2a2a",
-    },
-    footerText: {
-        fontFamily: "'Courier New', monospace",
-        fontSize: "9px",
-        letterSpacing: "4px",
-        color: "#333",
-        margin: "0 0 2px 0",
-    },
-    footerSub: {
-        fontFamily: "'Courier New', monospace",
-        fontSize: "9px",
-        letterSpacing: "4px",
-        color: "#333",
-        margin: "0",
-    }, */
     profileFooter: {
         display: "flex",
         alignItem: "center",
