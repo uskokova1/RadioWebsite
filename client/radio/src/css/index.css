@@ -1,0 +1,32 @@
+/* Base resets only — layout handled by global.css and per-page styles */
+
+:root {
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove Vite defaults that break layout */
+body {
+    margin: 0;
+    padding: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    /* DO NOT add display:flex or place-items here — global.css handles body */
+}
+
+/* Reset default button hover from Vite */
+button:hover {
+    border-color: transparent;
+}
+
+button:focus,
+button:focus-visible {
+    outline: none;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
