@@ -1,20 +1,21 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
+/*below is placeholder for however we do events if we do it*/
+const mockEvents = [
+    {id: 1, title: "The Nest", description:"February 27th, 2026", thumbnail:null},
+];
+
 function Home() {
     const [playing, setPlaying] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
+    const [events, setEvents] = useState(mockEvents);
 
     useEffect(() => {
-        const onScroll = () => setScrolled(window.scrollY > 20);
-        window.addEventListener("scroll", onScroll);
-        return () => window.removeEventListener("scroll", onScroll);
+        //db hook up later
     }, []);
 
     return (
         <div style={styles.page}>
-
-
             <div style={styles.column}>
 
                 {/* HERO / GRAPHIC HOOK */}
@@ -65,6 +66,31 @@ function Home() {
                     </button>
                 </div>
 
+                {/*Events thingy*/}
+                <div style={styles.eventsSection}>
+                    <div style = {styles.eventsSectionHeader}>
+                        <p style = {styles.cardLabel}>Upcoming Events</p>
+                        <Link to = "/Events" style = {styles.eventsLink}>See All</Link>
+                    </div>
+                    {events.length === 0 ? (
+                        <p style = {styles.noEvents}>No Upcoming Events</p>
+                    ) : (
+                        <div style = {styles.eventsRow}>
+                            {events.slice(0, 3).map(ev => (
+                                <div key = {ev.id} style = {styles.eventChip}>
+                                    {ev.thumbnail && (
+                                        <img src={ev.thumbnail} alt={ev.title} style={styles.eventChipThumb} />
+                                    )}
+                                    <div style = {styles.eventChipBody}>
+                                        <p style={styles.eventChipTitle}>{ev.title}</p>
+                                        <p style={styles.eventChipDesc}>{ev.description?.slice(0, 60)}...</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
                 {/* BOTTOM NAV */}
                 <div style={styles.bottomNav}>
                     <Link to="/Account" style={styles.navBtn}>
@@ -74,10 +100,9 @@ function Home() {
                     <Link to="/Blog" style={styles.navBtn}>
                         Blogs
                     </Link>
-                    <button style={styles.navBtn}>
-                        {/* future: settings modal */}
+                    <Link to="/Events" style={styles.navBtn}>
                         Events
-                    </button>
+                    </Link>
                 </div>
 
             </div>
@@ -222,6 +247,71 @@ const styles = {
         flexShrink: 0,
         transition: "background 0.2s ease",
     },
+    //Events Styling
+    eventsSection: {
+        padding: "24px 32px",
+        borderTop: "1px solid #2a2a2a"
+    },
+    eventsSectionHeader: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: "16px"
+    },
+    eventsLink: {
+        fontFamily: "'Courier New', monospace",
+        fontSize: "10px",
+        color: "#fa4040",
+        letterSpacing: "2px",
+        textDecoration: "none"
+    },
+    noEvents: {
+        fontFamily: "'Courier New', monospace",
+        fontSize: "11px",
+        color: "#333",
+        letterSpacing: "2px"
+    },
+    eventsRow: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "12px"
+    },
+    eventChip: {
+        display: "flex",
+        gap: "14px",
+        background: "#222",
+        border: "1px solid #2e2e2e",
+        borderRadius: "8px",
+        overflow: "hidden",
+    },
+    eventChipThumb: {
+        width: "80px",
+        height: "80px",
+        objectFit: "cover",
+        flexShrink: 0
+    },
+    eventChipBody: {
+        padding: "12px 14px",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center"
+    },
+    eventChipTitle: {
+        fontFamily: "'Georgia', serif",
+        fontSize: "15px",
+        color: "#f5f0e8",
+        margin: "0 0 4px 0",
+        fontWeight: "bold"
+    },
+    eventChipDesc: {
+        fontFamily: "'Courier New', monospace",
+        fontSize: "10px",
+        color: "#666",
+        margin: "0",
+        letterSpacing: "1px"
+    },
+
+
     bottomNav: {
         display: "flex",
         gap: "12px",

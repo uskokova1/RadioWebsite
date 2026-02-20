@@ -3,6 +3,18 @@ import { Link, useLocation } from "react-router-dom";
 
 /*Basically, NavBar is what it says, the little hamburger that can take you from place to place */
 
+/*
+  PROFILE STATE NOTE:
+  Replace the mock `currentUser` object below with real user state once
+  auth is wired up. Pass it via context or props.
+  db hook { displayName, avatar } or however you do it
+*/
+
+const currentUser = {
+    displayName: null,
+    avatar: null,
+};
+
 function NavBar() {
     const [open, setOpen] = useState(false);
     const location = useLocation();
@@ -10,6 +22,8 @@ function NavBar() {
     const links = [
         { to: "/Home",    icon: "⌂", label: "Home"    },
         { to: "/Blog",    icon: "✎", label: "Blogs"   },
+        { to: "/Events",  icon: "◈", label: "Events"  },
+        { to: "/Contact", icon: "✉", label: "Contact" },
         { to: "/Account", icon: "◉", label: "Account" },
     ];
 
@@ -69,11 +83,27 @@ function NavBar() {
                     })}
                 </div>
 
-                {/* FOOTER */}
-                <div style={styles.sidebarFooter}>
-                    <p style={styles.footerText}>WSIN RADIO</p>
-                    <p style={styles.footerSub}>88.7 FM</p>
-                </div>
+                {/* profile footer */}
+                <Link
+                    to="/Profile"
+                    onClick={() => setOpen(false)}
+                    style={styles.profileFooter}
+                >
+                    <div style = {styles.profileCircle}>
+                        {currentUser.avatar
+                            ? <img src = {currentUser.avatar} alt = "Avatar" style={styles.profileImg} />
+                            : <span style = {styles.profileInitial}>?</span>
+                        }
+                    </div>
+                    <div style = {styles.profileText}>
+                        <p style = {styles.profileName}>
+                            {currentUser.displayName || "Guest"}
+                        </p>
+                        <p style = {styles.profileSub}>
+                            {currentUser.displayName ? "View Profile" : "Log In"}
+                        </p>
+                    </div>
+                </Link>
             </nav>
         </>
     );
@@ -171,6 +201,7 @@ const styles = {
         fontSize: "12px",
         letterSpacing: "3px",
     },
+    /*
     sidebarFooter: {
         padding: "20px 28px",
         borderTop: "1px solid #2a2a2a",
@@ -188,6 +219,57 @@ const styles = {
         letterSpacing: "4px",
         color: "#333",
         margin: "0",
+    }, */
+    profileFooter: {
+        display: "flex",
+        alignItem: "center",
+        gap: "12px",
+        padding: "16px 20px",
+        borderTop: "1px solid #2a2a2a",
+        textDecoration: "none",
+        transition: "background 0.2s ease",
+        background: "#161616",
+    },
+    profileCircle: {
+        width: "40px",
+        height: "40px",
+        borderRadius: "50%",
+        flexShrink: 0,
+        background: "#322d2d",
+        border: "2px solid #fa4040",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+    },
+    profileImg: {
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+    },
+    profileInitial: {
+        fontFamily: "'Georgia', serif",
+        fontSize: "16px",
+        color: "#fa4040",
+    },
+    profileText: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "2px",
+    },
+    profileName: {
+        fontFamily: "'Courier New', monospace",
+        fontSize: "11px",
+        color: "#ddd",
+        margin: "0",
+        letterSpacing: "1px",
+    },
+    profileSub: {
+        fontFamily: "'Courier New', monospace",
+        fontSize: "9px",
+        color: "#555",
+        margin: "0",
+        letterSpacing: "2px",
     },
 };
 
