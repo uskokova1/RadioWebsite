@@ -6,7 +6,7 @@ const Header = () => {
 
     return (
         <div>
-           <h1> header here, {userData && userData.name}</h1>
+           <h1> header here, {userData.name}</h1>
         </div>
     )
 }

@@ -115,15 +115,18 @@ export const sendVerifyOtp = async (req, res) => {
 
         await user.save();
 
+        //console.log(transporter);
         const mailOptions = {
             from: process.env.EMAIL,
             to: user.email,
             subject: "WSIN Account Verification",
             text: `Your code is ${otp}. Verify your account using this code`
         }
+
         await transporter.sendMail(mailOptions);
 
     } catch(err){
+        console.log(err);
         return res.json({success:false, message:err.message});
     }
 }

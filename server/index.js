@@ -1,18 +1,19 @@
+import './config/dotenv.js'
+//dotenv.config({path: './server/.env'});
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import connectDB from "./config/mongodb.js";
 import authRouter from './routes/authRoutes.js';
 import userRouter from "./routes/userRoutes.js";
 
 const app = express();
-dotenv.config({path: './server/.env'});
 const port = process.env.PORT || 4000;
 connectDB()
 
 app.use(express.json());
 app.use(cookieParser());
+
 
 const allowedOrigins = ['http://localhost:5173']
 app.use(cors({origin: allowedOrigins, credentials: true}));
