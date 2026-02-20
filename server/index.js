@@ -1,67 +1,28 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv').config(); //initializes environment variables from .env file
-const jwt = require('jsonwebtoken');
+import './config/dotenv.js'
+//dotenv.config({path: './server/.env'});
+import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import connectDB from "./config/mongodb.js";
+import authRouter from './routes/authRoutes.js';
+import userRouter from "./routes/userRoutes.js";
 
 const app = express();
-const PORT = 3000;
+const port = process.env.PORT || 4000;
+connectDB()
 
-app.use(cors()) //by default, allows any cross-origin-resource sharing     look it up xd
-
-//app.use(express.static('blah blah'))
-// to run the frontend,  run npm run dev in client/radio folder
-// the line above can be uncommented when we run npm run build which will compile react files so we can serve them from the nodejs server instead of localy
-
-app.get('/api/test', (req, res) => {
-  //res.sendFile("Test Message!");
-  res.send(JSON.stringify("test message!"));
-});
-
-//starts server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+app.use(express.json());
+app.use(cookieParser());
 
 
+const allowedOrigins = ['http://localhost:5173']
+app.use(cors({origin: allowedOrigins, credentials: true}));
 
-//code below is nowhere near done fr xd
-// Generating JWT
-app.post("/user/generateToken", (req, res) => {
-  // Validate User Here
-  // Then generate JWT Token
+app.use('/api/auth', authRouter)
+app.use('/api/user', userRouter)
 
-  let jwtSecretKey = process.env.JWT_SECRET_KEY;
-  let data = {
-    time: Date(),
-    userId: 12,
-  }
+app.get('/', (req, res) => {})
 
-  const token = jwt.sign(data, jwtSecretKey);
-
-  res.send(token);
-});
-
-// Verification of JWT
-app.get("/user/validateToken", (req, res) => {
-  // Tokens are generally passed in header of request
-  // Due to security reasons.
-
-  let tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
-  let jwtSecretKey = process.env.JWT_SECRET_KEY;
-
-  try {
-    const token = req.header(tokenHeaderKey);
-
-    const verified = jwt.verify(token, jwtSecretKey);
-    if (verified) {
-      return res.send("Successfully Verified");
-    } else {
-      // Access Denied
-      return res.status(401).send(error);
-    }
-  } catch (error) {
-    // Access Denied
-    return res.status(401).send(error);
-  }
-});
-
+app.listen(port, () => {
+  console.log(`Listening on port ${port}`);
+})
