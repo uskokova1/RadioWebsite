@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import "../css/global.css";
+
 
 function Events() {
     const [events, setEvents] = useState([]);

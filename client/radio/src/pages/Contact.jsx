@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../css/global.css";
+
 
 // ADD OR REMOVE MEMBERS HERE — just copy/paste a member object
 const TEAM_MEMBERS = [

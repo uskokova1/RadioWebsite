@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../css/global.css";
+
 
 /*this whole thing has to be remade*/
 
