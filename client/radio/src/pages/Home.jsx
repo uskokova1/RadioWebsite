@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import {useState, useEffect, useContext} from "react";
+import {Link, useNavigate} from "react-router-dom";
+import {AppContext} from "../context/AppContext.jsx";
 
 /*below is placeholder for however we do events if we do it*/
 const mockEvents = [
@@ -9,13 +10,18 @@ const mockEvents = [
 function Home() {
     const [playing, setPlaying] = useState(false);
     const [events, setEvents] = useState(mockEvents);
+    const navigate = useNavigate();
+
+    const {userData} = useContext(AppContext)
+    console.log(userData)
 
     useEffect(() => {
         //db hook up later
     }, []);
 
     return (
-        <div style={styles.page}>
+        <div className='min-h-1 flex justify-center bg-[#111]'>
+
             <div style={styles.column}>
 
                 {/* HERO / GRAPHIC HOOK */}
@@ -27,6 +33,12 @@ function Home() {
                         <p style={styles.heroSub}>Rewind. Play. Repeat.</p>
                     </div>
                     <div style={styles.heroBadge}>1590 AM</div>
+                    {!userData.isAccountVerified &&
+                    <button onClick={()=>{
+                        navigate("/email-verify")
+                    }}
+                            className='text-l text-gray-800 bg-red-600 rounded-full p-1 absolute right-8 top-18 z-10 hover:scale-110 hover:font-bold'> Veryify Account </button>
+                    }
                 </div>
 
                 {/* ABOUT */}
@@ -104,20 +116,13 @@ function Home() {
                         Events
                     </Link>
                 </div>
-
             </div>
+
         </div>
     );
 }
 
 const styles = {
-    page: {
-        minHeight: "100vh",
-        background: "#111",
-        display: "flex",
-        justifyContent: "center",
-        // noise texture via repeating CSS — real grain applied in index.css
-    },
     column: {
         width: "100%",
         maxWidth: "760px",

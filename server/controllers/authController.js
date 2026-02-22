@@ -178,7 +178,7 @@ export const sendResetOtp = async (req, res) => {
         return res.json({success:false, message:"email required"});
     }
     try{
-        const user = await userModel.findById(email);
+        const user = await userModel.findOne({"email": email});
         if (!user){
             return res.json({success:false, message:"user not found"});
         }
@@ -212,7 +212,7 @@ export const resetPassword = async (req, res) => {
     }
 
     try{
-        const user = await userModel.findById(email);
+        const user = await userModel.findOne({"email":email});
         if(!user){
             return res.json({success:false, message:"user not found"});
         }
