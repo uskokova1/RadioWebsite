@@ -13,7 +13,7 @@ import Blog from './pages/Blog'
 import Events from './pages/Events'
 import Contact from './pages/Contact'
 import Profile from './pages/Profile'
-
+import DepthMap from './pages/DepthMap.jsx'
 
 const App = () => {
 
@@ -22,6 +22,7 @@ const App = () => {
             <ToastContainer/>
             <Routes>
                 <Route path='/' element={<Home />} />
+                <Route path='depth' element={<DepthMap />} />
                 <Route path='/login' element={<Login />} />
                 <Route path='/email-verify' element={<EmailVerify />} />
                 <Route path='/reset-password' element={<ResetPassword />} />

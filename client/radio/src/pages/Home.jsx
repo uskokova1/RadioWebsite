@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import Wigglie from "../components/Wigglie.jsx";
 
 /*below is placeholder for however we do events if we do it*/
 const mockEvents = [
@@ -22,8 +23,11 @@ function Home() {
                 <div style={styles.hero}>
                     <div style={styles.heroInner}>
                         <p style={styles.heroEyebrow}>TUNED INTO</p>
-                        <h1 style={styles.heroTitle}>WSIN<br />RADIO</h1>
-                        <div style={styles.heroLine} />
+                        <Wigglie>
+                            <h1 style={styles.heroTitle}>WSIN<br />RADIO</h1>
+                            <div style={styles.heroLine} />
+                        </Wigglie>
+
                         <p style={styles.heroSub}>Rewind. Play. Repeat.</p>
                     </div>
                     <div style={styles.heroBadge}>1590 AM</div>
@@ -104,7 +108,11 @@ function Home() {
                         Events
                     </Link>
                 </div>
-
+                {/*  testing stuff
+                <Wigglie className='text-4xl text-white justify-center flex'>
+                    fjeiafjdnavufasondnu
+                </Wigglie>
+                */}
             </div>
         </div>
     );
