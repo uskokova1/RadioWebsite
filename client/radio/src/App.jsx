@@ -13,6 +13,8 @@ import Blog from './pages/Blog'
 import Events from './pages/Events'
 import Contact from './pages/Contact'
 import Profile from './pages/Profile'
+import BlogMaker from "./pages/BlogMaker.jsx";
+import BlogEditor from "./obsolete/blogEditor.jsx";
 
 
 const App = () => {
@@ -21,6 +23,7 @@ const App = () => {
         <div>
             <ToastContainer/>
             <Routes>
+                <Route path="/blog" element={<BlogMaker />}/>
                 <Route path='/' element={<Home />} />
                 <Route path='/login' element={<Login />} />
                 <Route path='/email-verify' element={<EmailVerify />} />
