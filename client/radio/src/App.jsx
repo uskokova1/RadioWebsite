@@ -14,6 +14,7 @@ import Events from './pages/Events'
 import Contact from './pages/Contact'
 import Profile from './pages/Profile'
 import DepthMap from './pages/DepthMap.jsx'
+import Home2 from "./pages/Home2.jsx";
 
 const App = () => {
 
@@ -21,12 +22,12 @@ const App = () => {
         <div>
             <ToastContainer/>
             <Routes>
-                <Route path='/' element={<Home />} />
+                <Route path='/' element={<Home2 />} />
                 <Route path='depth' element={<DepthMap />} />
                 <Route path='/login' element={<Login />} />
                 <Route path='/email-verify' element={<EmailVerify />} />
                 <Route path='/reset-password' element={<ResetPassword />} />
-                <Route path="/Home" element={<Home />} />
+                <Route path="/Home" element={<Home2 />} />
                 <Route path="/Account" element={<Account />} />
                 <Route path="/Blog" element={<Blog />} />
                 <Route path="/Events" element={<Events />} />
