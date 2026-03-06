@@ -20,6 +20,7 @@ const App = () => {
     return (
         <div>
             <ToastContainer/>
+            <NavBar/>
             <Routes>
                 <Route path='/' element={<Home />} />
                 <Route path='/login' element={<Login />} />
