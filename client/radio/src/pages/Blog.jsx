@@ -1,73 +1,134 @@
-import { useState } from "react";
-
-
-/*this whole thing has to be remade*/
+import { useState, useEffect, useContext } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { AppContext } from "../context/AppContext.jsx";
 
 function Blog() {
-    const [posts, setPosts] = useState([]);
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [showForm, setShowForm] = useState(false);
-    const [editingId, setEditingId] = useState(null);
+    const { backendUrl, userData } = useContext(AppContext);
+    const isAdmin = userData && userData.role === 'admin';
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (editingId !== null) {
-            // edit logic - replace with db update call later
-            setPosts(posts.map(post =>
-                post.id === editingId ? { ...post, title, description } : post
-            ));
-            setEditingId(null);
-        } else {
-            // creation logic - replace later
-            const newPost = {
-                id: Date.now(),
-                title,
-                description,
-                // author: currentUser.id  <-- hook up to account later
-            };
-            setPosts([...posts, newPost]);
+    const [posts, setPosts]             = useState([]);
+    const [loading, setLoading]         = useState(true);
+    const [title, setTitle]             = useState("");
+    const [description, setDescription] = useState("");
+    const [showForm, setShowForm]       = useState(false);
+    const [editingId, setEditingId]     = useState(null);
+    const [submitting, setSubmitting]   = useState(false);
+
+    useEffect(() => {
+        fetchPosts();
+    }, []);
+
+    const fetchPosts = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + '/api/posts');
+            if (data.success) {
+                setPosts(data.posts);
+            } else {
+                toast.error(data.message);
+            }
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setLoading(false);
         }
+    };
+
+    const resetForm = () => {
         setTitle("");
         setDescription("");
         setShowForm(false);
+        setEditingId(null);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            if (editingId !== null) {
+                const { data } = await axios.put(
+                    `${backendUrl}/api/posts/${editingId}`,
+                    { title, description },
+                    { withCredentials: true }
+                );
+                if (data.success) {
+                    setPosts(posts.map(p => p._id === editingId ? data.post : p));
+                    toast.success("Post updated");
+                    resetForm();
+                } else {
+                    toast.error(data.message);
+                }
+            } else {
+                const { data } = await axios.post(
+                    `${backendUrl}/api/posts`,
+                    { title, description },
+                    { withCredentials: true }
+                );
+                if (data.success) {
+                    setPosts([data.post, ...posts]);
+                    toast.success("Post created");
+                    resetForm();
+                } else {
+                    toast.error(data.message);
+                }
+            }
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const handleEdit = (post) => {
         setTitle(post.title);
         setDescription(post.description);
-        setEditingId(post.id);
+        setEditingId(post._id);
         setShowForm(true);
     };
 
-    const handleDelete = (id) => {
-        // post deletion logic - replace with db delete call later
-        setPosts(posts.filter(post => post.id !== id));
+    const handleDelete = async (id) => {
+        try {
+            const { data } = await axios.delete(
+                `${backendUrl}/api/posts/${id}`,
+                { withCredentials: true }
+            );
+            if (data.success) {
+                setPosts(posts.filter(p => p._id !== id));
+                toast.success("Post deleted");
+            } else {
+                toast.error(data.message);
+            }
+        } catch (err) {
+            toast.error(err.message);
+        }
     };
+
+    const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric',
+    });
 
     return (
         <div style={styles.page}>
             <div style={styles.column}>
 
-                {/* HEADER */}
                 <div style={styles.header}>
                     <p style={styles.eyebrow}>WSIN RADIO</p>
                     <h2 style={styles.pageTitle}>WSIN Blogs</h2>
                     <div style={styles.titleLine} />
                 </div>
 
-                {/* NEW POST BUTTON */}
-                <div style={styles.section}>
-                    <button
-                        style={{ ...styles.newPostBtn, ...(showForm ? styles.cancelBtn : {}) }}
-                        onClick={() => { setShowForm(!showForm); setEditingId(null); setTitle(""); setDescription(""); }}
-                    >
-                        {showForm ? "✕ Cancel" : "+ New Post"}
-                    </button>
-                </div>
+                {isAdmin && (
+                    <div style={styles.section}>
+                        <button
+                            style={{ ...styles.newPostBtn, ...(showForm ? styles.cancelBtn : {}) }}
+                            onClick={() => showForm ? resetForm() : setShowForm(true)}
+                        >
+                            {showForm ? "✕ Cancel" : "+ New Post"}
+                        </button>
+                    </div>
+                )}
 
-                {/* FORM */}
-                {showForm && (
+                {isAdmin && showForm && (
                     <form onSubmit={handleSubmit} style={styles.form}>
                         <p style={styles.formLabel}>{editingId !== null ? "EDIT POST" : "NEW POST"}</p>
                         <input
@@ -76,33 +137,37 @@ function Blog() {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             style={styles.input}
+                            required
                         />
                         <textarea
                             placeholder="Write something..."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             style={styles.textarea}
+                            required
                         />
-                        <button type="submit" style={styles.submitBtn}>
-                            {editingId !== null ? "Save Changes" : "Post"}
+                        <button type="submit" style={styles.submitBtn} disabled={submitting}>
+                            {submitting ? "Saving..." : editingId !== null ? "Save Changes" : "Post"}
                         </button>
                     </form>
                 )}
 
-                {/* POST LIST */}
                 <div style={styles.postList}>
-                    {posts.length === 0 && (
-                        <p style={styles.emptyMsg}>No posts yet. Be the first.</p>
-                    )}
+                    {loading && <p style={styles.emptyMsg}>Loading posts...</p>}
+                    {!loading && posts.length === 0 && <p style={styles.emptyMsg}>No posts yet.</p>}
                     {posts.map(post => (
-                        <div key={post.id} style={styles.postCard}>
-                            <p style={styles.postMeta}>POST #{post.id.toString().slice(-4)}</p>
+                        <div key={post._id} style={styles.postCard}>
+                            <p style={styles.postMeta}>
+                                {post.author?.username || 'WSIN'}&nbsp;·&nbsp;{formatDate(post.createdAt)}
+                            </p>
                             <h3 style={styles.postTitle}>{post.title}</h3>
                             <p style={styles.postDesc}>{post.description}</p>
-                            <div style={styles.postActions}>
-                                <button style={styles.editBtn} onClick={() => handleEdit(post)}>Edit</button>
-                                <button style={styles.deleteBtn} onClick={() => handleDelete(post.id)}>Delete</button>
-                            </div>
+                            {isAdmin && (
+                                <div style={styles.postActions}>
+                                    <button style={styles.editBtn} onClick={() => handleEdit(post)}>Edit</button>
+                                    <button style={styles.deleteBtn} onClick={() => handleDelete(post._id)}>Delete</button>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
