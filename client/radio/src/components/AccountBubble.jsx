@@ -12,10 +12,10 @@ const AccountBubble = () => {
     return (
         <div>
             {userData ?
-                <div className='w-8 h-8 flex justify-center items-center rounded-full bg-black text-white relative group'>
+                <div className='w-8 h-8 flex m-5 justify-center items-center rounded-full bg-black text-white relative group'>
                     {userData.name[0].toUpperCase()}
-                    <div className='absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-10'>
-                        <ul className='list-none m-0 p-2 bg-gray-100 text-sm'>
+                    <div className='absolute hidden group-hover:block bottom-8 z-10 text-black pt-10'>
+                        <ul className='list-none m-0 p-2 bg-gray-100 text-sm rounded-3xl'>
                             {!userData.isAccountVerified &&
                                 <li onClick={() => sendVerificationOtp()}
                                     className='py-1 px-2 hover:bg-gray-200 cursor-pointed'>Verify email</li>

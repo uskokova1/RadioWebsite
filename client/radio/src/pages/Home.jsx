@@ -24,6 +24,7 @@ function Home() {
 
     return (
         <div className='min-h-1 flex justify-center bg-[#111]'>
+
             <div style={styles.column}>
 
                 {/* HERO */}
@@ -56,6 +57,7 @@ function Home() {
                         Adanti Student Center! We bring you a <b>diverse mix of music, podcasts,
                         and student-led content,</b> making sure there's always something fresh to tune into.
                     </p>
+                    {/* db hook later: fetch station bio from /api/station/about */}
                 </div>
 
                 {/* LIVE PLAYER */}
@@ -71,6 +73,7 @@ function Home() {
                                 {playing ? "Live Stream — 1590 AM" : "Stream Offline"}
                             </p>
                             <p style={styles.playerSub}>
+                                {/* db hook later: fetch current track from /api/stream/nowplaying */}
                                 {playing ? "Now Playing: Nothing!" : "Tap to connect"}
                             </p>
                         </div>
@@ -117,6 +120,7 @@ function Home() {
                 </div>
 
             </div>
+
         </div>
     );
 }
