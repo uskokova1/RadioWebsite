@@ -10,15 +10,16 @@ export const getUserData = async (req, res) => {
             return res.json({success:false, message:"User not found"})
         }
 
-        res.json({
+        return res.json({
             success:true,
             userData:{
                 name: user.username,
                 isAccountVerified: user.isAccountVerified,
+                role: user.role,
             }
         })
 
     }catch(err){
         return res.status(400).send({success:false, message:err.message});
     }
-}
+};

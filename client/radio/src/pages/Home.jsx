@@ -1,30 +1,32 @@
-import {useState, useEffect, useContext} from "react";
-import {Link, useNavigate} from "react-router-dom";
-import {AppContext} from "../context/AppContext.jsx";
-
-/*below is placeholder for however we do events if we do it*/
-const mockEvents = [
-    {id: 1, title: "The Nest", description:"February 27th, 2026", thumbnail:null},
-];
+import { useState, useEffect, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { AppContext } from "../context/AppContext.jsx";
 
 function Home() {
     const [playing, setPlaying] = useState(false);
-    const [events, setEvents] = useState(mockEvents);
+    const [events, setEvents]   = useState([]);
     const navigate = useNavigate();
 
-    const {userData} = useContext(AppContext)
-    console.log(userData)
+    const { backendUrl, userData } = useContext(AppContext);
 
     useEffect(() => {
-        //db hook up later
+        const fetchEvents = async () => {
+            try {
+                const { data } = await axios.get(backendUrl + '/api/events');
+                if (data.success) setEvents(data.events);
+            } catch (err) {
+                console.error('Failed to load events:', err.message);
+            }
+        };
+        fetchEvents();
     }, []);
 
     return (
         <div className='min-h-1 flex justify-center bg-[#111]'>
-
             <div style={styles.column}>
 
-                {/* HERO / GRAPHIC HOOK */}
+                {/* HERO */}
                 <div style={styles.hero}>
                     <div style={styles.heroInner}>
                         <p style={styles.heroEyebrow}>TUNED INTO</p>
@@ -33,12 +35,16 @@ function Home() {
                         <p style={styles.heroSub}>Rewind. Play. Repeat.</p>
                     </div>
                     <div style={styles.heroBadge}>1590 AM</div>
-                    {!userData.isAccountVerified &&
-                    <button onClick={()=>{
-                        navigate("/email-verify")
-                    }}
-                            className='text-l text-gray-800 bg-red-600 rounded-full p-1 absolute right-8 top-18 z-10 hover:scale-110 hover:font-bold'> Veryify Account </button>
-                    }
+
+                    {/* Guard: userData can be false when not logged in */}
+                    {userData && !userData.isAccountVerified && (
+                        <button
+                            onClick={() => navigate("/email-verify")}
+                            className='text-l text-gray-800 bg-red-600 rounded-full p-1 absolute right-8 top-18 z-10 hover:scale-110 hover:font-bold'
+                        >
+                            Verify Account
+                        </button>
+                    )}
                 </div>
 
                 {/* ABOUT */}
@@ -47,9 +53,9 @@ function Home() {
                     <p style={styles.cardText}>
                         Welcome to <b>WSIN,</b> Southern Connecticut State University's
                         student-run radio station, broadcasting straight from Room 210 in the
-                        Adanti Student Center! We bring you a <b>diverse mix of music, podcasts, and student-led content,</b> making sure there's always something fresh to tune into.
+                        Adanti Student Center! We bring you a <b>diverse mix of music, podcasts,
+                        and student-led content,</b> making sure there's always something fresh to tune into.
                     </p>
-                    {/* db hook later: fetch station bio from /api/station/about */}
                 </div>
 
                 {/* LIVE PLAYER */}
@@ -58,14 +64,13 @@ function Home() {
                         <div style={{
                             ...styles.playerDot,
                             background: playing ? "#f87171" : "#555",
-                            boxShadow: playing ? "0 0 10px #f87171" : "none"
+                            boxShadow: playing ? "0 0 10px #f87171" : "none",
                         }} />
                         <div>
                             <p style={styles.playerTrack}>
                                 {playing ? "Live Stream — 1590 AM" : "Stream Offline"}
                             </p>
                             <p style={styles.playerSub}>
-                                {/* db hook later: fetch current track from /api/stream/nowplaying */}
                                 {playing ? "Now Playing: Nothing!" : "Tap to connect"}
                             </p>
                         </div>
@@ -78,24 +83,23 @@ function Home() {
                     </button>
                 </div>
 
-                {/*Events thingy*/}
+                {/* UPCOMING EVENTS — live from MongoDB, newest 3 */}
                 <div style={styles.eventsSection}>
-                    <div style = {styles.eventsSectionHeader}>
-                        <p style = {styles.cardLabel}>Upcoming Events</p>
-                        <Link to = "/Events" style = {styles.eventsLink}>See All</Link>
+                    <div style={styles.eventsSectionHeader}>
+                        <p style={styles.cardLabel}>Upcoming Events</p>
+                        <Link to="/Events" style={styles.eventsLink}>See All</Link>
                     </div>
                     {events.length === 0 ? (
-                        <p style = {styles.noEvents}>No Upcoming Events</p>
+                        <p style={styles.noEvents}>No Upcoming Events</p>
                     ) : (
-                        <div style = {styles.eventsRow}>
+                        <div style={styles.eventsRow}>
                             {events.slice(0, 3).map(ev => (
-                                <div key = {ev.id} style = {styles.eventChip}>
-                                    {ev.thumbnail && (
-                                        <img src={ev.thumbnail} alt={ev.title} style={styles.eventChipThumb} />
-                                    )}
-                                    <div style = {styles.eventChipBody}>
+                                <div key={ev._id} style={styles.eventChip}>
+                                    <div style={styles.eventChipBody}>
                                         <p style={styles.eventChipTitle}>{ev.title}</p>
-                                        <p style={styles.eventChipDesc}>{ev.description?.slice(0, 60)}...</p>
+                                        <p style={styles.eventChipDesc}>
+                                            {ev.description?.slice(0, 80)}{ev.description?.length > 80 ? '...' : ''}
+                                        </p>
                                     </div>
                                 </div>
                             ))}
@@ -106,18 +110,13 @@ function Home() {
                 {/* BOTTOM NAV */}
                 <div style={styles.bottomNav}>
                     <Link to="/Account" style={styles.navBtn}>
-                        {/* db hook later: swap to "My Account" if logged in */}
-                        Log In
+                        {userData ? "My Account" : "Log In"}
                     </Link>
-                    <Link to="/Blog" style={styles.navBtn}>
-                        Blogs
-                    </Link>
-                    <Link to="/Events" style={styles.navBtn}>
-                        Events
-                    </Link>
+                    <Link to="/Blog" style={styles.navBtn}>Blogs</Link>
+                    <Link to="/Events" style={styles.navBtn}>Events</Link>
                 </div>
-            </div>
 
+            </div>
         </div>
     );
 }

@@ -31,7 +31,7 @@ export const register = async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-            maxAge: 3*24*160*60*1000
+            maxAge: 3*24*60*60*1000
         })
 
         const mailOptions = {
@@ -58,6 +58,7 @@ export const login = async (req, res) => {
 
     try{
         const user = await userModel.findOne({email:email});
+
         if(!user){
             return res.json({success:false, message:"invalid email"});
         }
@@ -77,7 +78,8 @@ export const login = async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-            maxAge: 3*24*160*60*1000
+            /*maxAge: 3*24*160*60*1000*/
+            maxAge: 3*24*60*60*1000 //correct calculation
         })
 
         return res.json({success: true})
@@ -105,6 +107,10 @@ export const sendVerifyOtp = async (req, res) => {
         const {userId} = req.body;
         const user = await userModel.findById(userId);
 
+        if (!user){
+            return res.json({success:false, message:"User does not exist"});
+        }
+
         if(user.isAccountVerified){
             return res.json({success:false, message:"Account already verified"});
         }
@@ -112,7 +118,6 @@ export const sendVerifyOtp = async (req, res) => {
         const otp = String(Math.floor(100000+ Math.random() * 900000))
         user.verifyOtp = otp
         user.verifyOtpExpiredAt = Date.now() + 10*60*1000
-
         await user.save();
 
         //console.log(transporter);
@@ -122,8 +127,9 @@ export const sendVerifyOtp = async (req, res) => {
             subject: "WSIN Account Verification",
             text: `Your code is ${otp}. Verify your account using this code`
         }
-
         await transporter.sendMail(mailOptions);
+
+        return res.json({success:true, message:"Verification sent"});
 
     } catch(err){
         console.log(err);

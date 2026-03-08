@@ -1,61 +1,111 @@
-import { useState, useRef } from "react";
-
+import { useState, useEffect, useContext } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { AppContext } from "../context/AppContext.jsx";
 
 function Events() {
-    const [events, setEvents] = useState([]);
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [thumbnail, setThumbnail] = useState(null); // base64 preview
-    const [showForm, setShowForm] = useState(false);
-    const [editingId, setEditingId] = useState(null);
-    const fileRef = useRef(null);
+    const { backendUrl, userData } = useContext(AppContext);
+    const isAdmin = userData && userData.role === 'admin';
 
-    const handleImage = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => setThumbnail(ev.target.result);
-        reader.readAsDataURL(file);
+    const [events, setEvents]           = useState([]);
+    const [loading, setLoading]         = useState(true);
+    const [title, setTitle]             = useState("");
+    const [description, setDescription] = useState("");
+    const [showForm, setShowForm]       = useState(false);
+    const [editingId, setEditingId]     = useState(null);
+    const [submitting, setSubmitting]   = useState(false);
+
+    useEffect(() => {
+        fetchEvents();
+    }, []);
+
+    const fetchEvents = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + '/api/events');
+            if (data.success) {
+                setEvents(data.events);
+            } else {
+                toast.error(data.message);
+            }
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const resetForm = () => {
-        setTitle(""); setDescription(""); setThumbnail(null);
-        setShowForm(false); setEditingId(null);
-        if (fileRef.current) fileRef.current.value = "";
+        setTitle("");
+        setDescription("");
+        setShowForm(false);
+        setEditingId(null);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (editingId !== null) {
-            // edit logic - replace with db update call later
-            setEvents(events.map(ev =>
-                ev.id === editingId ? { ...ev, title, description, thumbnail } : ev
-            ));
-        } else {
-            // creation logic - replace with db insert call later
-            setEvents([...events, {
-                id: Date.now(),
-                title,
-                description,
-                thumbnail,
-                // author: currentUser.id  <-- hook up to account later
-            }]);
+        setSubmitting(true);
+        try {
+            if (editingId !== null) {
+                const { data } = await axios.put(
+                    `${backendUrl}/api/events/${editingId}`,
+                    { title, description },
+                    { withCredentials: true }
+                );
+                if (data.success) {
+                    setEvents(events.map(ev => ev._id === editingId ? data.event : ev));
+                    toast.success("Event updated");
+                    resetForm();
+                } else {
+                    toast.error(data.message);
+                }
+            } else {
+                const { data } = await axios.post(
+                    `${backendUrl}/api/events`,
+                    { title, description },
+                    { withCredentials: true }
+                );
+                if (data.success) {
+                    setEvents([data.event, ...events]);
+                    toast.success("Event created");
+                    resetForm();
+                } else {
+                    toast.error(data.message);
+                }
+            }
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setSubmitting(false);
         }
-        resetForm();
     };
 
     const handleEdit = (ev) => {
         setTitle(ev.title);
         setDescription(ev.description);
-        setThumbnail(ev.thumbnail);
-        setEditingId(ev.id);
+        setEditingId(ev._id);
         setShowForm(true);
     };
 
-    const handleDelete = (id) => {
-        // delete logic - replace with db delete call later
-        setEvents(events.filter(ev => ev.id !== id));
+    const handleDelete = async (id) => {
+        try {
+            const { data } = await axios.delete(
+                `${backendUrl}/api/events/${id}`,
+                { withCredentials: true }
+            );
+            if (data.success) {
+                setEvents(events.filter(ev => ev._id !== id));
+                toast.success("Event deleted");
+            } else {
+                toast.error(data.message);
+            }
+        } catch (err) {
+            toast.error(err.message);
+        }
     };
+
+    const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric',
+    });
 
     return (
         <div style={styles.page}>
@@ -68,73 +118,58 @@ function Events() {
                     <p style={styles.headerSub}>What's happening at the station.</p>
                 </div>
 
-                <div style={styles.section}>
-                    <button
-                        style={{ ...styles.newBtn, ...(showForm ? styles.cancelBtn : {}) }}
-                        onClick={() => showForm ? resetForm() : setShowForm(true)}
-                    >
-                        {showForm ? "✕ Cancel" : "+ New Event"}
-                    </button>
-                </div>
+                {isAdmin && (
+                    <div style={styles.section}>
+                        <button
+                            style={{ ...styles.newBtn, ...(showForm ? styles.cancelBtn : {}) }}
+                            onClick={() => showForm ? resetForm() : setShowForm(true)}
+                        >
+                            {showForm ? "✕ Cancel" : "+ New Event"}
+                        </button>
+                    </div>
+                )}
 
-                {showForm && (
+                {isAdmin && showForm && (
                     <form onSubmit={handleSubmit} style={styles.form}>
                         <p style={styles.formLabel}>{editingId !== null ? "EDIT EVENT" : "NEW EVENT"}</p>
-
-                        {/* THUMBNAIL UPLOAD */}
-                        <div
-                            style={styles.thumbUpload}
-                            onClick={() => fileRef.current.click()}
-                        >
-                            {thumbnail
-                                ? <img src={thumbnail} alt="thumbnail" style={styles.thumbPreview} />
-                                : <span style={styles.thumbPlaceholder}>+ Add Thumbnail</span>
-                            }
-                        </div>
-                        <input
-                            ref={fileRef}
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImage}
-                            style={{ display: "none" }}
-                        />
-
                         <input
                             type="text"
                             placeholder="Event Title"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             style={styles.input}
+                            required
                         />
                         <textarea
                             placeholder="Describe the event..."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             style={styles.textarea}
+                            required
                         />
-                        <button type="submit" style={styles.submitBtn}>
-                            {editingId !== null ? "Save Changes" : "Post Event"}
+                        <button type="submit" style={styles.submitBtn} disabled={submitting}>
+                            {submitting ? "Saving..." : editingId !== null ? "Save Changes" : "Post Event"}
                         </button>
                     </form>
                 )}
 
                 <div style={styles.list}>
-                    {events.length === 0 && (
-                        <p style={styles.emptyMsg}>No events yet. Add one above.</p>
-                    )}
+                    {loading && <p style={styles.emptyMsg}>Loading events...</p>}
+                    {!loading && events.length === 0 && <p style={styles.emptyMsg}>No events yet. Check back soon.</p>}
                     {events.map(ev => (
-                        <div key={ev.id} style={styles.card}>
-                            {ev.thumbnail && (
-                                <img src={ev.thumbnail} alt={ev.title} style={styles.cardThumb} />
-                            )}
+                        <div key={ev._id} style={styles.card}>
                             <div style={styles.cardBody}>
-                                <p style={styles.cardMeta}>EVENT</p>
+                                <p style={styles.cardMeta}>
+                                    {ev.author?.username || 'WSIN'}&nbsp;·&nbsp;{formatDate(ev.createdAt)}
+                                </p>
                                 <h3 style={styles.cardTitle}>{ev.title}</h3>
                                 <p style={styles.cardDesc}>{ev.description}</p>
-                                <div style={styles.cardActions}>
-                                    <button style={styles.editBtn} onClick={() => handleEdit(ev)}>Edit</button>
-                                    <button style={styles.deleteBtn} onClick={() => handleDelete(ev.id)}>Delete</button>
-                                </div>
+                                {isAdmin && (
+                                    <div style={styles.cardActions}>
+                                        <button style={styles.editBtn} onClick={() => handleEdit(ev)}>Edit</button>
+                                        <button style={styles.deleteBtn} onClick={() => handleDelete(ev._id)}>Delete</button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}
