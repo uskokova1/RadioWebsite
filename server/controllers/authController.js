@@ -111,7 +111,7 @@ export const sendVerifyOtp = async (req, res) => {
 
         const otp = String(Math.floor(100000+ Math.random() * 900000))
         user.verifyOtp = otp
-        user.verifyOtpExpireAt = Date.now() + 10*60*1000
+        user.verifyOtpExpiredAt = Date.now() + 10*60*1000
 
         await user.save();
 
@@ -148,7 +148,7 @@ export const verifyEmail = async (req, res) => {
             return res.json({success: false, message: "invalid code"})
         }
 
-        if(user.verifyOtpExpireAt < Date.now()){
+        if(user.verifyOtpExpiredAt < Date.now()){
             return res.json({success:false, message:"code expired"})
         }
 
@@ -185,7 +185,7 @@ export const sendResetOtp = async (req, res) => {
 
         const otp = String(Math.floor(100000+ Math.random() * 900000))
         user.resetOtp = otp
-        user.resetOtpExpireAt = Date.now() + 15*60*1000
+        user.resetOtpExpiredAt = Date.now() + 15*60*1000
 
         await user.save();
 
@@ -219,13 +219,13 @@ export const resetPassword = async (req, res) => {
         if(user.resetOtp == "" || user.resetOtp !== otp){
             return res.json({success:false, message: "invalid OTP"})
         }
-        if(user.resetOtpExpireAt < Date.now()){
+        if(user.resetOtpExpiredAt < Date.now()){
             return res.json({success:false, message:"code expired"})
         }
         const hashedPwd = await bcrypt.hash(newPassword, 10);
         user.password = hashedPwd;
         user.resetOtp = ''
-        user.resetOtpExpireAt = 0;
+        user.resetOtpExpiredAt = 0;
 
         await user.save();
         return res.json({success:true, message:"Password reset successfully"})
