@@ -23,3 +23,18 @@ export const getUserData = async (req, res) => {
         return res.status(400).send({success:false, message:err.message});
     }
 };
+
+export const getAllUsers = async (req, res) => {
+    try{
+        const users = await userModel.find({}).select('username role email');
+
+        if(!users){
+            return res.json({success:false, message:"No users"})
+        }
+
+        return res.json(users)
+
+    }catch(err){
+        return res.status(400).send({success:false, message:err.message});
+    }
+};

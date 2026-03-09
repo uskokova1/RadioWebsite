@@ -30,6 +30,9 @@ function Home() {
                 {/* HERO */}
                 <div style={styles.hero}>
                     <div style={styles.heroInner}>
+                        {userData.role == 'admin' && (
+                            <button className='absolute right-0 top-8 p-2 m-1 transition-all rounded-3xl bg-red-500 hover:scale-110' onClick={() => navigate('/admin')}> admin dashboard</button>
+                        )}
                         <p style={styles.heroEyebrow}>TUNED INTO</p>
                         <h1 style={styles.heroTitle}>WSIN<br />RADIO</h1>
                         <div style={styles.heroLine} />

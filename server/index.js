@@ -8,6 +8,7 @@ import authRouter from './routes/authRoutes.js';
 import userRouter from "./routes/userRoutes.js";
 import postRouter from './routes/postRoutes.js';
 import eventRouter from './routes/eventRoutes.js';
+import {generalRateLimiter} from "./middleware/rateLimiter.js";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -15,6 +16,7 @@ connectDB()
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(generalRateLimiter);
 
 
 const allowedOrigins = ['http://localhost:5173']

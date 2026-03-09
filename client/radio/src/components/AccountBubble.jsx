@@ -7,7 +7,7 @@ const AccountBubble = () => {
 
     const navigate = useNavigate();
     const {userData, logout,sendVerificationOtp} = useContext(AppContext);
-    console.log(userData)
+    //console.log(userData)
 
     return (
         <div>
