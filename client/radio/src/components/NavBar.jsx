@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 import AccountBubble from "./AccountBubble.jsx";
+import {Home} from "lucide-react"
 
 const currentUser = {
     displayName: null,
@@ -9,6 +10,7 @@ const currentUser = {
 
 function NavBar() {
     const [open, setOpen] = useState(false);
+    const navigate = useNavigate();
     const location = useLocation();
 
     const links = [
@@ -22,6 +24,18 @@ function NavBar() {
     return (
         <>
 
+            <button style={{
+                ...styles.toggleBtn,
+                left: '80px',
+                display: open ? 'none' : 'flex',
+                background: open ? "#2a2a2a" : "#322d2d",
+                }}
+                    onClick={()=>navigate('/')}
+                    className='hover:scale-110 transition-all spring-bounce-60 spring-duration-300'
+            >
+                <Home className='text-red-500'/>
+            </button>
+
             <button
                 onClick={() => setOpen(!open)}
                 style={{
@@ -29,6 +43,7 @@ function NavBar() {
                     display: open ? 'none' : 'block',
                     background: open ? "#2a2a2a" : "#322d2d",
                 }}
+                className='hover:scale-110 transition-all spring-bounce-60 spring-duration-300'
             >
                 <span style={styles.toggleIcon}>{open ? "✕" : "☰"}</span>
             </button>
@@ -58,6 +73,8 @@ function NavBar() {
                     {links.map(link => {
                         const active = location.pathname === link.to;
                         return (
+                            <div className='hover:bg-neutral-800 rounded-4xl'
+                            >
                             <Link
                                 key={link.to}
                                 to={link.to}
@@ -71,7 +88,7 @@ function NavBar() {
                             >
                                 <span style={styles.navIcon}>{link.icon}</span>
                                 <span style={styles.navLabel}>{link.label}</span>
-                            </Link>
+                            </Link></div>
                         );
                     })}
                 </div>
@@ -121,7 +138,7 @@ const styles = {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        transition: "background 0.2s ease",
+        //transition: "background 0.2s ease",
     },
     toggleIcon: {
         color: "#ff1212",
@@ -187,16 +204,18 @@ const styles = {
         padding: "14px 28px",
         textDecoration: "none",
         transition: "all 0.2s ease",
+        alignContent: "center",
+        margin: '5px',
     },
     navIcon: {
-        fontSize: "18px",
+        fontSize: "22px",
         width: "20px",
         textAlign: "center",
         flexShrink: 0,
     },
     navLabel: {
         fontFamily: "'Courier New', monospace",
-        fontSize: "12px",
+        fontSize: "16px",
         letterSpacing: "3px",
     },
     profileFooter: {

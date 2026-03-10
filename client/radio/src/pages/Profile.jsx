@@ -1,8 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
+import {AppContext} from "@/context/AppContext.jsx";
 
 
 function Profile() {
-    const [displayName, setDisplayName] = useState("Your Name");
+    const {userData} = useContext(AppContext);
+    const [displayName, setDisplayName] = useState(userData.name);
+
     const [bio, setBio] = useState("");
     const [avatar, setAvatar] = useState(null);
     const [stickers, setStickers] = useState([null, null, null]);
@@ -69,7 +72,7 @@ function Profile() {
                             : <p style={styles.displayName}>{displayName}</p>
                         }
                         {/* db hook later: show username/email from /api/user/me */}
-                        <p style={styles.profileSub}>@username</p>
+                        <p style={styles.profileSub}>{userData.email}</p>
                     </div>
                 </div>
 

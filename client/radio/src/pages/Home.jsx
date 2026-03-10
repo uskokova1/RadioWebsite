@@ -115,9 +115,14 @@ function Home() {
 
                 {/* BOTTOM NAV */}
                 <div style={styles.bottomNav}>
-                    <Link to="/Account" style={styles.navBtn}>
-                        {userData ? "My Account" : "Log In"}
-                    </Link>
+                    {userData ?
+                    <Link to="/profile" style={styles.navBtn}>
+                        My Account
+                    </Link> :
+                        <Link to="/login" style={styles.navBtn}>
+                            Log In
+                        </Link>
+                    }
                     <Link to="/Blog" style={styles.navBtn}>Blogs</Link>
                     <Link to="/Events" style={styles.navBtn}>Events</Link>
                 </div>
