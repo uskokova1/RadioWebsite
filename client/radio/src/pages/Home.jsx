@@ -25,106 +25,114 @@ function Home() {
     return (
         <div className='min-h-1 flex justify-center bg-[#111]'>
 
-            <div style={styles.column}>
+            <div style={styles.page}>
+                <div style={styles.topSection}>
+                    <div style={styles.innerColumn}>
+                            {/* HERO */}
+                            <div style={styles.hero}>
+                                <div style={styles.heroInner}>
+                                    {userData.role === 'admin' && (
+                                        <button className='absolute right-0 top-8 p-2 m-1 transition-all rounded-3xl bg-red-500 hover:scale-110' onClick={() => navigate('/admin')}> admin dashboard</button>
+                                    )}
+                                    <p style={styles.heroEyebrow}>TUNED INTO</p>
+                                    <h1 style={styles.heroTitle}>WSIN<br />RADIO</h1>
+                                    <div style={styles.heroLine} />
+                                    <p style={styles.heroSub}>Rewind. Play. Repeat.</p>
+                                </div>
+                                <div style={styles.heroBadge}>1590 AM</div>
 
-                {/* HERO */}
-                <div style={styles.hero}>
-                    <div style={styles.heroInner}>
-                        {userData.role == 'admin' && (
-                            <button className='absolute right-0 top-8 p-2 m-1 transition-all rounded-3xl bg-red-500 hover:scale-110' onClick={() => navigate('/admin')}> admin dashboard</button>
-                        )}
-                        <p style={styles.heroEyebrow}>TUNED INTO</p>
-                        <h1 style={styles.heroTitle}>WSIN<br />RADIO</h1>
-                        <div style={styles.heroLine} />
-                        <p style={styles.heroSub}>Rewind. Play. Repeat.</p>
+                                {/* Guard: userData can be false when not logged in */}
+                                {userData && !userData.isAccountVerified && (
+                                    <button
+                                        onClick={() => navigate("/email-verify")}
+                                        className='text-l text-gray-800 bg-red-600 rounded-full p-1 absolute right-8 top-18 z-10 hover:scale-110 hover:font-bold'
+                                    >
+                                        Verify Account
+                                    </button>
+                                )}
+                            </div>
                     </div>
-                    <div style={styles.heroBadge}>1590 AM</div>
-
-                    {/* Guard: userData can be false when not logged in */}
-                    {userData && !userData.isAccountVerified && (
-                        <button
-                            onClick={() => navigate("/email-verify")}
-                            className='text-l text-gray-800 bg-red-600 rounded-full p-1 absolute right-8 top-18 z-10 hover:scale-110 hover:font-bold'
-                        >
-                            Verify Account
-                        </button>
-                    )}
                 </div>
 
-                {/* ABOUT */}
-                <div style={styles.card}>
-                    <p style={styles.cardLabel}>ABOUT THE STATION</p>
-                    <p style={styles.cardText}>
-                        Welcome to <b>WSIN,</b> Southern Connecticut State University's
-                        student-run radio station, broadcasting straight from Room 210 in the
-                        Adanti Student Center! We bring you a <b>diverse mix of music, podcasts,
-                        and student-led content,</b> making sure there's always something fresh to tune into.
-                    </p>
-                    {/* db hook later: fetch station bio from /api/station/about */}
-                </div>
+                <div style={styles.bottomSection}>
+                    <div style={styles.innerColumn}>
+                            {/* ABOUT */}
+                            <div style={styles.card}>
+                                <p style={styles.cardLabel}>ABOUT THE STATION</p>
+                                <p style={styles.cardText}>
+                                    Welcome to <b>WSIN,</b> Southern Connecticut State University's
+                                    student-run radio station, broadcasting straight from Room 210 in the
+                                    Adanti Student Center! We bring you a <b>diverse mix of music, podcasts,
+                                    and student-led content,</b> making sure there's always something fresh to tune into.
+                                </p>
+                                {/* db hook later: fetch station bio from /api/station/about */}
+                            </div>
 
-                {/* LIVE PLAYER */}
-                <div style={styles.player}>
-                    <div style={styles.playerLeft}>
-                        <div style={{
-                            ...styles.playerDot,
-                            background: playing ? "#f87171" : "#555",
-                            boxShadow: playing ? "0 0 10px #f87171" : "none",
-                        }} />
-                        <div>
-                            <p style={styles.playerTrack}>
-                                {playing ? "Live Stream — 1590 AM" : "Stream Offline"}
-                            </p>
-                            <p style={styles.playerSub}>
-                                {/* db hook later: fetch current track from /api/stream/nowplaying */}
-                                {playing ? "Now Playing: Nothing!" : "Tap to connect"}
-                            </p>
-                        </div>
-                    </div>
-                    <button
-                        style={{ ...styles.playerBtn, background: playing ? "#c58484" : "#fa4040" }}
-                        onClick={() => setPlaying(!playing)}
-                    >
-                        {playing ? "■ STOP" : "▶ PLAY"}
-                    </button>
-                </div>
-
-                {/* UPCOMING EVENTS — live from MongoDB, newest 3 */}
-                <div style={styles.eventsSection}>
-                    <div style={styles.eventsSectionHeader}>
-                        <p style={styles.cardLabel}>Upcoming Events</p>
-                        <Link to="/Events" style={styles.eventsLink}>See All</Link>
-                    </div>
-                    {events.length === 0 ? (
-                        <p style={styles.noEvents}>No Upcoming Events</p>
-                    ) : (
-                        <div style={styles.eventsRow}>
-                            {events.slice(0, 3).map(ev => (
-                                <div key={ev._id} style={styles.eventChip}>
-                                    <div style={styles.eventChipBody}>
-                                        <p style={styles.eventChipTitle}>{ev.title}</p>
-                                        <p style={styles.eventChipDesc}>
-                                            {ev.description?.slice(0, 80)}{ev.description?.length > 80 ? '...' : ''}
+                            {/* LIVE PLAYER */}
+                            <div style={styles.player}>
+                                <div style={styles.playerLeft}>
+                                    <div style={{
+                                        ...styles.playerDot,
+                                        background: playing ? "#f87171" : "#555",
+                                        boxShadow: playing ? "0 0 10px #f87171" : "none",
+                                    }} />
+                                    <div>
+                                        <p style={styles.playerTrack}>
+                                            {playing ? "Live Stream — 1590 AM" : "Stream Offline"}
+                                        </p>
+                                        <p style={styles.playerSub}>
+                                            {/* db hook later: fetch current track from /api/stream/nowplaying */}
+                                            {playing ? "Now Playing: Nothing!" : "Tap to connect"}
                                         </p>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                                <button
+                                    style={{ ...styles.playerBtn, background: playing ? "#c58484" : "#fa4040" }}
+                                    onClick={() => setPlaying(!playing)}
+                                >
+                                    {playing ? "■ STOP" : "▶ PLAY"}
+                                </button>
+                            </div>
 
-                {/* BOTTOM NAV */}
-                <div style={styles.bottomNav}>
-                    {userData ?
-                    <Link to="/profile" style={styles.navBtn}>
-                        My Account
-                    </Link> :
-                        <Link to="/login" style={styles.navBtn}>
-                            Log In
-                        </Link>
-                    }
-                    <Link to="/Blog" style={styles.navBtn}>Blogs</Link>
-                    <Link to="/Events" style={styles.navBtn}>Events</Link>
+                            {/* UPCOMING EVENTS — live from MongoDB, newest 3 */}
+                            <div style={styles.eventsSection}>
+                                <div style={styles.eventsSectionHeader}>
+                                    <p style={styles.cardLabel}>Upcoming Events</p>
+                                    <Link to="/Events" style={styles.eventsLink}>See All</Link>
+                                </div>
+                                {events.length === 0 ? (
+                                    <p style={styles.noEvents}>No Upcoming Events</p>
+                                ) : (
+                                    <div style={styles.eventsRow}>
+                                        {events.slice(0, 3).map(ev => (
+                                            <div key={ev._id} style={styles.eventChip}>
+                                                <div style={styles.eventChipBody}>
+                                                    <p style={styles.eventChipTitle}>{ev.title}</p>
+                                                    <p style={styles.eventChipDesc}>
+                                                        {ev.description?.slice(0, 80)}{ev.description?.length > 80 ? '...' : ''}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                    </div>
+
+
+                            {/* BOTTOM NAV */}
+                    <div style={styles.bottomNav}>
+                        {userData ?
+                        <Link to="/profile" style={styles.navBtn}>
+                            My Account
+                        </Link> :
+                            <Link to="/login" style={styles.navBtn}>
+                                Log In
+                            </Link>
+                        }
+                        <Link to="/Blog" style={styles.navBtn}>Blogs</Link>
+                        <Link to="/Events" style={styles.navBtn}>Events</Link>
+                    </div>
                 </div>
 
             </div>
@@ -134,17 +142,43 @@ function Home() {
 }
 
 const styles = {
-    column: {
+    page: { //overall containter which makes color seperation of top and bottom possible
         width: "100%",
-        maxWidth: "760px",
+        //display: "flex", //Only needed when trying to fix(Tag1)
+        //flexDirection: "column", //Only needed when trying to fix (Tag1)
+    },
+
+    topSection: { //Specifies that the whole top should have this color
+        width: "100%",
+        background: "#322d2d",
+        display: "flex",
+        justifyContent: "center",
+    },
+
+    bottomSection: { //Specifies that the whole bottom should have this color
+        width: "100%",
+        background: "#111111",
+        display: "flex",
+        justifyContent: "center",
+        minHeight: "calc(100vh - 405px)",//NEED TO FIX THIS(Tag1) so it auto fills to the bottom
+        //flex: 1, //Only needed when trying to fix (Tag1)
+    },
+
+    innerColumn: { // This forces the text to the center even though color for the text was placed outside of this and at the same hight as the text
+        width: "1200px",
+        padding: "48px 32px 36px",
+        boxSizing: "border-box",
+    },
+    column: { //Probalby won't need this anymore
+        width: "1200px",
         minHeight: "100vh",
         background: "#1a1a1a",
         display: "flex",
         flexDirection: "column",
         gap: "0",
-        boxShadow: "0 0 60px rgba(0,0,0,0.8)",
-        borderLeft: "1px solid #2a2a2a",
-        borderRight: "1px solid #2a2a2a",
+        //boxShadow: "0 0 60px rgba(0,0,0,0.8)",
+        //borderLeft: "1px solid #2a2a2a",
+        //borderRight: "1px solid #2a2a2a",
     },
     hero: {
         background: "#322d2d",
@@ -174,7 +208,7 @@ const styles = {
         letterSpacing: "-2px",
     },
     heroLine: {
-        width: "60px",
+        width: "80px",
         height: "3px",
         background: "#fc8484",
         margin: "20px 0",
@@ -327,12 +361,26 @@ const styles = {
         letterSpacing: "1px"
     },
 
-
-    bottomNav: {
+    bottomNavSection: { //without nav having extra min height than marginTop"Auto" cant force it to the bottom of the screen
+                        //with this bottom section the nav is still forced center column but with extra space at the bottom.
+                        // if you use the same inner column as about and Hero(title header) it gives too much thickness to title
+                        // color and about color
+        width: "1200px",
+        padding: "48px 32px 36px",
+        boxSizing: "border-box",
+        display: "flex",
+        //flexDirection: "column",
+        //minHeight: "10PX",
+    },
+    bottomNav: { //this fixes nav to the bottom of the screen no matter what.
+        position: "fixed",
+        bottom: 0,
+        //left: 0,
+        //right: 0,                    // or width: "100%"
         display: "flex",
         gap: "12px",
-        padding: "24px 32px 48px",
-        marginTop: "auto",
+        padding: "24px 32px 48px",   // you can keep this, but consider reducing bottom padding;spacing between buttons and bottome of the screen
+        zIndex: 1000,          /* make sure it's above other content */
     },
     navBtn: {
         flex: 1,
