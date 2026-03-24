@@ -21,6 +21,7 @@ function Home() {
         };
         fetchEvents();
     }, []);
+
     // STYLE FORMAT IS AS FOLLOWS:
     // PAGE
         // topSection

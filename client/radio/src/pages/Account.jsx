@@ -39,6 +39,7 @@ function Account() {
         alert("Google OAuth not connected yet.");
     };
 
+
     // STYLE FORMAT IS AS FOLLOWS
     // PAGE
         // topSection
@@ -115,11 +116,10 @@ function Account() {
                                     />
                                 </div>
 
-                                {isLogin && (
-                                    <button type="button" style={styles.forgotBtn} onClick={() => setShowForgot(true)}>
-                                        Forgot password?
-                                    </button>
-                                )}
+                                {/*isLogin placed inside the button object instead of outside. Now when is Login changes it from hidden to visable instead of getting rid of everything including spacing*/}
+                                <button type="button" style={{...styles.forgotBtn, visibility: isLogin ? "visible" : "hidden",}} onClick={() => setShowForgot(true)}>
+                                    Forgot password?
+                                </button>
 
                                 <button type="submit" style={styles.submitBtn}>
                                     {isLogin ? "Login" : "Create Account"}
