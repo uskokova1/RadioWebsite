@@ -41,93 +41,97 @@ function Account() {
 
     return (
         <div style={styles.page}>
-            <div style={styles.column}>
-
-                <div style={styles.header}>
-                    <p style={styles.eyebrow}>WSIN RADIO</p>
-                    <h2 style={styles.pageTitle}>{showForgot ? "Reset Password" : isLogin ? "Login" : "Create Account"}</h2>
-                    <div style={styles.titleLine} />
+            <div style={styles.topSection}>
+                <div style={styles.innerColumn}>
+                    <div style={styles.header}>
+                        <p style={styles.eyebrow}>WSIN RADIO</p>
+                        <h2 style={styles.pageTitle}>{showForgot ? "Reset Password" : isLogin ? "Login" : "Create Account"}</h2>
+                        <div style={styles.titleLine} />
+                    </div>
                 </div>
-
-                {showForgot ? (
-                    <form onSubmit={handleForgot} style={styles.form}>
-                        <p style={styles.formLabel}>ENTER YOUR EMAIL</p>
-                        <div style={styles.fieldGroup}>
-                            <label style={styles.fieldLabel}>EMAIL</label>
-                            <input
-                                type="email"
-                                placeholder="Enter your email"
-                                value={forgotEmail}
-                                onChange={e => setForgotEmail(e.target.value)}
-                                style={styles.input}
-                            />
-                        </div>
-                        <button type="submit" style={styles.submitBtn}>Send Reset Link</button>
-                        <button type="button" style={styles.backBtn} onClick={() => setShowForgot(false)}>
-                            ← Back to Login
-                        </button>
-                    </form>
-                ) : (
-                    <>
-                        <div style={styles.oauthSection}>
-                            <button style={styles.googleBtn} onClick={handleGoogle}>
-                                <span style={styles.googleIcon}>G</span>
-                                {isLogin ? "Sign in with Google" : "Sign up with Google"}
-                            </button>
-                            <div style={styles.dividerRow}>
-                                <div style={styles.dividerLine} />
-                                <span style={styles.dividerText}>or</span>
-                                <div style={styles.dividerLine} />
-                            </div>
-                        </div>
-
-                        <form onSubmit={handleSubmit} style={styles.form}>
-                            <p style={styles.formLabel}>{isLogin ? "SIGN IN TO YOUR ACCOUNT" : "REGISTER A NEW ACCOUNT"}</p>
-
+            </div>
+            <div style={styles.bottomSection}>
+                <div style={styles.innerColumn}>
+                    {showForgot ? (
+                        <form onSubmit={handleForgot} style={styles.form}>
+                            <p style={styles.formLabel}>ENTER YOUR EMAIL</p>
                             <div style={styles.fieldGroup}>
                                 <label style={styles.fieldLabel}>EMAIL</label>
                                 <input
-                                    type="text"
-                                    placeholder="Enter email"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    value={forgotEmail}
+                                    onChange={e => setForgotEmail(e.target.value)}
                                     style={styles.input}
                                 />
                             </div>
-
-                            <div style={styles.fieldGroup}>
-                                <label style={styles.fieldLabel}>PASSWORD</label>
-                                <input
-                                    type="password"
-                                    placeholder="Enter password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    style={styles.input}
-                                />
-                            </div>
-
-                            {isLogin && (
-                                <button type="button" style={styles.forgotBtn} onClick={() => setShowForgot(true)}>
-                                    Forgot password?
-                                </button>
-                            )}
-
-                            <button type="submit" style={styles.submitBtn}>
-                                {isLogin ? "Login" : "Create Account"}
+                            <button type="submit" style={styles.submitBtn}>Send Reset Link</button>
+                            <button type="button" style={styles.backBtn} onClick={() => setShowForgot(false)}>
+                                ← Back to Login
                             </button>
                         </form>
+                    ) : (
+                        <>
+                            <div style={styles.oauthSection}>
+                                <button style={styles.googleBtn} onClick={handleGoogle}>
+                                    <span style={styles.googleIcon}>G</span>
+                                    {isLogin ? "Sign in with Google" : "Sign up with Google"}
+                                </button>
+                                <div style={styles.dividerRow}>
+                                    <div style={styles.dividerLine} />
+                                    <span style={styles.dividerText}>or</span>
+                                    <div style={styles.dividerLine} />
+                                </div>
+                            </div>
+                            <form onSubmit={handleSubmit} style={styles.form}>
+                                <p style={styles.formLabel}>{isLogin ? "SIGN IN TO YOUR ACCOUNT" : "REGISTER A NEW ACCOUNT"}</p>
 
-                        <div style={styles.toggleRow}>
-                            <p style={styles.toggleText}>
-                                {isLogin ? "Don't have an account?" : "Already have an account?"}
-                            </p>
-                            <button style={styles.toggleBtn} onClick={() => setIsLogin(!isLogin)}>
-                                {isLogin ? "Sign Up" : "Login"}
-                            </button>
-                        </div>
-                    </>
-                )}
+                                <div style={styles.fieldGroup}>
+                                    <label style={styles.fieldLabel}>EMAIL</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter email"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        style={styles.input}
+                                    />
+                                </div>
 
+                                <div style={styles.fieldGroup}>
+                                    <label style={styles.fieldLabel}>PASSWORD</label>
+                                    <input
+                                        type="password"
+                                        placeholder="Enter password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        style={styles.input}
+                                    />
+                                </div>
+
+                                {isLogin && (
+                                    <button type="button" style={styles.forgotBtn} onClick={() => setShowForgot(true)}>
+                                        Forgot password?
+                                    </button>
+                                )}
+
+                                <button type="submit" style={styles.submitBtn}>
+                                    {isLogin ? "Login" : "Create Account"}
+                                </button>
+
+                            </form>
+
+                            <div style={styles.toggleRow}>
+                                <p style={styles.toggleText}>
+                                    {isLogin ? "Don't have an account?" : "Already have an account?"}
+                                </p>
+                                <button style={styles.toggleBtn} onClick={() => setIsLogin(!isLogin)}>
+                                    {isLogin ? "Sign Up" : "Login"}
+                                </button>
+                            </div>
+                        </>
+                    )}
+
+                </div>
             </div>
         </div>
     );
@@ -136,11 +140,32 @@ function Account() {
 /*I put styles in each page cause its easier if you wanna directly edit a component on da page if y'kna mean*/
 
 const styles = {
-    page: {
-        minHeight: "100vh",
-        background: "#111",
+    page: { //overall containter which makes color seperation of top and bottom possible
+        width: "100%",
+        //display: "flex", //Only needed when trying to fix(Tag1)
+        //flexDirection: "column", //Only needed when trying to fix (Tag1)
+    },
+
+    topSection: { //Specifies that the whole top should have this color
+        width: "100%",
+        background: "#322d2d",
         display: "flex",
-        justifyContent: "center"
+        justifyContent: "center",
+    },
+
+    bottomSection: { //Specifies that the whole bottom should have this color
+        width: "100%",
+        background: "#111111",
+        display: "flex",
+        justifyContent: "center",
+        minHeight: "calc(100vh - 405px)",//NEED TO FIX THIS(Tag1) so it auto fills to the bottom
+        //flex: 1, //Only needed when trying to fix (Tag1)
+    },
+
+    innerColumn: { // This forces the text to the center even though color for the text was placed outside of this and at the same hight as the text
+        width: "1200px",
+        padding: "48px 32px 36px",
+        boxSizing: "border-box",
     },
     column: {
         width: "100%",
