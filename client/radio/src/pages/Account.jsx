@@ -39,6 +39,13 @@ function Account() {
         alert("Google OAuth not connected yet.");
     };
 
+    // STYLE FORMAT IS AS FOLLOWS
+    // PAGE
+        // topSection
+            //innerColumn
+        // bottomSection
+            //innerColumn
+    // Be sure to use this format and place everything in their respective places.
     return (
         <div style={styles.page}>
             <div style={styles.topSection}>

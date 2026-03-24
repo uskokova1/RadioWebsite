@@ -21,7 +21,13 @@ function Home() {
         };
         fetchEvents();
     }, []);
-
+    // STYLE FORMAT IS AS FOLLOWS:
+    // PAGE
+        // topSection
+            //innerColumn
+        // bottomSection
+            //innerColumn
+    // Be sure to use this format and place everything in their respective places.
     return (
         <div className='min-h-1 flex justify-center bg-[#111]'>
 
