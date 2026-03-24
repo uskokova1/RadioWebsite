@@ -39,6 +39,7 @@ function Account() {
         alert("Google OAuth not connected yet.");
     };
 
+
     // STYLE FORMAT IS AS FOLLOWS
     // PAGE
         // topSection
