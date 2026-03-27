@@ -1,13 +1,14 @@
 import React, { useState, useRef } from 'react';
 import Moveable from 'react-moveable';
-import { motion } from "motion/react"
+import { motion, AnimatePresence } from "motion/react";
+import { SquareX } from 'lucide-react';
 
 const DraggableWindow = ({ icon, children }) => {
     const [showContainers, setShowContainers] = useState(false);
+    const [target, setTarget] = useState(null);
+    const [dragTarget, setDragTarget] = useState(null);
 
-
-    const [target,  setTarget] = useState(null);
-    const [dragTarget,  setDragTarget] = useState(null);
+    const [zs, setzs] = useState(children.map((child,index) => index));
 
     const handleToggle = () => {
         setShowContainers(prev => !prev);
@@ -17,8 +18,18 @@ const DraggableWindow = ({ icon, children }) => {
         setShowContainers(false);
     };
 
+    const handleZs = (key) => {
+        const newZs = zs.map((z,index) => {
+            if (index == key) {
+                return zs.length;
+            }else{
+                return z-1;
+            }
+        })
+        setzs(newZs);
+    }
 
-        return (
+    return (
         <div>
             {/* Decoupled icon to toggle visibility */}
             <div onClick={handleToggle} style={{ cursor: 'pointer' }}>
@@ -26,91 +37,77 @@ const DraggableWindow = ({ icon, children }) => {
             </div>
 
             {/* Render containers if visible */}
-            {showContainers && (
-                <>
-                    {React.Children.map(children, (child, index) => (
-                        <div
-                            key={index}
-                             style={{
-                                 position: 'absolute',
-                                 top: child.props.spawnx,
-                                 left: child.props.spawny,
-                                 zIndex: index,
-                             }}
-                            onMouseEnter={(e) => {
-                                setTarget(e.currentTarget)
-                            }}
-                            className='flex-col'
-                        >
-                        <motion.div
-                            initial={{ scaleY: 0.5 }}
-                            animate={{ scaleY: 1 }}
-                            transition={{ type: "spring" }}
-                            className='border-amber-50 border-2 bg-white rounded-md'
-                        >
+            <AnimatePresence>
+                {showContainers && (
+                    <>
+                        {React.Children.map(children, (child, index) => (
                             <div
-                                className='flex-col align-top w-full h-8 bg-red-400 rounded-t-md'
-                                onMouseEnter ={(e) => {
-                                    setDragTarget(e.currentTarget)
+                                key={index}
+                                data-keyforz={index}
+                                style={{
+                                    position: 'absolute',
+                                    top: child.props.spawnx || 0,
+                                    left: child.props.spawny || 0,
+                                    zIndex: zs[index],
                                 }}
+                                onMouseEnter={(e) => {
+                                    setTarget(e.currentTarget);
+                                }}
+                                className='flex-col'
                             >
-                                <h1 className='px-4 py-1'> {child.props.windowName} </h1>
-                                {/* Close icon inside each container */}
-                                <div
-                                    style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        right: 0,
-                                        cursor: 'pointer',
-                                        background: 'red',
-                                        color: '#fff',
-                                        borderRadius: '50%',
-                                        width: '20px',
-                                        height: '20px',
-                                        textAlign: 'center',
-                                        lineHeight: '20px',
-                                        fontSize: '14px',
-                                    }}
-                                    onClick={handleCloseAll}
+                                <motion.div
+                                    key={index}
+                                    initial={{ scaleY: 0.5 }}
+                                    animate={{ scaleY: 1 }}
+                                    transition={{ type: "spring", duration: .5 }}
+                                    className='border-amber-50 border-2 bg-white rounded-md'
                                 >
-                                    &times;
-                                </div>
+                                    <div
+                                        className='flex-col align-top w-full h-8 bg-red-400 rounded-t-md'
+                                        onMouseEnter={(e) => {
+                                            setDragTarget(e.currentTarget);
+                                        }}
+                                    >
+                                        <h1 className='px-4 py-1'>{child.props.windowName}</h1>
+                                        {/* Close icon inside each container */}
+                                        <SquareX
+                                            className='absolute right-0 top-0 scale-140 m-1 bg-red-700'
+                                            onClick={handleCloseAll}
+                                        />
+                                    </div>
+
+                                    {/* Render the child content */}
+                                    <div className='flex-col justify-center'>
+                                        {child}
+                                    </div>
+                                </motion.div>
                             </div>
+                        ))}
 
-                            {/* Render the child content */}
-                            <div className='flex-col justify-center'>
-                                {child}
-                            </div>
-                        </motion.div>
-                        </div>
-                    ))}
 
-                    {/* Moveable component for dragging/scaling */}
-                    <Moveable
-                            target={target}
-                            dragTarget={dragTarget}
-                            draggable={true}
-                            //resizable={true}
-                            origin={false}
-                            hideDefaultLines={true}
-                            onDragStart={(e) => {
-                                e.target.style.zIndex = children.length;
+                        <Moveable
+                                target={target} // Attach Moveable to the specific child element
+                                dragTarget={dragTarget}
+                                draggable={true}
+                                origin={false}
+                                //resizable={true}
+                                hideDefaultLines={true}
+                                onDragStart={(e) => {
+                                    handleZs(e.target.dataset.keyforz)
+                                }}
+                                onDrag={e => {
+                                    e.target.style.transform = e.transform;
+                                }}
+                                onResize={e => {
+                                    e.target.style.width = `${e.width}px`;
+                                    e.target.style.height = `${e.height}px`;
+                                    e.target.style.transform = e.drag.transform;
+                                }}
+                            />
 
-                            }}
-                            onDragEnd={(e) => {
-                                //e.target.style.zIndex = e.target.style.zIndex-1;
-                            }}
-                            onDrag={e => {
-                                e.target.style.transform = e.transform;
-                            }}
-                            onResize={e => {
-                                e.target.style.width = `${e.width}px`;
-                                e.target.style.height = `${e.height}px`;
-                                e.target.style.transform = e.drag.transform;
-                            }}
-                        />
-                </>
-            )}
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

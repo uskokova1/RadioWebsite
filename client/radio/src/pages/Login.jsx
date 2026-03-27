@@ -65,9 +65,6 @@ const Login = () => {
 
     return (
         <div className='bg-zinc-950 w-full h-full'>
-            <div>
-                <div className="flex justify-center p-10">
-
                     <Card className="w-full max-w-md bg-zinc-900 border-zinc-800 text-white">
 
                         <CardHeader>
@@ -160,10 +157,6 @@ const Login = () => {
                         </CardContent>
 
                     </Card>
-
-                </div>
-
-            </div>
         </div>
     )
 }
