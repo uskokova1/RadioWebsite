@@ -43,12 +43,8 @@ const EmailVerify = () => {
     }
 
     return (
-        <div style={styles.page}>
-            <div style={styles.column}>
-                <div style={styles.header}>
-                    <p className='text-red-500 text-xl font-bold'>WSIN RADIO</p>
-                    <h2 className='m-auto p-5 text-white text-5xl font-bold'>Email Verification</h2>
-                </div>
+        <div className='bg-zinc-950 w-full h-full'>
+            <div>
 
                 <div className="flex justify-center p-10">
 

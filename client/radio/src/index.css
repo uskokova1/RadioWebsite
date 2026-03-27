@@ -133,3 +133,7 @@
     @apply font-sans;
     }
 }
+
+.moveable-control {
+    background-color: white !important;
+}

@@ -7,6 +7,7 @@ import {ToastContainer} from "react-toastify";
 
 
 import Home from './pages/Home'
+import Home2 from './pages/Home2'
 import Account from './pages/Account'
 import NavBar from './components/NavBar'
 import Blog from './pages/Blog'
@@ -22,9 +23,9 @@ const App = () => {
     return (
         <div>
             <ToastContainer/>
-            <NavBar/>
+            {/*<NavBar/>*/}
             <Routes>
-                <Route path='/' element={<Home />} />
+                <Route path='/' element={<Home2 />} />
                 <Route path='/admin/users' element={<ShowUsers />} />
                 <Route path='/admin' element={<AdminDashboard />} />
                 <Route path='/login' element={<Login />} />
