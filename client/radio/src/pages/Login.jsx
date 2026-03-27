@@ -64,16 +64,8 @@ const Login = () => {
     }
 
     return (
-        <div style={styles.page}>
-            <div style={styles.column}>
-
-                <div style={styles.header}>
-                    <p className='text-red-500 text-xl font-bold'>WSIN RADIO</p>
-                    <h2 className='m-auto p-5 text-white text-5xl font-bold'>
-                        {state === "Sign up" ? "Create Account" : "Login"}
-                    </h2>
-                </div>
-
+        <div className='bg-zinc-950 w-full h-full'>
+            <div>
                 <div className="flex justify-center p-10">
 
                     <Card className="w-full max-w-md bg-zinc-900 border-zinc-800 text-white">
@@ -176,33 +168,5 @@ const Login = () => {
     )
 }
 
-const styles = {
-    page: {
-        minHeight: "100vh",
-        background: "#111",
-        display: "flex",
-        justifyContent: "center",
-    },
-    column: {
-        width: "100%",
-        maxWidth: "760px",
-        minHeight: "100vh",
-        background: "#1a1a1a",
-        display: "flex",
-        flexDirection: "column",
-        boxShadow: "0 0 60px rgba(0,0,0,0.8)",
-        borderLeft: "1px solid #2a2a2a",
-        borderRight: "1px solid #2a2a2a",
-    },
-    header: {
-        background: "#322d2d",
-        padding: "40px 32px 28px",
-        borderBottom: "1px solid #3a3a3a",
-        justifyContent: "center",
-        display: "flex",
-        flexDirection: "column",
-        textAlign: "center"
-    },
-}
 
 export default Login
