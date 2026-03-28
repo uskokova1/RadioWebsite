@@ -1,5 +1,7 @@
+import dns from "node:dns/promises";
+dns.setServers(["1.1.1.1"]);
+
 import './config/dotenv.js'
-//dotenv.config({path: './server/.env'});
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -8,6 +10,8 @@ import authRouter from './routes/authRoutes.js';
 import userRouter from "./routes/userRoutes.js";
 import postRouter from './routes/postRoutes.js';
 import eventRouter from './routes/eventRoutes.js';
+import commentRouter from './routes/commentRoutes.js';
+import contactRouter from './routes/contactRoutes.js';
 import {generalRateLimiter} from "./middleware/rateLimiter.js";
 
 const app = express();
@@ -18,14 +22,15 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(generalRateLimiter);
 
-
 const allowedOrigins = ['http://localhost:5173']
 app.use(cors({origin: allowedOrigins, credentials: true}));
 
-app.use('/api/auth', authRouter)
-app.use('/api/user', userRouter)
-app.use('/api/posts', postRouter)
-app.use('/api/events', eventRouter)
+app.use('/api/auth',     authRouter)
+app.use('/api/user',     userRouter)
+app.use('/api/posts',    postRouter)
+app.use('/api/events',   eventRouter)
+app.use('/api/comments', commentRouter)
+app.use('/api/contacts', contactRouter)
 
 app.get('/', (req, res) => {})
 
