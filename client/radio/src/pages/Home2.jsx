@@ -5,6 +5,7 @@ import Login from '@/pages/Login.jsx'
 import EmailVerify from "@/pages/EmailVerify.jsx";
 import BlogGrid from "@/components/BlogGrid.jsx";
 import BlogButton from "@/components/BlogButton.jsx";
+import ContactsButton from "@/components/ContactsButton.jsx";
 
 const App = () => {
     const [showWindow, setShowWindow] = useState(1)
@@ -16,7 +17,7 @@ const App = () => {
     }
 
     return (
-        <div>
+        <div className='polka relative min-h-screen min-w-screen z-90'>
             <House onClick={(e) => handleSwitch(e,1)}
                 className='absolute left-5 top-15 hover:scale-110 transition-all spring-duration-300 spring-bounce-60'/>
 
@@ -27,6 +28,7 @@ const App = () => {
             </DraggableWindow>
 
             <BlogButton />
+            <ContactsButton />
         </div>
     );
 };

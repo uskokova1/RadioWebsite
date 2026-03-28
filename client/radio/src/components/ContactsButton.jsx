@@ -1,15 +1,15 @@
 import React, {useContext, useEffect, useState} from 'react';
 import DraggableWindow from '@/components/DraggableWindow.jsx';
-import { House, Book } from 'lucide-react';
-import BlogGrid from "@/components/BlogGrid.jsx";
+import { Contact } from 'lucide-react';
 import axios from "axios";
-import {toast} from "react-toastify";
 import {AppContext} from "@/context/AppContext.jsx";
 import {Card, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.jsx";
+import {Avatar} from "@/components/ui/avatar.jsx"
+import {Tooltip} from "@/components/ui/tooltip.jsx"
+
 
 const BlogButton = () => {
     const [showWindow, setShowWindow] = useState(1)
-    const [postOpen, setPostOpen] = useState(false)
 
     const handleSwitch = (e, n) => {
         if(n == showWindow) {setShowWindow(null)}
@@ -17,75 +17,50 @@ const BlogButton = () => {
             setShowWindow(n)
         }
     }
-    const openPost= (e, postid) => {
-        setPostOpen(postid)
-    }
 
     const { backendUrl } = useContext(AppContext);
+    const [members, setMembers] = useState([]);
+    const [selected, setSelected] = useState(null);
+    const [randomY, setRandomY] = useState(null);
 
-    const [posts, setPosts]             = useState([]);
-    const [loading, setLoading]         = useState(true);
 
     useEffect(() => {
-        fetchPosts();
+        const fetchContacts = async () => {
+            try {
+                const { data } = await axios.get(backendUrl + '/api/contacts');
+                if (data.success) setMembers(data.contacts);
+            } catch (err) {
+                console.error(err.message);
+            }
+        };
+        fetchContacts();
     }, []);
 
-    const fetchPosts = async () => {
-        try {
-            const { data } = await axios.get(backendUrl + '/api/posts');
-            if (data.success) {
-                setPosts(data.posts);
-            } else {
-                toast.error(data.message);
-            }
-        } catch (err) {
-            toast.error(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+    useEffect(() => {
+         setRandomY(members.map(() => Math.random()*300))
+        console.log(randomY)
+    }, [members])
 
-    const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('en-US', {
-        year: 'numeric', month: 'long', day: 'numeric',
-    });
 
     return (
         <div>
-            <Book onClick={(e) => handleSwitch(e,0)}
-                  className='absolute left-5 top-25 hover:scale-110 transition-all spring-duration-300 spring-bounce-60'/>
+            <Contact onClick={(e) => handleSwitch(e,0)}
+                  className='absolute left-5 top-45 hover:scale-110 transition-all spring-duration-300 spring-bounce-60'/>
             <DraggableWindow visible={showWindow == 0}>
-                <div spawnx={300} spawny={300} windowName='Blogs' className='bg-zinc-900'>
-                    {loading && <p>Loading posts...</p>}
-                    {!loading && posts.length === 0 && <p>No posts yet.</p>}
-                    {posts.map((post) => (
-                        <>
-                            <Card
-                                className="w-full max-w-md bg-zinc-900 border-zinc-800 text-white">
-                                <Book onClick={(e) => openPost(e,post._id)}
-                                      className='absolute right-5 hover:scale-110 transition-all spring-duration-300 spring-bounce-60'/>
-                                <CardHeader>
-                                    <CardTitle className="">
-                                        {post.title}
-                                    </CardTitle>
-                                    <CardDescription className=" text-zinc-400">
-                                        {post.description}
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardFooter className="text-zinc-400">
-                                    {post.author?.username || 'WSIN'}&nbsp;·&nbsp;{formatDate(post.createdAt)}
-                                </CardFooter>
-                            </Card>
-                        </>
-                    ))}
-                </div>
-                {/* <BlogGrid windowName='blogs' spawnx={50} spawny={90} onVariableChange={setShowWindow}/> */}
-            </DraggableWindow>
-            {postOpen && (
-                <DraggableWindow visible={true}>
+                    {members.map((member,index) => (
+                        <Card spawnx={index*220+70} spawny={randomY[index]+150} windowName='contacts' className='flex px-5 rounded-none w-50'>
+                            <Avatar className="w-16 h-16 rounded-full bg-zinc-900 flex-row m-auto justify-center">
+                                <p1 className="text-lg font-semibold text-white align m-auto">{member.initials}</p1>
+                            </Avatar>
+                            <CardTitle className="flex-row m-1 text-xl font-semibold">{member.name}</CardTitle>
 
-                </DraggableWindow>
-            )}
-        </div>
+                            <CardHeader className="flex-col text-gray-500">{member.position}</CardHeader>
+
+
+                        </Card>))}
+                    </DraggableWindow>
+                        </div>
+
     );
 };
 

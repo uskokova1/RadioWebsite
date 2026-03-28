@@ -13,6 +13,9 @@ const DraggableWindow = ({ icon, children, visible }) => {
     useEffect(() => {
         setShowContainers(visible)
     }, [visible]);
+    useEffect(() => {
+        setzs(React.Children.toArray(children).map((child,index) => index));
+    }, [children]);
 
     /*
     const handleToggle = () => {
@@ -22,6 +25,7 @@ const DraggableWindow = ({ icon, children, visible }) => {
 
     const handleCloseAll = () => {
         setShowContainers(false);
+        visible=false;
     };
 
     const handleZs = (key) => {

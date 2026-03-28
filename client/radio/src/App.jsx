@@ -18,11 +18,13 @@ import ShowUsers from "@/pages/ShowUsers.jsx";
 import AdminDashboard from "@/pages/AdminDashboard.jsx";
 import AdminComments from "@/pages/AdminComments.jsx";
 import AdminContacts from "@/pages/AdminContacts.jsx";
+import {TooltipProvider} from "@/components/ui/tooltip.jsx"
 
 const App = () => {
 
     return (
         <div>
+            <TooltipProvider>
             <ToastContainer/>
             {/*<NavBar/>*/}
             <Routes>
@@ -39,6 +41,7 @@ const App = () => {
                 <Route path="/Contact" element={<Contact />} />
                 <Route path="/Profile" element={<Profile />} />
             </Routes>
+            </TooltipProvider>
         </div>
     )
 }
