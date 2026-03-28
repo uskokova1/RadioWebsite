@@ -1,18 +1,24 @@
-import React, { useState, useRef } from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import Moveable from 'react-moveable';
 import { motion, AnimatePresence } from "motion/react";
 import { SquareX } from 'lucide-react';
 
-const DraggableWindow = ({ icon, children }) => {
-    const [showContainers, setShowContainers] = useState(false);
+const DraggableWindow = ({ icon, children, visible }) => {
+    const [showContainers, setShowContainers] = useState(true);
     const [target, setTarget] = useState(null);
     const [dragTarget, setDragTarget] = useState(null);
 
-    const [zs, setzs] = useState(children.map((child,index) => index));
+    const [zs, setzs] = useState(React.Children.toArray(children).map((child,index) => index));
 
+    useEffect(() => {
+        setShowContainers(visible)
+    }, [visible]);
+
+    /*
     const handleToggle = () => {
         setShowContainers(prev => !prev);
     };
+     */
 
     const handleCloseAll = () => {
         setShowContainers(false);
@@ -31,10 +37,10 @@ const DraggableWindow = ({ icon, children }) => {
 
     return (
         <div>
-            {/* Decoupled icon to toggle visibility */}
+            {/* Decoupled icon to toggle visibility
             <div onClick={handleToggle} style={{ cursor: 'pointer' }}>
                 {icon}
-            </div>
+            </div>*/}
 
             {/* Render containers if visible */}
             <AnimatePresence>
@@ -46,19 +52,20 @@ const DraggableWindow = ({ icon, children }) => {
                                 data-keyforz={index}
                                 style={{
                                     position: 'absolute',
-                                    top: child.props.spawnx || 0,
-                                    left: child.props.spawny || 0,
-                                    zIndex: zs[index],
+                                    top: child.props.spawny || 0,
+                                    left: child.props.spawnx || 0,
+                                    zIndex: zs[index]
                                 }}
                                 onMouseEnter={(e) => {
                                     setTarget(e.currentTarget);
                                 }}
-                                className='flex-col'
+                                className='flex-col transform-none relative'
                             >
                                 <motion.div
                                     key={index}
                                     initial={{ scaleY: 0.5 }}
                                     animate={{ scaleY: 1 }}
+                                    exit={{ scaleY: 0 }}
                                     transition={{ type: "spring", duration: .5 }}
                                     className='border-amber-50 border-2 bg-white rounded-md'
                                 >
