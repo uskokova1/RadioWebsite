@@ -12,6 +12,7 @@ function CommentSection({ targetType, targetId, isAdmin, userData, backendUrl })
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
+        axios.defaults.withCredentials = true;
         fetchComments();
     }, [targetId]);
 
@@ -183,6 +184,7 @@ function Blog() {
     const [loading, setLoading]         = useState(true);
     const [title, setTitle]             = useState("");
     const [description, setDescription] = useState("");
+    const [image, setImage] = useState(null);
     const [showForm, setShowForm]       = useState(false);
     const [editingId, setEditingId]     = useState(null);
     const [submitting, setSubmitting]   = useState(false);
@@ -204,21 +206,46 @@ function Blog() {
 
     const resetForm = () => { setTitle(""); setDescription(""); setShowForm(false); setEditingId(null); };
 
+// handleSubmit
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
+
         try {
-            if (editingId !== null) {
-                const { data } = await axios.put(`${backendUrl}/api/posts/${editingId}`, { title, description }, { withCredentials: true });
-                if (data.success) { setPosts(posts.map(p => p._id === editingId ? data.post : p)); toast.success("Post updated"); resetForm(); }
-                else toast.error(data.message);
+            const formData = new FormData();
+            formData.append("title", title);
+            formData.append("description", description);
+            if (image) formData.append("image", image);
+            formData.append("userId", userData._id);
+
+            let res;
+            if (editingId) {
+                res = await axios.put(
+                    `${backendUrl}/api/posts/${editingId}`,
+                    formData,
+                    { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
+                );
             } else {
-                const { data } = await axios.post(`${backendUrl}/api/posts`, { title, description }, { withCredentials: true });
-                if (data.success) { setPosts([data.post, ...posts]); toast.success("Post created"); resetForm(); }
-                else toast.error(data.message);
+                res = await axios.post(
+                    `${backendUrl}/api/posts`,
+                    formData,
+                    { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
+                );
             }
-        } catch (err) { toast.error(err.message); }
-        finally { setSubmitting(false); }
+
+            if (res.data.success) {
+                if (editingId) setPosts(posts.map(p => p._id === editingId ? res.data.post : p));
+                else setPosts([res.data.post, ...posts]);
+
+                toast.success(editingId ? "Post updated" : "Post created");
+                resetForm();
+                setImage(null);
+            } else toast.error(res.data.message);
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const handleEdit = (post) => { setTitle(post.title); setDescription(post.description); setEditingId(post._id); setShowForm(true); };
@@ -255,6 +282,11 @@ function Blog() {
                     <form onSubmit={handleSubmit} style={styles.form}>
                         <p style={styles.formLabel}>{editingId !== null ? "EDIT POST" : "NEW POST"}</p>
                         <input type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} style={styles.input} required />
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={e => setImage(e.target.files[0])}
+                        />
                         <textarea placeholder="Write something..." value={description} onChange={e => setDescription(e.target.value)} style={styles.textarea} required />
                         <button type="submit" style={styles.submitBtn} disabled={submitting}>
                             {submitting ? "Saving..." : editingId !== null ? "Save Changes" : "Post"}
@@ -282,6 +314,9 @@ function Blog() {
                                 {/* expanded content */}
                                 {expanded && (
                                     <div style={styles.expandedBody}>
+                                        <img
+                                            src={backendUrl + post.image}
+                                        />
                                         <p style={styles.postDescFull}>{post.description}</p>
                                         {isAdmin && (
                                             <div style={styles.postActions}>

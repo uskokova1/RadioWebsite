@@ -31,42 +31,40 @@ export const getPostById = async (req, res) => {
     }
 };
 
-// POST /api/posts admin only
+// POST /api/posts
 export const createPost = async (req, res) => {
     const { userId, title, description } = req.body;
+    const image = req.file ? `/uploads/${req.file.filename}` : undefined;
 
     if (!title || !description) {
         return res.json({ success: false, message: 'Title and description required' });
     }
 
     try {
-        const post = new postModel({ title, description, author: userId });
+        const post = new postModel({ title, description, author: userId, image });
         await post.save();
         await post.populate('author', 'username');
-
         return res.json({ success: true, post });
     } catch (err) {
         return res.json({ success: false, message: err.message });
     }
 };
 
-// PUT /api/posts/:id admin only
+// PUT /api/posts/:id
 export const updatePost = async (req, res) => {
     const { title, description } = req.body;
+    const image = req.file ? `/uploads/${req.file.filename}` : undefined;
 
     try {
         const post = await postModel.findById(req.params.id);
+        if (!post) return res.json({ success: false, message: 'Post not found' });
 
-        if (!post) {
-            return res.json({ success: false, message: 'Post not found' });
-        }
-
-        if (title)       post.title       = title;
+        if (title) post.title = title;
         if (description) post.description = description;
+        if (image) post.image = image;
 
         await post.save();
         await post.populate('author', 'username');
-
         return res.json({ success: true, post });
     } catch (err) {
         return res.json({ success: false, message: err.message });

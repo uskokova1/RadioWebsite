@@ -81,7 +81,7 @@ export const login = async (req, res) => {
             /*maxAge: 3*24*160*60*1000*/
             maxAge: 3*24*60*60*1000 //correct calculation
         })
-
+        
         return res.json({success: true})
 
     } catch (err){

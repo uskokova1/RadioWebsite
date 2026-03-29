@@ -7,6 +7,8 @@ import {
     deletePost,
 } from "../controllers/postController.js";
 import adminAuth from '../middleware/adminAuth.js';
+import { upload } from '../middleware/upload.js';
+
 
 const postRouter = express.Router();
 
@@ -15,8 +17,8 @@ postRouter.get('/', getAllPosts);
 postRouter.get('/:id', getPostById);
 
 //admin
-postRouter.post('/', adminAuth, createPost);
-postRouter.put('/:id', adminAuth, updatePost);
+postRouter.post('/', adminAuth, upload.single('image'), createPost);
+postRouter.put('/:id', adminAuth, upload.single('image'), updatePost);
 postRouter.delete('/:id', adminAuth, deletePost);
 
 export default postRouter;
