@@ -33,7 +33,8 @@ export const getEventById = async (req, res) => {
 
 // POST /api/events admin only
 export const createEvent = async (req, res) => {
-    const { userId, title, description } = req.body;
+    const {title, description } = req.body;
+    req.body.userId = req.userId;
 
     if (!title || !description) {
         return res.json({ success: false, message: 'Title and description required' });

@@ -216,7 +216,7 @@ function Blog() {
             formData.append("title", title);
             formData.append("description", description);
             if (image) formData.append("image", image);
-            formData.append("userId", userData._id);
+            //formData.append("userId", userData._id);
 
             let res;
             if (editingId) {

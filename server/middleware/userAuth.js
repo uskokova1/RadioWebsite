@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken'
 
 const userAuth = async (req, res, next) => {
     const {token} = req.cookies;
+    //console.log(req);
 
     if(!token){
         return res.json({success: false, message:"Not authorized, login again"})

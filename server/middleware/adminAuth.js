@@ -26,8 +26,7 @@ const adminAuth = async (req, res, next) => {
         }
 
         if (!req.body) req.body = {};
-        req.body.userId = tokenDecode.id;
-
+        req.userId = tokenDecode.id;
         next();
 
     } catch (err) {

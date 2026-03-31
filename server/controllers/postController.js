@@ -33,7 +33,10 @@ export const getPostById = async (req, res) => {
 
 // POST /api/posts
 export const createPost = async (req, res) => {
+    req.body.userId = req.userId;
     const { userId, title, description } = req.body;
+
+
     const image = req.file ? `/uploads/${req.file.filename}` : undefined;
 
     if (!title || !description) {

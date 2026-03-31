@@ -26,7 +26,7 @@ const App = () => {
         <div>
             <TooltipProvider>
             <ToastContainer/>
-            <NavBar/>
+                {/*<NavBar/> */}
             <Routes>
                 <Route path='/' element={<Home2 />} />
                 <Route path='/admin/users' element={<ShowUsers />} />
