@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { AppContext } from "../context/AppContext.jsx";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Markdown from 'react-showdown';
 
 const EMOJIS = ['👍', '❤️', '😂', '🔥', '😮'];
 
@@ -184,11 +185,19 @@ function Blog() {
     const [loading, setLoading]         = useState(true);
     const [title, setTitle]             = useState("");
     const [description, setDescription] = useState("");
-    const [image, setImage] = useState(null);
+    const [selectedImagePath, setSelectedImagePath] = useState(null);
+    const [uploadedImages, setUploadedImages] = useState([]);
     const [showForm, setShowForm]       = useState(false);
     const [editingId, setEditingId]     = useState(null);
     const [submitting, setSubmitting]   = useState(false);
     const [expandedId, setExpandedId]   = useState(null);  // which post is expanded
+
+    const fetchImages = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + '/api/images', { withCredentials: true });
+            if (data.success) setUploadedImages(data.images);
+        } catch (err) { console.error(err.message); }
+    };
 
     useEffect(() => { fetchPosts(); }, []);
 
@@ -204,32 +213,33 @@ function Blog() {
         }
     };
 
-    const resetForm = () => { setTitle(""); setDescription(""); setShowForm(false); setEditingId(null); };
+    const resetForm = () => {
+        setTitle("");
+        setDescription("");
+        setSelectedImagePath(null);
+        setShowForm(false);
+        setEditingId(null);
+    };
 
-// handleSubmit
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
 
         try {
-            const formData = new FormData();
-            formData.append("title", title);
-            formData.append("description", description);
-            if (image) formData.append("image", image);
-            //formData.append("userId", userData._id);
+            const body = { title, description, image: selectedImagePath };
 
             let res;
             if (editingId) {
                 res = await axios.put(
                     `${backendUrl}/api/posts/${editingId}`,
-                    formData,
-                    { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
+                    body,
+                    { withCredentials: true }
                 );
             } else {
                 res = await axios.post(
                     `${backendUrl}/api/posts`,
-                    formData,
-                    { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
+                    body,
+                    { withCredentials: true }
                 );
             }
 
@@ -239,7 +249,7 @@ function Blog() {
 
                 toast.success(editingId ? "Post updated" : "Post created");
                 resetForm();
-                setImage(null);
+                setSelectedImagePath(null);
             } else toast.error(res.data.message);
         } catch (err) {
             toast.error(err.message);
@@ -248,7 +258,14 @@ function Blog() {
         }
     };
 
-    const handleEdit = (post) => { setTitle(post.title); setDescription(post.description); setEditingId(post._id); setShowForm(true); };
+    const handleEdit = (post) => {
+        setTitle(post.title);
+        setDescription(post.description);
+        setSelectedImagePath(post.image || null);
+        setEditingId(post._id);
+        setShowForm(true);
+        fetchImages();
+    };
 
     const handleDelete = async (id) => {
         try {
@@ -282,12 +299,59 @@ function Blog() {
                     <form onSubmit={handleSubmit} style={styles.form}>
                         <p style={styles.formLabel}>{editingId !== null ? "EDIT POST" : "NEW POST"}</p>
                         <input type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} style={styles.input} required />
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={e => setImage(e.target.files[0])}
-                        />
-                        <textarea placeholder="Write something..." value={description} onChange={e => setDescription(e.target.value)} style={styles.textarea} required />
+                        <div>
+                            <p style={{ ...styles.formLabel, marginBottom: 8 }}>POST IMAGE (optional)</p>
+                            <div style={styles.imagePicker}>
+                                <div
+                                    key="__none"
+                                    style={{
+                                        ...styles.imagePickerItem,
+                                        ...(selectedImagePath === null ? styles.imagePickerSelected : {}),
+                                    }}
+                                    onClick={() => setSelectedImagePath(null)}
+                                >
+                                    None
+                                </div>
+                                {uploadedImages.map(img => (
+                                    <div
+                                        key={img.name}
+                                        style={{
+                                            ...styles.imagePickerItem,
+                                            ...(selectedImagePath === `/uploads/${img.name}` ? styles.imagePickerSelected : {}),
+                                        }}
+                                        onClick={() => setSelectedImagePath(`/uploads/${img.name}`)}
+                                    >
+                                        <img
+                                            src={`${backendUrl}/uploads/${img.name}`}
+                                            alt={img.name}
+                                            style={styles.imagePickerThumb}
+                                        />
+                                        <span style={styles.imagePickerName}>{img.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div>
+                            <p style={{ ...styles.formLabel, marginBottom: 8 }}>CONTENT <span style={{ color: "#444" }}>— Markdown supported</span></p>
+                            <div style={styles.editorWrap}>
+                                <textarea
+                                    placeholder="Write something..."
+                                    value={description}
+                                    onChange={e => setDescription(e.target.value)}
+                                    style={styles.editorTextarea}
+                                    required
+                                />
+                                <div className="prose prose-invert" style={styles.previewPane}>
+                                    {!description && <p style={{ color: "#444", fontFamily: "'Georgia', serif", fontSize: "14px" }}>Preview will appear here…</p>}
+                                    {description && (
+                                        <Markdown
+                                            markdown={description}
+                                            options={{ tables: true, strikethrough: true, ghCodeBlocks: true }}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                         <button type="submit" style={styles.submitBtn} disabled={submitting}>
                             {submitting ? "Saving..." : editingId !== null ? "Save Changes" : "Post"}
                         </button>
@@ -314,7 +378,7 @@ function Blog() {
                                 {/* expanded content */}
                                 {expanded && (
                                     <div style={styles.expandedBody}>
-                                        <img
+                                        <img className='aspect-square object-cover w-65'
                                             src={backendUrl + post.image}
                                         />
                                         <p style={styles.postDescFull}>{post.description}</p>
@@ -364,7 +428,7 @@ const cStyles = {
 
 const styles = {
     page:       { minHeight: "100vh", background: "#111", display: "flex", justifyContent: "center" },
-    column:     { width: "100%", maxWidth: "760px", minHeight: "100vh", background: "#1a1a1a", display: "flex", flexDirection: "column", boxShadow: "0 0 60px rgba(0,0,0,0.8)", borderLeft: "1px solid #2a2a2a", borderRight: "1px solid #2a2a2a" },
+    column:     { width: "100%", maxWidth: "1100px", minHeight: "100vh", background: "#1a1a1a", display: "flex", flexDirection: "column", boxShadow: "0 0 60px rgba(0,0,0,0.8)", borderLeft: "1px solid #2a2a2a", borderRight: "1px solid #2a2a2a" },
     header:     { background: "#322d2d", padding: "40px 32px 28px", borderBottom: "1px solid #3a3a3a" },
     eyebrow:    { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "5px", color: "#fa4040", margin: "0 0 10px 0" },
     pageTitle:  { fontFamily: "'Georgia', serif", fontSize: "48px", fontWeight: "bold", color: "#f5f0e8", margin: "0", letterSpacing: "-1px" },
@@ -376,6 +440,9 @@ const styles = {
     formLabel:  { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "4px", color: "#555", margin: "0" },
     input:      { fontFamily: "'Courier New', monospace", fontSize: "13px", color: "#f5f0e8", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "10px 12px", outline: "none", width: "100%" },
     textarea:   { fontFamily: "'Georgia', serif", fontSize: "14px", color: "#ccc", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "10px 12px", outline: "none", width: "100%", minHeight: "100px", resize: "vertical" },
+    editorWrap: { display: "flex", gap: "16px", alignItems: "flex-start" },
+    editorTextarea: { flex: 1, fontFamily: "'Courier New', monospace", fontSize: "13px", color: "#ccc", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "12px", outline: "none", minHeight: "280px", resize: "vertical" },
+    previewPane: { flex: 1, background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "12px", minHeight: "280px", overflowY: "auto" },
     submitBtn:  { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "2px", color: "#fff", background: "#fa4040", border: "none", borderRadius: "4px", padding: "10px", cursor: "pointer", alignSelf: "flex-end" },
     postList:   { padding: "20px 32px 48px", display: "flex", flexDirection: "column", gap: "12px" },
     emptyMsg:   { fontFamily: "'Courier New', monospace", fontSize: "12px", color: "#444", letterSpacing: "2px", textAlign: "center", marginTop: "40px" },
@@ -388,8 +455,13 @@ const styles = {
     postDesc:   { fontFamily: "'Georgia', serif", fontSize: "13px", color: "#666", lineHeight: "1.5", margin: "0" },
     postDescFull:{ fontFamily: "'Georgia', serif", fontSize: "14px", color: "#888", lineHeight: "1.6", margin: "0 0 16px 0" },
     postActions:{ display: "flex", gap: "8px", marginBottom: "16px" },
-    editBtn:    { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#fa4040", background: "transparent", border: "1px solid #fc848444", borderRadius: "3px", padding: "6px 12px", cursor: "pointer" },
-    deleteBtn:  { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#888", background: "transparent", border: "1px solid #333", borderRadius: "3px", padding: "6px 12px", cursor: "pointer" },
+    imagePicker: { display: "flex", flexWrap: "wrap", gap: "8px", padding: "8px" },
+    imagePickerItem: { width: "70px", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", cursor: "pointer", padding: "4px", border: "1px solid #333", borderRadius: "4px", background: "#1a1a1a" },
+    imagePickerSelected: { borderColor: "#fa4040", background: "#241212" },
+    imagePickerThumb: { width: "60px", height: "60px", objectFit: "cover", borderRadius: "3px" },
+    imagePickerName: { fontSize: "8px", fontFamily: "'Courier New', monospace", color: "#888", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "64px" },
+    editBtn:    { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#fa4040", background: "transparent", border: "1px solid #fc848444",
+    borderRadius: "3px", padding: "6px 12px", cursor: "pointer" },    deleteBtn:  { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#888", background: "transparent", border: "1px solid #333", borderRadius: "3px", padding: "6px 12px", cursor: "pointer" },
 };
 
 export default Blog;

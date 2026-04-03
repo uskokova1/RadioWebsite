@@ -34,10 +34,7 @@ export const getPostById = async (req, res) => {
 // POST /api/posts
 export const createPost = async (req, res) => {
     req.body.userId = req.userId;
-    const { userId, title, description } = req.body;
-
-
-    const image = req.file ? `/uploads/${req.file.filename}` : undefined;
+    const { userId, title, description, image } = req.body;
 
     if (!title || !description) {
         return res.json({ success: false, message: 'Title and description required' });
@@ -55,8 +52,7 @@ export const createPost = async (req, res) => {
 
 // PUT /api/posts/:id
 export const updatePost = async (req, res) => {
-    const { title, description } = req.body;
-    const image = req.file ? `/uploads/${req.file.filename}` : undefined;
+    const { title, description, image } = req.body;
 
     try {
         const post = await postModel.findById(req.params.id);
@@ -64,7 +60,7 @@ export const updatePost = async (req, res) => {
 
         if (title) post.title = title;
         if (description) post.description = description;
-        if (image) post.image = image;
+        post.image = image;
 
         await post.save();
         await post.populate('author', 'username');

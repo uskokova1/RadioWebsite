@@ -23,6 +23,7 @@ const AdminDashboard = () => {
         { title: 'Blog Management',     desc: 'CRUD your blogs',                    path: '/blog'           },
         { title: 'Comment Moderation',  desc: 'Review and remove comments',         path: '/admin/comments' },
         { title: 'Manage Contacts',     desc: 'Add, edit, and remove contacts',     path: '/admin/contacts' },
+        { title: 'Image Manager',       desc: 'Upload and delete images',           path: '/admin/images'   },
     ];
 
     return (

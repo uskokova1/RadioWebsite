@@ -9,6 +9,7 @@ import postRouter from './routes/postRoutes.js';
 import eventRouter from './routes/eventRoutes.js';
 import commentRouter from './routes/commentRoutes.js';
 import contactRouter from './routes/contactRoutes.js';
+import imageRouter from './routes/imageRoutes.js';
 import {generalRateLimiter} from "./middleware/rateLimiter.js";
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/api/posts',    postRouter)
 app.use('/api/events',   eventRouter)
 app.use('/api/comments', commentRouter)
 app.use('/api/contacts', contactRouter)
+app.use('/api/images',    imageRouter)
 
 
 app.use('/uploads', express.static('./server/uploads/'))

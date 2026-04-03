@@ -18,6 +18,7 @@ import ShowUsers from "@/pages/ShowUsers.jsx";
 import AdminDashboard from "@/pages/AdminDashboard.jsx";
 import AdminComments from "@/pages/AdminComments.jsx";
 import AdminContacts from "@/pages/AdminContacts.jsx";
+import AdminImages from "@/pages/AdminImages.jsx";
 import {TooltipProvider} from "@/components/ui/tooltip.jsx"
 
 const App = () => {
@@ -39,6 +40,9 @@ const App = () => {
                 <Route path="/Blog" element={<Blog />} />
                 <Route path="/Events" element={<Events />} />
                 <Route path="/Contact" element={<Contact />} />
+                <Route path="/admin/images" element={<AdminImages />} />
+                <Route path="/admin/contacts" element={<AdminContacts />} />
+                <Route path="/admin/comments" element={<AdminComments />} />
                 <Route path="/Profile" element={<Profile />} />
             </Routes>
             </TooltipProvider>
