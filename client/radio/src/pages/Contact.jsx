@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { useContext } from "react";
 import { AppContext } from "../context/AppContext.jsx";
 
 function Contact() {
@@ -46,7 +45,11 @@ function Contact() {
                     <div style={styles.modal} onClick={e => e.stopPropagation()}>
                         <button style={styles.modalClose} onClick={() => setSelected(null)}>✕</button>
                         <div style={styles.modalAvatar}>
-                            <span style={styles.modalAvatarText}>{selected.initials}</span>
+                            {selected.image ? (
+                                <img src={`${backendUrl}${selected.image}`} alt={selected.name} style={styles.modalAvatarImg} />
+                            ) : (
+                                <span style={styles.modalAvatarText}>{selected.initials || '?'}</span>
+                            )}
                         </div>
                         <p style={styles.modalName}>{selected.name}</p>
                         <p style={styles.modalPosition}>{selected.position}</p>
@@ -57,8 +60,9 @@ function Contact() {
                         </div>
                         {selected.link && (
                             <div style={styles.modalField}>
-                                <span style={styles.modalFieldLabel}>LINK</span>
-                                <a href={selected.link} target="_blank" rel="noreferrer" style={styles.modalFieldValue}>{selected.link}</a>
+                                <button onClick={() => window.open(selected.link, '_blank')} style={styles.linkBtn}>
+                                    &rarr; Visit Link
+                                </button>
                             </div>
                         )}
                     </div>
@@ -70,6 +74,7 @@ function Contact() {
 
 function MemberCard({ member, onClick }) {
     const [hovered, setHovered] = useState(false);
+    const {backendUrl} = useContext(AppContext);
     return (
         <div
             style={{
@@ -83,7 +88,13 @@ function MemberCard({ member, onClick }) {
             onMouseLeave={() => setHovered(false)}
             onClick={onClick}
         >
-            <div style={styles.avatar}><span style={styles.avatarText}>{member.initials}</span></div>
+            <div style={styles.avatar}>
+                {member.image ? (
+                    <img src={`${backendUrl}${member.image}`} alt={member.name} style={styles.avatarImg} />
+                ) : (
+                    <span style={styles.avatarText}>{member.initials || '?'}</span>
+                )}
+            </div>
             <p style={styles.cardName}>{member.name}</p>
             <p style={styles.cardPosition}>{member.position}</p>
             <p style={{ ...styles.cardHint, opacity: hovered ? 1 : 0 }}>click for info</p>
@@ -103,7 +114,6 @@ const styles = {
     empty:           { fontFamily: "'Courier New', monospace", fontSize: "11px", color: "#444", letterSpacing: "2px", textAlign: "center", padding: "40px" },
     grid:            { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "20px", padding: "32px" },
     card:            { background: "#222", border: "1px solid #2e2e2e", borderRadius: "12px", padding: "24px 16px 20px", display: "flex", flexDirection: "column", alignItems: "center", transition: "all 0.2s ease", userSelect: "none" },
-    avatar:          { width: "64px", height: "64px", borderRadius: "50%", background: "#322d2d", border: "2px solid #fa4040", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "14px" },
     avatarText:      { fontFamily: "'Courier New', monospace", fontSize: "18px", color: "#fa4040", fontWeight: "bold" },
     cardName:        { fontFamily: "'Georgia', serif", fontSize: "14px", color: "#f5f0e8", margin: "0 0 4px 0", textAlign: "center", fontWeight: "bold" },
     cardPosition:    { fontFamily: "'Courier New', monospace", fontSize: "9px", color: "#666", letterSpacing: "2px", margin: "0", textAlign: "center" },
@@ -111,7 +121,6 @@ const styles = {
     modalBackdrop:   { position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 },
     modal:           { background: "#1a1a1a", border: "1px solid #333", borderRadius: "16px", padding: "40px 36px 32px", width: "320px", position: "relative", display: "flex", flexDirection: "column", alignItems: "center", boxShadow: "0 24px 60px rgba(0,0,0,0.8)" },
     modalClose:      { position: "absolute", top: "16px", right: "16px", background: "transparent", border: "1px solid #333", borderRadius: "50%", width: "28px", height: "28px", color: "#666", cursor: "pointer", fontSize: "12px", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 },
-    modalAvatar:     { width: "80px", height: "80px", borderRadius: "50%", background: "#322d2d", border: "2px solid #fa4040", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" },
     modalAvatarText: { fontFamily: "'Courier New', monospace", fontSize: "24px", color: "#fa4040", fontWeight: "bold" },
     modalName:       { fontFamily: "'Georgia', serif", fontSize: "22px", color: "#f5f0e8", margin: "0 0 6px 0", fontWeight: "bold", textAlign: "center" },
     modalPosition:   { fontFamily: "'Courier New', monospace", fontSize: "10px", color: "#fa4040", letterSpacing: "3px", margin: "0", textAlign: "center" },

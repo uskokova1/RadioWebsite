@@ -13,11 +13,16 @@ export const getAllContacts = async (req, res) => {
 // POST /api/contacts  — adminAuth
 export const createContact = async (req, res) => {
     try {
-        const { name, position, email, link, initials } = req.body;
-        if (!name || !position || !email || !initials) {
-            return res.json({ success: false, message: 'name, position, email, and initials required' });
+        const { name, position, email, link, initials, image } = req.body;
+        if (!name || !position || !email) {
+            return res.json({ success: false, message: 'name, position, and email required' });
         }
-        const contact = new contactModel({ name, position, email, link: link || null, initials });
+        const contact = new contactModel({
+            name, position, email,
+            link: link || null,
+            image: image || null,
+            initials: initials || null,
+        });
         await contact.save();
         return res.json({ success: true, contact });
     } catch (err) {
@@ -31,12 +36,13 @@ export const updateContact = async (req, res) => {
         const contact = await contactModel.findById(req.params.id);
         if (!contact) return res.json({ success: false, message: 'Contact not found' });
 
-        const { name, position, email, link, initials } = req.body;
+        const { name, position, email, link, initials, image } = req.body;
         if (name)     contact.name     = name;
         if (position) contact.position = position;
         if (email)    contact.email    = email;
-        if (initials) contact.initials = initials;
-        contact.link = link !== undefined ? link : contact.link;
+        if (initials !== undefined)  contact.initials  = initials;
+        contact.link  = link !== undefined  ? link  : contact.link;
+        contact.image = image !== undefined ? image : contact.image;
 
         await contact.save();
         return res.json({ success: true, contact });

@@ -5,17 +5,18 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { ArrowLeft } from 'lucide-react';
 
-const EMPTY_FORM = { name: '', position: '', email: '', link: '', initials: '' };
+const EMPTY_FORM = { name: '', position: '', email: '', link: '', initials: '', image: '' };
 
 const AdminContacts = () => {
     const { backendUrl, userData, getUserData } = useContext(AppContext);
     const navigate = useNavigate();
 
-    const [contacts, setContacts]   = useState([]);
-    const [form, setForm]           = useState(EMPTY_FORM);
-    const [editingId, setEditingId] = useState(null);
-    const [showForm, setShowForm]   = useState(false);
-    const [submitting, setSubmitting] = useState(false);
+    const [contacts, setContacts]         = useState([]);
+    const [uploadedImages, setUploadedImages] = useState([]);
+    const [form, setForm]                 = useState(EMPTY_FORM);
+    const [editingId, setEditingId]       = useState(null);
+    const [showForm, setShowForm]         = useState(false);
+    const [submitting, setSubmitting]     = useState(false);
 
     useEffect(() => { if (!userData) getUserData(); }, []);
 
@@ -32,6 +33,13 @@ const AdminContacts = () => {
         try {
             const { data } = await axios.get(backendUrl + '/api/contacts');
             if (data.success) setContacts(data.contacts);
+        } catch (err) { console.error(err.message); }
+    };
+
+    const fetchImages = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + '/api/images', { withCredentials: true });
+            if (data.success) setUploadedImages(data.images);
         } catch (err) { console.error(err.message); }
     };
 
@@ -61,9 +69,10 @@ const AdminContacts = () => {
     };
 
     const handleEdit = (c) => {
-        setForm({ name: c.name, position: c.position, email: c.email, link: c.link || '', initials: c.initials });
+        setForm({ name: c.name, position: c.position, email: c.email, link: c.link || '', initials: c.initials || '', image: c.image || '' });
         setEditingId(c._id);
         setShowForm(true);
+        fetchImages();
     };
 
     const handleDelete = async (id) => {
@@ -97,16 +106,54 @@ const AdminContacts = () => {
                     {showForm && (
                         <form onSubmit={handleSubmit} style={styles.form}>
                             <p style={styles.formLabel}>{editingId ? 'EDIT CONTACT' : 'NEW CONTACT'}</p>
-                            {['name', 'position', 'email', 'initials', 'link'].map(field => (
+                            {['name', 'position', 'email'].map(field => (
                                 <input
                                     key={field}
-                                    placeholder={field.charAt(0).toUpperCase() + field.slice(1) + (field === 'link' ? ' (optional)' : '')}
+                                    placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
                                     value={form[field]}
                                     onChange={e => setForm({ ...form, [field]: e.target.value })}
                                     style={styles.input}
-                                    required={field !== 'link'}
+                                    required
                                 />
                             ))}
+                            <div>
+                                <p style={{ ...styles.formLabel, marginBottom: 8 }}>CONTACT IMAGE (optional)</p>
+                                <div style={styles.imagePicker}>
+                                    <div
+                                        style={{
+                                            ...styles.imagePickerItem,
+                                            ...(form.image === '' ? styles.imagePickerSelected : {}),
+                                        }}
+                                        onClick={() => setForm({ ...form, image: '' })}
+                                    >
+                                        None
+                                    </div>
+                                    {uploadedImages.map(img => (
+                                        <div
+                                            key={img.name}
+                                            style={{
+                                                ...styles.imagePickerItem,
+                                                ...(form.image === `/uploads/${img.name}` ? styles.imagePickerSelected : {}),
+                                            }}
+                                            onClick={() => setForm({ ...form, image: `/uploads/${img.name}` })}
+                                        >
+                                            <img src={`${backendUrl}/uploads/${img.name}`} alt={img.name} style={styles.imageThumb} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <input
+                                placeholder="Link (optional)"
+                                value={form.link}
+                                onChange={e => setForm({ ...form, link: e.target.value })}
+                                style={styles.input}
+                            />
+                            <input
+                                placeholder="Initials (optional)"
+                                value={form.initials}
+                                onChange={e => setForm({ ...form, initials: e.target.value })}
+                                style={styles.input}
+                            />
                             <button type="submit" style={styles.submitBtn} disabled={submitting}>
                                 {submitting ? 'Saving...' : editingId ? 'Save Changes' : 'Add Contact'}
                             </button>
@@ -118,7 +165,13 @@ const AdminContacts = () => {
                         {contacts.map(c => (
                             <div key={c._id} style={styles.card}>
                                 <div style={styles.cardLeft}>
-                                    <div style={styles.avatar}><span style={styles.avatarText}>{c.initials}</span></div>
+                                    <div style={styles.avatar}>
+                                        {c.image ? (
+                                            <img src={`${backendUrl}${c.image}`} alt={c.name} style={styles.avatarImg} />
+                                        ) : (
+                                            <span style={styles.avatarText}>{c.initials || '?'}</span>
+                                        )}
+                                    </div>
                                     <div>
                                         <p style={styles.cardName}>{c.name}</p>
                                         <p style={styles.cardPos}>{c.position}</p>
@@ -155,12 +208,18 @@ const styles = {
     cardLeft:    { display: "flex", gap: "16px", alignItems: "center" },
     avatar:      { width: "48px", height: "48px", borderRadius: "50%", background: "#322d2d", border: "2px solid #fa4040", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
     avatarText:  { fontFamily: "'Courier New', monospace", fontSize: "14px", color: "#fa4040", fontWeight: "bold" },
+    avatarImg:   { width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" },
     cardName:    { fontFamily: "'Georgia', serif", fontSize: "15px", color: "#f5f0e8", margin: "0 0 2px 0", fontWeight: "bold" },
     cardPos:     { fontFamily: "'Courier New', monospace", fontSize: "9px", color: "#666", letterSpacing: "2px", margin: "0 0 2px 0" },
     cardEmail:   { fontFamily: "'Courier New', monospace", fontSize: "10px", color: "#555", margin: "0" },
     cardActions: { display: "flex", gap: "8px" },
     editBtn:     { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#fa4040", background: "transparent", border: "1px solid #fa404044", borderRadius: "3px", padding: "6px 12px", cursor: "pointer" },
     deleteBtn:   { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#888", background: "transparent", border: "1px solid #333", borderRadius: "3px", padding: "6px 12px", cursor: "pointer" },
+
+    imagePicker: { display: "flex", flexWrap: "wrap", gap: "8px", padding: "8px" },
+    imagePickerItem: { width: "48px", height: "48px", cursor: "pointer", padding: "2px", border: "2px solid #333", borderRadius: "50%", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", background: "#1a1a1a" },
+    imagePickerSelected: { borderColor: "#fa4040", background: "#241212" },
+    imageThumb:  { width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" },
 };
 
 export default AdminContacts;

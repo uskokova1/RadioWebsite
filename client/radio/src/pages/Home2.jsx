@@ -5,7 +5,6 @@ import EmailVerify from "@/pages/EmailVerify.jsx";
 import BlogButton from "@/components/BlogButton.jsx";
 import ContactsButton from "@/components/ContactsButton.jsx";
 import { useWindowManager, WindowManager } from '@/context/WindowManager.jsx';
-import MarkdownView from "react-showdown";
 
 const App = () => {
     const { addWindow, closeGroup, windows } = useWindowManager();
