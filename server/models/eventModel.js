@@ -7,6 +7,7 @@ const eventSchema = new mongoose.Schema({
     dates     : {type: [Date], default: []},
     recurrence: {type: String, enum: ['none', 'daily', 'weekly', 'biweekly', 'monthly', 'yearly'], default: 'none'},
     repeatDays: {type: [String], enum: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'], default: []},
+    time      : {type: String, default: null}, // HH:MM format
     author : {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
 }, { timestamps: true });
 

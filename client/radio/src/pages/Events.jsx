@@ -128,6 +128,7 @@ function Events() {
     const [eventDates, setEventDates]   = useState([]);
     const [recurrence, setRecurrence]   = useState();
     const [repeatDays, setRepeatDays]   = useState([]);
+    const [eventTime, setEventTime]     = useState('');
     const [showForm, setShowForm]       = useState(false);
     const [editingId, setEditingId]     = useState(null);
     const [submitting, setSubmitting]   = useState(false);
@@ -144,7 +145,7 @@ function Events() {
         finally { setLoading(false); }
     };
 
-    const resetForm = () => { setTitle(""); setDescription(""); setSelectedImagePath(null); setEventDates([]); setRecurrence('none'); setRepeatDays([]); setShowForm(false); setEditingId(null); };
+    const resetForm = () => { setTitle(""); setDescription(""); setSelectedImagePath(null); setEventDates([]); setRecurrence('none'); setRepeatDays([]); setEventTime(''); setShowForm(false); setEditingId(null); };
 
     const fetchImages = async () => {
         try {
@@ -163,7 +164,9 @@ function Events() {
                 image: selectedImagePath,
                 dates: recurrence? [] : eventDates,
                 recurrence,
-                repeatDays: recurrence ? repeatDays : [] };
+                repeatDays: recurrence ? repeatDays : [],
+                time: eventTime || null,
+            };
             if (editingId !== null) {
                 const { data } = await axios.put(`${backendUrl}/api/events/${editingId}`, body, { withCredentials: true });
                 if (data.success) { setEvents(events.map(ev => ev._id === editingId ? data.event : ev)); toast.success("Event updated"); resetForm(); }
@@ -184,6 +187,7 @@ function Events() {
         setEventDates((ev.dates || []).map(d => new Date(d)));
         setRecurrence(ev.recurrence || 'none');
         setRepeatDays(ev.repeatDays || []);
+        setEventTime(ev.time || '');
         setEditingId(ev._id);
         setShowForm(true);
         fetchImages();
@@ -279,6 +283,16 @@ function Events() {
                                     </button>
                                 ))}
                             </div>
+                        </div>
+
+                        <div>
+                            <p style={{ ...styles.formLabel, marginBottom: 8 }}>EVENT TIME (optional)</p>
+                            <input
+                                type="time"
+                                value={eventTime}
+                                onChange={e => setEventTime(e.target.value)}
+                                style={styles.input}
+                            />
                         </div>
 
                         <div>
