@@ -33,15 +33,17 @@ export const getEventById = async (req, res) => {
 
 // POST /api/events admin only
 export const createEvent = async (req, res) => {
-    const {title, description } = req.body;
+    const {title, description, image, dates, recurrence, repeatDays} = req.body;
     req.body.userId = req.userId;
 
     if (!title || !description) {
         return res.json({ success: false, message: 'Title and description required' });
     }
 
+    const { userId } = req.body;
+
     try {
-        const event = new eventModel({ title, description, author: userId });
+        const event = new eventModel({ title, description, author: userId, image: image || null, dates: dates || [], recurrence: recurrence || 'none', repeatDays: repeatDays || [] });
         await event.save();
         await event.populate('author', 'username');
 
@@ -53,7 +55,7 @@ export const createEvent = async (req, res) => {
 
 // PUT /api/events/:id admin only
 export const updateEvent = async (req, res) => {
-    const { title, description } = req.body;
+    const { title, description, image, date, recurrence } = req.body;
 
     try {
         const event = await eventModel.findById(req.params.id);
@@ -62,8 +64,12 @@ export const updateEvent = async (req, res) => {
             return res.json({ success: false, message: 'Event not found' });
         }
 
-        if (title)       event.title       = title;
+        if (title) event.title = title;
         if (description) event.description = description;
+        if (image !== undefined) event.image = image;
+        if (dates !== undefined) event.dates = dates;
+        if (recurrence !== undefined) event.recurrence = recurrence;
+        if (repeatDays !== undefined) event.repeatDays = repeatDays;
 
         await event.save();
         await event.populate('author', 'username');

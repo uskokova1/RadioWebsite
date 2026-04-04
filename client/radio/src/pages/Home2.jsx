@@ -4,6 +4,7 @@ import Login from '@/pages/Login.jsx';
 import EmailVerify from "@/pages/EmailVerify.jsx";
 import BlogButton from "@/components/BlogButton.jsx";
 import ContactsButton from "@/components/ContactsButton.jsx";
+import EventsCalendar from "@/components/EventsCalendar.jsx";
 import { useWindowManager, WindowManager } from '@/context/WindowManager.jsx';
 
 const App = () => {
@@ -56,6 +57,7 @@ const App = () => {
             />
             <BlogButton />
             <ContactsButton />
+            <EventsCalendar />
         </div>
     );
 };

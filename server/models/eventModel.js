@@ -3,7 +3,10 @@ import mongoose from 'mongoose';
 const eventSchema = new mongoose.Schema({
     title : {type: String, required: true},
     description : {type: String, required: true},
-    //thumbnail : {type: String, default: ''}, //dynamic store image url add later
+    image     : {type: String, default: null},
+    dates     : {type: [Date], default: []},
+    recurrence: {type: String, enum: ['none', 'daily', 'weekly', 'biweekly', 'monthly', 'yearly'], default: 'none'},
+    repeatDays: {type: [String], enum: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'], default: []},
     author : {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
 }, { timestamps: true });
 

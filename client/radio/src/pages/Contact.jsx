@@ -114,6 +114,8 @@ const styles = {
     empty:           { fontFamily: "'Courier New', monospace", fontSize: "11px", color: "#444", letterSpacing: "2px", textAlign: "center", padding: "40px" },
     grid:            { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "20px", padding: "32px" },
     card:            { background: "#222", border: "1px solid #2e2e2e", borderRadius: "12px", padding: "24px 16px 20px", display: "flex", flexDirection: "column", alignItems: "center", transition: "all 0.2s ease", userSelect: "none" },
+    avatar:          { width: "64px", height: "64px", borderRadius: "50%", background: "#322d2d", border: "2px solid #fa4040", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "14px", overflow: "hidden" },
+    avatarImg:       { width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" },
     avatarText:      { fontFamily: "'Courier New', monospace", fontSize: "18px", color: "#fa4040", fontWeight: "bold" },
     cardName:        { fontFamily: "'Georgia', serif", fontSize: "14px", color: "#f5f0e8", margin: "0 0 4px 0", textAlign: "center", fontWeight: "bold" },
     cardPosition:    { fontFamily: "'Courier New', monospace", fontSize: "9px", color: "#666", letterSpacing: "2px", margin: "0", textAlign: "center" },
@@ -121,6 +123,8 @@ const styles = {
     modalBackdrop:   { position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 },
     modal:           { background: "#1a1a1a", border: "1px solid #333", borderRadius: "16px", padding: "40px 36px 32px", width: "320px", position: "relative", display: "flex", flexDirection: "column", alignItems: "center", boxShadow: "0 24px 60px rgba(0,0,0,0.8)" },
     modalClose:      { position: "absolute", top: "16px", right: "16px", background: "transparent", border: "1px solid #333", borderRadius: "50%", width: "28px", height: "28px", color: "#666", cursor: "pointer", fontSize: "12px", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 },
+    modalAvatar:     { width: "80px", height: "80px", borderRadius: "50%", background: "#322d2d", border: "2px solid #fa4040", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px", overflow: "hidden" },
+    modalAvatarImg:  { width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" },
     modalAvatarText: { fontFamily: "'Courier New', monospace", fontSize: "24px", color: "#fa4040", fontWeight: "bold" },
     modalName:       { fontFamily: "'Georgia', serif", fontSize: "22px", color: "#f5f0e8", margin: "0 0 6px 0", fontWeight: "bold", textAlign: "center" },
     modalPosition:   { fontFamily: "'Courier New', monospace", fontSize: "10px", color: "#fa4040", letterSpacing: "3px", margin: "0", textAlign: "center" },
@@ -128,6 +132,7 @@ const styles = {
     modalField:      { width: "100%", display: "flex", flexDirection: "column", gap: "4px", marginBottom: "14px" },
     modalFieldLabel: { fontFamily: "'Courier New', monospace", fontSize: "9px", letterSpacing: "3px", color: "#444" },
     modalFieldValue: { fontFamily: "'Courier New', monospace", fontSize: "12px", color: "#aaa", textDecoration: "none", wordBreak: "break-all" },
+    linkBtn:         { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#fa4040", background: "#241212", border: "1px solid #fa404044", borderRadius: "3px", padding: "8px 16px", cursor: "pointer", width: "100%", textAlign: "center" },
 };
 
 export default Contact;
