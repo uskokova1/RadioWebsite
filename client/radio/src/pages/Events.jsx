@@ -157,7 +157,13 @@ function Events() {
         e.preventDefault();
         setSubmitting(true);
         try {
-            const body = { title, description, image: selectedImagePath, dates: recurrence? [] : eventDates, recurrence, repeatDays: recurrence ? repeatDays : [] };
+            const body = {
+                title,
+                description,
+                image: selectedImagePath,
+                dates: recurrence? [] : eventDates,
+                recurrence,
+                repeatDays: recurrence ? repeatDays : [] };
             if (editingId !== null) {
                 const { data } = await axios.put(`${backendUrl}/api/events/${editingId}`, body, { withCredentials: true });
                 if (data.success) { setEvents(events.map(ev => ev._id === editingId ? data.event : ev)); toast.success("Event updated"); resetForm(); }
@@ -180,8 +186,6 @@ function Events() {
         setRepeatDays(ev.repeatDays || []);
         setEditingId(ev._id);
         setShowForm(true);
-        console.log(ev)
-        setEventDates(ev.dates || []);
         fetchImages();
     };
     const handleDelete = async (id) => {

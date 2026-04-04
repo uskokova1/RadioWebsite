@@ -55,7 +55,7 @@ export const createEvent = async (req, res) => {
 
 // PUT /api/events/:id admin only
 export const updateEvent = async (req, res) => {
-    const { title, description, image, date, recurrence } = req.body;
+    const { title, description, image, dates, recurrence, repeatDays } = req.body;
 
     try {
         const event = await eventModel.findById(req.params.id);
