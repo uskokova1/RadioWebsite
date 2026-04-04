@@ -10,6 +10,7 @@ import eventRouter from './routes/eventRoutes.js';
 import commentRouter from './routes/commentRoutes.js';
 import contactRouter from './routes/contactRoutes.js';
 import imageRouter from './routes/imageRoutes.js';
+import blogGroupRouter from './routes/blogGroupRoutes.js';
 import {generalRateLimiter} from "./middleware/rateLimiter.js";
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/events',   eventRouter)
 app.use('/api/comments', commentRouter)
 app.use('/api/contacts', contactRouter)
 app.use('/api/images',    imageRouter)
+app.use('/api/bloggroup', blogGroupRouter)
 
 
 app.use('/uploads', express.static('./server/uploads/'))
@@ -49,7 +51,10 @@ app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 })
  */
-
+/*
+import {seedDefaultBlogGroup} from './scripts/seedDefaultBlogGroup.js'
+seedDefaultBlogGroup()
+ */
 
 import https from 'https';
 import fs from 'fs';

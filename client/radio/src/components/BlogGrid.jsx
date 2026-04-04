@@ -1,41 +1,68 @@
-import React, {useState} from 'react';
-import { BookOpen, ImageIcon, MessageCircle } from 'lucide-react'; // Icons for your grid
+import React, { useState, useContext, useEffect } from 'react';
+import { ImageIcon, FolderOpen } from 'lucide-react';
+import axios from "axios";
+import { AppContext } from "@/context/AppContext.jsx";
 
-const BlogGrid = ({onVariableChange}) => {
-    const blogPosts = [
-        {
-            id: 1,
-            windowName: "Post 1", // Title of the window
-            text: "This is a description of Post 1.", // Text content
-        },
-        {
-            id: 2,
-            windowName: "Post 2", // Title of the window
-            text: "This is a description of Post 2.", // Text content
-        },
-        {
-            id: 3,
-            windowName: "Post 3", // Title of the window
-            text: "This is a description of Post 3.", // Text content
-        },
-    ];
+const BlogGrid = ({ onVariableChange }) => {
+    const { backendUrl } = useContext(AppContext);
+    const [blogGroups, setBlogGroups] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const handleChange = (event, postid) => {
-        // Call the parent's callback function with the new value
-        onVariableChange(postid);
+    useEffect(() => {
+        fetchGroups();
+    }, []);
+
+    const fetchGroups = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + '/api/bloggroup');
+            setBlogGroups(data);
+        } catch (err) {
+            console.error(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
+    const handleClick = (event, group) => {
+        onVariableChange(group);
+    };
+
+    if (loading) {
+        return <div className="text-sm text-zinc-400 p-3">Loading...</div>;
+    }
+
+    if (blogGroups.length === 0) {
+        return <div className="text-sm text-zinc-400 p-3">No blog groups found.</div>;
+    }
+
     return (
-        <>
-        {blogPosts.map(post => (
-                <div className="w-50 h-20 grid grid-cols-3 gap-4 p-4 bg-gray-500">
-                    <ImageIcon onClick={(e) => handleChange(e,post.id)}
-                               className='hover:scale-110 transition-all spring-duration-300 spring-bounce-60'
-                    />
-                    <h1>{post.id}</h1>
-            </div>
-        ))}
-        </>
+        <div className="grid grid-cols-3 gap-2 p-3">
+            {blogGroups.map((group) => (
+                <div
+                    key={group._id}
+                    onClick={(e) => handleClick(e, group)}
+                    className="flex flex-col items-center cursor-pointer hover:scale-105 transition-all spring-duration-300 spring-bounce-60"
+                >
+                    {group.coverImage ? (
+                        <div className="w-full aspect-[4/3] rounded border border-zinc-700 overflow-hidden bg-zinc-800">
+                            <img
+                                src={`${backendUrl}/uploads/${group.coverImage}`}
+                                alt={group.name}
+                                className="w-full h-full object-cover"
+                                draggable={false}
+                            />
+                        </div>
+                    ) : (
+                        <div className="w-full aspect-[4/3] rounded flex items-center justify-center">
+                            <FolderOpen className="w-10 h-10 text-zinc-500" />
+                        </div>
+                    )}
+                    <span className="text-xs text-zinc-300 mt-1 truncate w-full text-center px-1">
+                        {group.name}
+                    </span>
+                </div>
+            ))}
+        </div>
     );
 };
 

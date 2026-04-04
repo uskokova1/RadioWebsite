@@ -1,137 +1,113 @@
-import React, {useContext, useEffect, useState} from 'react';
-import DraggableWindow from '@/components/DraggableWindow.jsx';
-import { House, Book } from 'lucide-react';
+import React, { useContext, useState } from 'react';
+import { Book } from 'lucide-react';
 import axios from "axios";
-import {toast} from "react-toastify";
-import {AppContext} from "@/context/AppContext.jsx";
-import {Card, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.jsx";
-import { WindowManagerProvider, WindowManager, useWindowManager } from '@/context/WindowManager.jsx';
+import { toast } from "react-toastify";
+import { AppContext } from "@/context/AppContext.jsx";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card.jsx";
+import { useWindowManager } from '@/context/WindowManager.jsx';
 import MarkdownView from "react-showdown";
 import CommentSection from "@/components/CommentSection.jsx";
+import BlogGrid from "@/components/BlogGrid.jsx";
 
+
+const BLOGS_GROUP = 1;
 
 const BlogButton = () => {
-    const { addWindow, closeGroup} = useWindowManager();
-    const [openAlready, setOpenAlready] = useState(false);
-
+    const { addWindow, closeGroup, windows } = useWindowManager();
+    const [lastGroup, setLastGroup] = useState(null);
     const { backendUrl } = useContext(AppContext);
 
-    const [posts, setPosts]             = useState([]);
-    const [loading, setLoading]         = useState(true);
+    let whichPostOpen = null;
 
-    useEffect(() => {
-        fetchPosts();
-    }, []);
-
-    const fetchPosts = async () => {
-        try {
-            const { data } = await axios.get(backendUrl + '/api/posts');
-            if (data.success) {
-                setPosts(data.posts);
-            } else {
-                toast.error(data.message);
-            }
-        } catch (err) {
-            toast.error(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    let whichPostOpen = null
-    const openPost = (e, post) => {
-
-        if(post._id == whichPostOpen?._id){
+    const openPost = (post) => {
+        if (post._id == whichPostOpen?._id) {
             closeGroup(post._id);
-            whichPostOpen = null
-        }
-        else{
+            whichPostOpen = null;
+        } else {
             closeGroup(whichPostOpen?._id);
             whichPostOpen = post;
 
             addWindow({
                 windowName: post.title,
-                spawnx: 200,
-                spawny: 80,
+                spawnx: 200, spawny: 80,
                 group: post._id,
-                content: <img className='aspect-square object-cover w-65'
-                              draggable={false}
-                              src={backendUrl + post.image}
-                />
-            })
+                content: <img className='aspect-square object-cover w-65' draggable={false} src={backendUrl + post.image} />
+            });
             addWindow({
                 windowName: post.title,
-                spawnx: 500,
-                spawny: 150,
+                spawnx: 500, spawny: 150,
                 group: post._id,
                 content: <MarkdownView className='prose prose-invert bg-zinc-900 w-70 p-3' markdown={post.description} />
-            })
+            });
             addWindow({
                 windowName: post.title,
-                spawnx: 200,
-                spawny: 350,
+                spawnx: 200, spawny: 350,
                 group: post._id,
-                content: <CommentSection
-                    targetType="post"
-                    targetId={post._id}
-                />
-            })
-
+                content: <CommentSection targetType="post" targetId={post._id} />
+            });
         }
-    }
+    };
 
-    const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('en-US', {
-        year: 'numeric', month: 'long', day: 'numeric',
-    });
+    const handleGroupSelect = async (group) => {
+        closeGroup(whichPostOpen?._id);
+        whichPostOpen = null;
+
+        try {
+            const { data } = await axios.get(`${backendUrl}/api/posts/blog/${group._id}`);
+            const posts = data.success ? data.posts : [];
+
+            closeGroup(BLOGS_GROUP);
+            addWindow({
+                windowName: `${group.name} — Posts`,
+                spawnx: 300, spawny: 200,
+                group: BLOGS_GROUP,
+                content: (
+                    <div className='bg-zinc-900 w-60 min-h-32 max-h-96 overflow-y-auto'>
+                        {posts.length === 0 && <p className="text-zinc-400 text-sm p-3">No posts in this group yet.</p>}
+                        {posts.map((post) => (
+                            <div key={post._id} className="p-1.5">
+                                <Card className="w-full bg-zinc-900 border-zinc-800 text-white cursor-pointer"
+                                      onClick={() => openPost(post)}>
+                                    <Book className='absolute right-5 hover:scale-110 transition-all spring-duration-300 spring-bounce-60' />
+                                    <CardHeader>
+                                        <CardTitle className="text-sm">{post.title}</CardTitle>
+                                    </CardHeader>
+                                </Card>
+                            </div>
+                        ))}
+                    </div>
+                )
+            });
+        } catch (err) {
+            toast.error(err.message);
+        }
+    };
+
+    const handleToggle = () => {
+        const groupOpen = windows.some(win => win.group === BLOGS_GROUP);
+        if (!groupOpen) {
+            setLastGroup(null);
+            addWindow({
+                windowName: 'Blog Groups',
+                spawnx: 300, spawny: 200,
+                group: BLOGS_GROUP,
+                content: (
+                    <div className='bg-zinc-900 w-72 min-h-32'>
+                        <BlogGrid onVariableChange={handleGroupSelect} />
+                    </div>
+                )
+            });
+        } else {
+            closeGroup(BLOGS_GROUP);
+        }
+    };
 
     return (
         <div>
             <Book
                 className='absolute left-5 top-25 hover:scale-110 transition-all spring-duration-300 spring-bounce-60'
-                onClick={(e) => {
-                    if(!openAlready){
-                        setOpenAlready(true);
-                        addWindow({
-                    windowName: 'Blogs',
-                    spawnx: 300,
-                    spawny: 200,
-                    group: 1,
-                    content:
-                        <div className='bg-zinc-900 w-60'>
-                        {loading && <p>Loading posts...</p>}
-                        {!loading && posts.length === 0 && <p>No posts yet.</p>}
-                        {posts.map((post) => (
-                            <div key={post._id}>
-                                <Card
-                                    className="w-full max-w-md bg-zinc-900 border-zinc-800 text-white">
-                                    <Book onClick={(e) => openPost(e,post)}
-                                          className='absolute right-5 hover:scale-110 transition-all spring-duration-300 spring-bounce-60'/>
-                                    <CardHeader>
-                                        <CardTitle className="">
-                                            {post.title}
-                                        </CardTitle>
-                                        {/*
-                                        <CardDescription className=" text-zinc-400">
-                                            {post.description}
-                                        </CardDescription>
-                                        */}
-                                    </CardHeader>
-                                    {/*
-                                    <CardFooter className="text-zinc-400">
-                                        {post.author?.username || 'WSIN'}&nbsp;·&nbsp;{formatDate(post.createdAt)}
-                                    </CardFooter>
-                                    */}
-                                </Card>
-                            </div>
-                        ))}
-                    </div>
-                })
-                    }else{
-                    setOpenAlready(false)
-                    closeGroup(1)
-                    }}}
+                onClick={handleToggle}
             />
-
         </div>
     );
 };

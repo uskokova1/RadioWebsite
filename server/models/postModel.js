@@ -6,6 +6,7 @@ const postSchema = new mongoose.Schema({
     markdown: {type: String},
     image: { type: String },
     author: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
+    blogGroup: {type: mongoose.Schema.Types.ObjectId, ref: 'BlogGroup', required: true},
 }, { timestamps: true }); //this gives us created at/uploaded at
 
 const postModel = mongoose.models.Post || mongoose.model('Post', postSchema);

@@ -5,6 +5,7 @@ import {
     createPost,
     updatePost,
     deletePost,
+    getBlogGroupPosts,
 } from "../controllers/postController.js";
 import adminAuth from '../middleware/adminAuth.js';
 import { upload } from '../middleware/upload.js';
@@ -14,6 +15,7 @@ const postRouter = express.Router();
 
 //public
 postRouter.get('/', getAllPosts);
+postRouter.get('/blog/:id', getBlogGroupPosts);
 postRouter.get('/:id', getPostById);
 
 //admin

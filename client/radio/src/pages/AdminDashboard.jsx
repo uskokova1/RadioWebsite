@@ -20,7 +20,7 @@ const AdminDashboard = () => {
     const cards = [
         { title: 'User Management',     desc: 'View and manage all users',          path: '/admin/users'    },
         { title: 'Event Management',    desc: 'Create and edit events',             path: '/events'         },
-        { title: 'Blog Management',     desc: 'CRUD your blogs',                    path: '/blog'           },
+        { title: 'Blog Management',     desc: 'Manage blog groups and posts',         path: '/admin/blogs'    },
         { title: 'Comment Moderation',  desc: 'Review and remove comments',         path: '/admin/comments' },
         { title: 'Manage Contacts',     desc: 'Add, edit, and remove contacts',     path: '/admin/contacts' },
         { title: 'Image Manager',       desc: 'Upload and delete images',           path: '/admin/images'   },

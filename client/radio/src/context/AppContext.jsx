@@ -11,6 +11,7 @@ export const AppContextProvider = (props) =>{
     const backendUrl = import.meta.env.VITE_BACKEND_URL
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [userData, setUserData] = useState(false)
+    const [blogGroups, setBlogGroups] = useState([])
 
     const getAuthState = async () => {
         try{
@@ -63,11 +64,21 @@ export const AppContextProvider = (props) =>{
         }
     }
 
+    const fetchBlogGroups = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + '/api/bloggroup')
+            data.length > 0 && setBlogGroups(data)
+        } catch (e) {
+            console.log('Failed to fetch blog groups:', e.message)
+        }
+    }
+
     useEffect(() => {
         axios.defaults.withCredentials = true
         if(!userData) {
             getAuthState()
         }
+        fetchBlogGroups()
     }, [])
 
     const value ={
@@ -76,7 +87,8 @@ export const AppContextProvider = (props) =>{
         userData, setUserData,
         getUserData,
         sendVerificationOtp,
-        logout
+        logout,
+        blogGroups, fetchBlogGroups
     }
 
     return (

@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 import { AppContext } from "../context/AppContext.jsx";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Markdown from 'react-showdown';
-
 const EMOJIS = ['👍', '❤️', '😂', '🔥', '😮'];
 
 function CommentSection({ targetType, targetId, isAdmin, userData, backendUrl }) {
@@ -178,9 +177,21 @@ function CommentSection({ targetType, targetId, isAdmin, userData, backendUrl })
 }
 
 function Blog() {
-    const { backendUrl, userData } = useContext(AppContext);
+    const { backendUrl, userData, blogGroups } = useContext(AppContext);
     const isAdmin = userData && userData.role === 'admin';
 
+    // Restore selected group from localStorage
+    const stored = localStorage.getItem("selectedBlogGroup");
+    const parsed = stored ? (() => { try { return JSON.parse(stored); } catch { return null; } })() : null;
+    const [selectedBlogGroup, setSelectedBlogGroup] = useState(parsed);
+
+    // Resolve stored group to full context object once blogGroups loads
+    useEffect(() => {
+        if (!selectedBlogGroup || typeof selectedBlogGroup !== 'object') return;
+        if (selectedBlogGroup.name) return; // already resolved
+        const full = blogGroups.find(g => g._id === selectedBlogGroup._id);
+        if (full) setSelectedBlogGroup(full);
+    }, [blogGroups, selectedBlogGroup]);
     const [posts, setPosts]             = useState([]);
     const [loading, setLoading]         = useState(true);
     const [title, setTitle]             = useState("");
@@ -199,11 +210,20 @@ function Blog() {
         } catch (err) { console.error(err.message); }
     };
 
-    useEffect(() => { fetchPosts(); }, []);
+    useEffect(() => {
+        fetchImages()
+    }, []);
+
+    useEffect(() => {
+        if (selectedBlogGroup) fetchPosts();
+    }, [selectedBlogGroup]);
 
     const fetchPosts = async () => {
         try {
-            const { data } = await axios.get(backendUrl + '/api/posts');
+            const url = selectedBlogGroup
+                ? `${backendUrl}/api/posts/blog/${selectedBlogGroup._id}`
+                : `${backendUrl}/api/posts`;
+            const { data } = await axios.get(url);
             if (data.success) setPosts(data.posts);
             else toast.error(data.message);
         } catch (err) {
@@ -226,7 +246,7 @@ function Blog() {
         setSubmitting(true);
 
         try {
-            const body = { title, description, image: selectedImagePath };
+            const body = { title, description, image: selectedImagePath, blogGroupId: selectedBlogGroup._id };
 
             let res;
             if (editingId) {
@@ -275,13 +295,74 @@ function Blog() {
         } catch (err) { toast.error(err.message); }
     };
 
+    const selectGroup = (group) => {
+        setSelectedBlogGroup(group);
+        localStorage.setItem("selectedBlogGroup", JSON.stringify({ _id: group._id, name: group.name }));
+    };
+
     const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    if (!selectedBlogGroup) {
+        // Default to ALL posts when no group selected yet
+        const headerTitle = 'ALL';
+        return (
+            <div style={styles.page}>
+                <div style={styles.column}>
+                    <div style={styles.header}>
+                        <a href="/BlogGroups" style={styles.backBtn}>&larr; All Blog Groups</a>
+                        <p style={{ ...styles.eyebrow, marginTop: "16px" }}>{headerTitle}</p>
+                        <h2 style={styles.pageTitle}>WSIN Blogs</h2>
+                        <div style={styles.titleLine} />
+                    </div>
+
+                    <div style={styles.postList}>
+                        {loading && <p style={styles.emptyMsg}>Loading posts...</p>}
+                        {!loading && posts.length === 0 && <p style={styles.emptyMsg}>No posts yet.</p>}
+                        {posts.map(post => {
+                            const expanded = expandedId === post._id;
+                            const gName = blogGroups.find(g => g._id === post.blogGroup)?.name;
+                            return (
+                                <div key={post._id} style={styles.postCard}>
+                                    <div style={styles.postClickable} onClick={() => setExpandedId(expanded ? null : post._id)}>
+                                        <div>
+                                            {gName && <span style={styles.groupBadge}>{gName}</span>}
+                                            <p style={styles.postMeta}>{post.author?.username || 'WSIN'}&nbsp;·&nbsp;{formatDate(post.createdAt)}</p>
+                                            <h3 style={styles.postTitle}>{post.title}</h3>
+                                            {!expanded && <p style={styles.postDesc}>{post.description?.slice(0, 120)}{post.description?.length > 120 ? '...' : ''}</p>}
+                                        </div>
+                                        <span style={styles.expandIcon}>{expanded ? '▲' : '▼'}</span>
+                                    </div>
+                                    {expanded && (
+                                        <div style={styles.expandedBody}>
+                                            {post.image && <img className='aspect-square object-cover w-65' src={backendUrl + post.image} />}
+                                            <p style={styles.postDescFull}>{post.description}</p>
+                                            {isAdmin && (
+                                                <div style={styles.postActions}>
+                                                    <button style={styles.editBtn} onClick={() => handleEdit(post)}>Edit</button>
+                                                    <button style={styles.deleteBtn} onClick={() => handleDelete(post._id)}>Delete</button>
+                                                </div>
+                                            )}
+                                            <CommentSection targetType="post" targetId={post._id} isAdmin={isAdmin} userData={userData} backendUrl={backendUrl} />
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div style={styles.page}>
             <div style={styles.column}>
                 <div style={styles.header}>
-                    <p style={styles.eyebrow}>WSIN RADIO</p>
+                    <a href="/BlogGroups" style={styles.backBtn}>&larr; All Blog Groups</a>
+                    <button style={styles.backBtn} onClick={() => { setSelectedBlogGroup(null); setExpandedId(null); }}>
+                        &larr; Back to Groups
+                    </button>
+                    <p style={{ ...styles.eyebrow, marginTop: "16px" }}>{selectedBlogGroup.name.toUpperCase()}</p>
                     <h2 style={styles.pageTitle}>WSIN Blogs</h2>
                     <div style={styles.titleLine} />
                 </div>
@@ -430,6 +511,8 @@ const styles = {
     page:       { minHeight: "100vh", background: "#111", display: "flex", justifyContent: "center" },
     column:     { width: "100%", maxWidth: "1100px", minHeight: "100vh", background: "#1a1a1a", display: "flex", flexDirection: "column", boxShadow: "0 0 60px rgba(0,0,0,0.8)", borderLeft: "1px solid #2a2a2a", borderRight: "1px solid #2a2a2a" },
     header:     { background: "#322d2d", padding: "40px 32px 28px", borderBottom: "1px solid #3a3a3a" },
+    backBtn:    { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "1px", color: "#fa4040", background: "transparent", border: "1px solid #fc848444", borderRadius: "4px", padding: "6px 14px", cursor: "pointer", textDecoration: "none", display: "inline-block", marginBottom: "8px" },
+    groupBadge: { fontFamily: "'Courier New', monospace", fontSize: "9px", color: "#fa4040", background: "#241212", border: "1px solid #fc848433", borderRadius: "3px", padding: "1px 6px", marginRight: "6px" },
     eyebrow:    { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "5px", color: "#fa4040", margin: "0 0 10px 0" },
     pageTitle:  { fontFamily: "'Georgia', serif", fontSize: "48px", fontWeight: "bold", color: "#f5f0e8", margin: "0", letterSpacing: "-1px" },
     titleLine:  { width: "40px", height: "3px", background: "#fa4040", marginTop: "16px" },
