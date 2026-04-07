@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 
 const eventSchema = new mongoose.Schema({
-    title : {type: String, required: true},
-    description : {type: String, required: true},
-    //thumbnail : {type: String, default: ''}, //dynamic store image url add later
-    author : {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
+    title:       { type: String, required: true },
+    description: { type: String, required: true },
+    author:      { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    rsvps:       [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 }, { timestamps: true });
 
 const eventModel = mongoose.models.Event || mongoose.model('Event', eventSchema);

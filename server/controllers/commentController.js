@@ -15,11 +15,11 @@ export const getComments = async (req, res) => {
     }
 };
 
-// GET /api/comments/all  — admin only, returns everything with optional ?flagged=true filter
+// GET /api/comments/all  — admin only
 export const getAllComments = async (req, res) => {
     try {
         const query = req.query.flagged === 'true'
-            ? { 'flaggedBy.0': { $exists: true } }   // at least one flag
+            ? { 'flaggedBy.0': { $exists: true } }
             : {};
 
         const comments = await commentModel
@@ -49,17 +49,16 @@ export const createComment = async (req, res) => {
     }
 };
 
-// DELETE /api/comments/:id  — userAuth (admin or own comment)
+// DELETE /api/comments/:id  — userAuth (own) or adminAuth
 export const deleteComment = async (req, res) => {
     try {
         const { userId } = req.body;
-        const comment = await commentModel.findById(req.params.id).populate('author', 'username role');
+        const comment = await commentModel.findById(req.params.id).populate('author', 'username');
 
         if (!comment) return res.json({ success: false, message: 'Comment not found' });
 
-        // allow if own comment or admin
-        const isOwn   = comment.author._id.toString() === userId;
-        const isAdmin = req.body.isAdmin;   // set by adminAuth when used on that route
+        const isOwn   = comment.author._id.toString() === userId.toString();
+        const isAdmin = req.body.isAdmin;
 
         if (!isOwn && !isAdmin) {
             return res.json({ success: false, message: 'Not authorized' });
@@ -82,11 +81,12 @@ export const reactToComment = async (req, res) => {
         const reaction = comment.reactions.find(r => r.emoji === emoji);
         if (!reaction) return res.json({ success: false, message: 'Invalid emoji' });
 
-        const idx = reaction.users.indexOf(userId);
+        // compare as strings — ObjectId !== string without this
+        const idx = reaction.users.findIndex(id => id.toString() === userId.toString());
         if (idx === -1) {
-            reaction.users.push(userId);    // add reaction
+            reaction.users.push(userId);
         } else {
-            reaction.users.splice(idx, 1);  // toggle off
+            reaction.users.splice(idx, 1);
         }
 
         await comment.save();
@@ -103,7 +103,9 @@ export const flagComment = async (req, res) => {
         const comment = await commentModel.findById(req.params.id);
         if (!comment) return res.json({ success: false, message: 'Comment not found' });
 
-        if (comment.flaggedBy.includes(userId)) {
+        // compare as strings
+        const alreadyFlagged = comment.flaggedBy.some(id => id.toString() === userId.toString());
+        if (alreadyFlagged) {
             return res.json({ success: false, message: 'Already flagged' });
         }
 
