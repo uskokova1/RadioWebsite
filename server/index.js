@@ -14,6 +14,7 @@ import commentRouter from './routes/commentRoutes.js';
 import contactRouter from './routes/contactRoutes.js';
 import {generalRateLimiter} from "./middleware/rateLimiter.js";
 
+
 const app = express();
 const port = process.env.PORT || 4000;
 connectDB()
@@ -34,6 +35,20 @@ app.use('/api/contacts', contactRouter)
 
 app.get('/', (req, res) => {})
 
+// radio metadata access
+app.get('/api/stream/status', async (req, res) => {
+  try {
+    const response = await fetch(`https://broadcast.shoutcheap.com/proxy/wsinradi/stream.xspf?_=${Date.now()}`);
+    const text = await response.text();
+
+    const listenersMatch = text.match(/Current Listeners: (\d+)/);
+    const listeners = listenersMatch ? parseInt(listenersMatch[1]) : null;
+
+    res.json({ success: true, listeners });
+  } catch (err) {
+    res.json({ success: false, message: err.message });
+  }
+});
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 })

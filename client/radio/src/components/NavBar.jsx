@@ -12,6 +12,7 @@ function NavBar() {
 
     const links = [
         { to: "/Home",                          icon: "⌂", label: "Home"    },
+        { to: "/Radio",                         icon: "◎", label: "Radio"   },
         { to: "/Blog",                          icon: "✎", label: "Blogs"   },
         { to: "/Events",                        icon: "◈", label: "Events"  },
         { to: "/Contact",                       icon: "✉", label: "Contact" },

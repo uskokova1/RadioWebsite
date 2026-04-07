@@ -13,6 +13,7 @@ import Blog          from './pages/Blog'
 import Events        from './pages/Events'
 import Contact       from './pages/Contact'
 import Profile       from './pages/Profile'
+import Radio         from './pages/Radio';
 
 import AdminDashboard from "@/pages/AdminDashboard.jsx";
 import ShowUsers      from "@/pages/ShowUsers.jsx";
@@ -30,6 +31,7 @@ const App = () => {
                 {/* public */}
                 <Route path='/'               element={<Home />}         />
                 <Route path='/Home'           element={<Home />}         />
+                <Route path='/Radio'          element={<Radio />}        />
                 <Route path='/login'          element={<Login />}        />
                 <Route path='/email-verify'   element={<EmailVerify />}  />
                 <Route path='/reset-password' element={<ResetPassword />}/>
