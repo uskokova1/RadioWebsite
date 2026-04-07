@@ -87,7 +87,7 @@ const BlogButton = () => {
     return (
         <div>
             <Book
-                className='absolute left-5 top-25 hover:scale-110 transition-all spring-duration-300 spring-bounce-60'
+                className='absolute left-40 top-275 w-20 h-20 hover:scale-110 transition-all spring-duration-300 spring-bounce-60'
                 onClick={(e) => {
                     if(!openAlready){
                         setOpenAlready(true);

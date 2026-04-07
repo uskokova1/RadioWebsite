@@ -139,9 +139,8 @@
     background-color: white !important;
 }
 .polka {
-    background-image:
-            radial-gradient(rgb(21, 21, 21) 10%, transparent 10%);
-    background-position: 20px 20px;
-    background-size: 40px 40px;
-    background-color: rgb(12, 12, 12);
+    background-image: url('MainBackground.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }

@@ -53,7 +53,7 @@ const App = () => {
 
             <House
                 onClick={toggleHouseWindows}
-                className='absolute left-5 top-15 hover:scale-110 transition-all spring-duration-300 spring-bounce-60'
+                className='absolute left-30 top-10 w-20 h-20 hover:scale-150 transition-all spring-duration-300 spring-bounce-60'
             />
             <BlogButton />
             <ContactsButton />
