@@ -6,6 +6,7 @@ import BlogButton from "@/components/BlogButton.jsx";
 import ContactsButton from "@/components/ContactsButton.jsx";
 import { useWindowManager, WindowManager } from '@/context/WindowManager.jsx';
 import MarkdownView from "react-showdown";
+import BoomBoxButton from "@/components/BoomBoxButton.jsx";
 
 const App = () => {
     const { addWindow, closeGroup, windows } = useWindowManager();
@@ -55,6 +56,7 @@ const App = () => {
                 onClick={toggleHouseWindows}
                 className='absolute left-30 top-10 w-20 h-20 hover:scale-150 transition-all spring-duration-300 spring-bounce-60'
             />
+            <BoomBoxButton/>
             <BlogButton />
             <ContactsButton />
         </div>
