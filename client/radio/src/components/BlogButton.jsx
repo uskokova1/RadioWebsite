@@ -92,7 +92,8 @@ const BlogButton = () => {
                 spawnx: 300, spawny: 200,
                 group: BLOGS_GROUP,
                 content: (
-                    <div className='bg-zinc-900 w-72 min-h-32'>
+                    <div
+                        className='bg-zinc-900 w-72 min-h-32'>
                         <BlogGrid onVariableChange={handleGroupSelect} />
                     </div>
                 )
@@ -104,9 +105,14 @@ const BlogButton = () => {
 
     return (
         <div>
-            <Book
-                className='absolute left-5 top-25 hover:scale-110 transition-all spring-duration-300 spring-bounce-60'
+            <video
+                autoPlay={true}
+                muted={true}
+                loop={true}
+                src='/clipboard.webm'
                 onClick={handleToggle}
+                className='absolute left-5 top-75 scale-60
+                hover:scale-65 transition-all spring-duration-300 spring-bounce-60'
             />
         </div>
     );

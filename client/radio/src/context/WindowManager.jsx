@@ -68,16 +68,21 @@ const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, grou
                 transition={{ type: 'spring', duration: 0.5 }}
                 className="border-amber-50 border-2 bg-white rounded-md"
                 ref={setTarget}
+                style={{
+                    backgroundColor: 'rgba(255, 50, 47, 0.50)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)'
+                }}
             >
                 <div
-                    className="flex-col align-top w-full h-8 bg-red-400 rounded-t-md relative cursor-move"
+                    className="flex-col align-top w-full h-8 rounded-t-md relative cursor-move"
                     onMouseEnter={(e) => {
                         setDragTarget(e.currentTarget);
                     }}
                 >
                     <h1 className="px-4 py-1">{windowName}</h1>
                     <SquareX
-                        className="absolute right-0 top-0 scale-140 m-1 bg-red-700 cursor-pointer"
+                        className="absolute right-0 top-0 scale-140 m-1 bg-transparent cursor-pointer"
                         onClick={() => closeGroup(group)}
                     />
                 </div>

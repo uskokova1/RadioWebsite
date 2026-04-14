@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { AppContext } from "../context/AppContext.jsx";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -58,6 +58,8 @@ function AdminBlogs() {
     const [editPostDesc, setEditPostDesc] = useState("");
     const [newPostTitle, setNewPostTitle] = useState("");
     const [newPostDesc, setNewPostDesc] = useState("");
+    const [uploadedImages, setUploadedImages] = useState([]);
+    const [currImg, setCurrImg] = useState(null);
 
     // Drag state
     const [draggingPost, setDraggingPost] = useState(null); // post id being dragged
@@ -68,6 +70,14 @@ function AdminBlogs() {
         e.dataTransfer.effectAllowed = "move";
         setDraggingPost(post._id);
     };
+
+    const fetchImages = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + '/api/images', { withCredentials: true });
+            if (data.success) setUploadedImages(data.images);
+        } catch (err) { console.error(err.message); }
+    };
+
 
     const handleDragEnter = (e, groupId) => {
         e.preventDefault();
@@ -105,7 +115,7 @@ function AdminBlogs() {
         setDropTarget(null);
     };
 
-    useEffect(() => { fetchTreeData(); }, []);
+    useEffect(() => { fetchTreeData(); fetchImages(); }, []);
 
     const fetchTreeData = async () => {
         try {
@@ -127,7 +137,7 @@ function AdminBlogs() {
         e.preventDefault();
         if (!newGroupName.trim()) return;
         try {
-            const { data } = await axios.post(`${backendUrl}/api/bloggroup`, { name: newGroupName, description: newGroupDesc }, { withCredentials: true });
+            const { data } = await axios.post(`${backendUrl}/api/bloggroup`, { name: newGroupName, description: newGroupDesc, coverImage: currImg}, { withCredentials: true });
             if (data._id) {
                 toast.success("Blog group created");
                 setNewGroupName("");
@@ -151,7 +161,7 @@ function AdminBlogs() {
 
     const handleSaveGroup = async (id) => {
         try {
-            const { data } = await axios.put(`${backendUrl}/api/bloggroup/${id}`, { name: editGroupName, description: editGroupDesc }, { withCredentials: true });
+            const { data } = await axios.put(`${backendUrl}/api/bloggroup/${id}`, { name: editGroupName, description: editGroupDesc, coverImage: currImg }, { withCredentials: true });
             if (data._id) {
                 toast.success("Group updated");
                 setEditingGroup(null);
@@ -271,6 +281,19 @@ function AdminBlogs() {
                                     <div style={{ ...treeStyles.formInline, marginLeft: "28px" }}>
                                         <input style={treeStyles.input} placeholder="Group name" value={editGroupName} onChange={e => setEditGroupName(e.target.value)} required />
                                         <textarea style={treeStyles.textarea} placeholder="Description" value={editGroupDesc} onChange={e => setEditGroupDesc(e.target.value)} />
+                                        <div className='flex flex-row'>
+                                        {uploadedImages.map(img => (
+                                            <div
+                                                key={img.name}
+                                                style={{... styles.imagePickerItem,
+                                                    ...('/uploads/'+img.name === currImg ? styles.imagePickerSelected : {}),}}
+                                                className='flex-row'
+                                                onClick={() => {setCurrImg(`/uploads/${img.name}`); console.log(currImg)}}
+                                            >
+                                                <img src={`${backendUrl}/uploads/${img.name}`} alt={img.name} />
+                                            </div>
+                                        ))}
+                                        </div>
                                         <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
                                             <button style={treeStyles.cancelBtn} onClick={() => setEditingGroup(null)}>Cancel</button>
                                             <button style={treeStyles.saveBtn} onClick={() => handleSaveGroup(group._id)}>Save</button>
@@ -346,5 +369,33 @@ function AdminBlogs() {
         </div>
     );
 }
-
+const styles = {
+    page:        { minHeight: "100vh", background: "#111", display: "flex", justifyContent: "center" },
+    column:      { width: "100%", maxWidth: "760px", minHeight: "100vh", background: "#1a1a1a", display: "flex", flexDirection: "column", boxShadow: "0 0 60px rgba(0,0,0,0.8)", borderLeft: "1px solid #2a2a2a", borderRight: "1px solid #2a2a2a" },
+    header:      { background: "#322d2d", padding: "40px 32px 28px", borderBottom: "1px solid #3a3a3a", display: "flex", flexDirection: "column" },
+    body:        { padding: "24px 32px" },
+    newBtn:      { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "2px", color: "#fa4040", background: "#241212", border: "1px solid #fa404055", borderRadius: "4px", padding: "10px 20px", cursor: "pointer" },
+    cancelBtn:   { color: "#aaa", background: "#222", borderColor: "#444" },
+    form:        { margin: "16px 0", background: "#222", border: "1px solid #333", borderRadius: "8px", padding: "20px", display: "flex", flexDirection: "column", gap: "10px" },
+    formLabel:   { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "4px", color: "#555", margin: "0" },
+    input:       { fontFamily: "'Courier New', monospace", fontSize: "13px", color: "#f5f0e8", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "10px 12px", outline: "none", width: "100%" },
+    submitBtn:   { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "2px", color: "#fff", background: "#fa4040", border: "none", borderRadius: "4px", padding: "10px", cursor: "pointer", alignSelf: "flex-end" },
+    list:        { marginTop: "24px", display: "flex", flexDirection: "column", gap: "10px" },
+    empty:       { fontFamily: "'Courier New', monospace", fontSize: "11px", color: "#444", letterSpacing: "2px", textAlign: "center", padding: "40px 0" },
+    card:        { background: "#222", border: "1px solid #2e2e2e", borderRadius: "8px", padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" },
+    cardLeft:    { display: "flex", gap: "16px", alignItems: "center" },
+    avatar:      { width: "48px", height: "48px", borderRadius: "50%", background: "#322d2d", border: "2px solid #fa4040", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
+    avatarText:  { fontFamily: "'Courier New', monospace", fontSize: "14px", color: "#fa4040", fontWeight: "bold" },
+    avatarImg:   { width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" },
+    cardName:    { fontFamily: "'Georgia', serif", fontSize: "15px", color: "#f5f0e8", margin: "0 0 2px 0", fontWeight: "bold" },
+    cardPos:     { fontFamily: "'Courier New', monospace", fontSize: "9px", color: "#666", letterSpacing: "2px", margin: "0 0 2px 0" },
+    cardEmail:   { fontFamily: "'Courier New', monospace", fontSize: "10px", color: "#555", margin: "0" },
+    cardActions: { display: "flex", gap: "8px" },
+    editBtn:     { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#fa4040", background: "transparent", border: "1px solid #fa404044", borderRadius: "3px", padding: "6px 12px", cursor: "pointer" },
+    deleteBtn:   { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#888", background: "transparent", border: "1px solid #333", borderRadius: "3px", padding: "6px 12px", cursor: "pointer" },
+    imagePicker: { display: "flex", flexWrap: "wrap", gap: "8px", padding: "8px" },
+    imagePickerItem: { width: "48px", height: "48px", cursor: "pointer", padding: "2px", border: "2px solid #333", borderRadius: "50%", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", background: "#1a1a1a" },
+    imagePickerSelected: { borderColor: "#fa4040", background: "#241212" },
+    imageThumb:  { width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" },
+};
 export default AdminBlogs;

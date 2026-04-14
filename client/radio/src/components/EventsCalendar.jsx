@@ -29,7 +29,7 @@ function EventsCalendar() {
         return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][date.getDay()];
     }
 
-    // 🔥 Memoized event processing
+    // Memoized event processing
     const { eventMap, eventDateObjects } = useMemo(() => {
         const eventMap = {};
 
@@ -51,12 +51,12 @@ function EventsCalendar() {
         }
 
         events.forEach(ev => {
-            // ✅ Fixed date events
+            // Fixed date events
             if (ev.dates) {
                 ev.dates.forEach(d => addEventOnDate(new Date(d), ev));
             }
 
-            // ✅ Recurring events (fixed)
+            // Recurring events (fixed)
             if (ev.repeatDays && ev.repeatDays.length > 0) {
                 const isBiweekly = ev.recurrence === 'biweekly';
                 const anchor = ev.startDate ? new Date(ev.startDate) : todayDate;

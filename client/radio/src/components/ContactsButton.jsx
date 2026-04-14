@@ -74,9 +74,14 @@ const ContactsButton = () => {
 
     return (
         <div>
-            <Contact
+            <video
+                autoPlay={true}
+                muted={true}
+                loop={true}
+                src='/contact.webm'
                 onClick={toggleContacts}
-                className='absolute left-5 top-45 hover:scale-110 transition-all spring-duration-300 spring-bounce-60'
+                className='absolute left-5 top-45 scale-60
+                hover:scale-65 transition-all spring-duration-300 spring-bounce-60'
             />
         </div>
     );

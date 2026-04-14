@@ -46,7 +46,7 @@ const BlogGrid = ({ onVariableChange }) => {
                     {group.coverImage ? (
                         <div className="w-full aspect-[4/3] rounded border border-zinc-700 overflow-hidden bg-zinc-800">
                             <img
-                                src={`${backendUrl}/uploads/${group.coverImage}`}
+                                src={`${backendUrl}${group.coverImage}`}
                                 alt={group.name}
                                 className="w-full h-full object-cover"
                                 draggable={false}

@@ -32,6 +32,7 @@ const AdminImages = () => {
             if (data.success) setImages(data.images);
             else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
+        console.log(images);
     };
 
     const handleFileChange = (e) => {
@@ -126,7 +127,7 @@ const AdminImages = () => {
 
                     {/* Image list */}
                     <p style={{ ...styles.formLabel, marginTop: '28px' }}>UPLOADED IMAGES ({images.length})</p>
-                    <ScrollArea style={{ maxHeight: 500, marginTop: 12 }}>
+                    <ScrollArea style={{ marginTop: 12 }}>
                         {images.length === 0 && <p style={styles.empty}>No images uploaded yet.</p>}
                         <div style={styles.grid}>
                             {images.map(img => (
@@ -152,7 +153,7 @@ const AdminImages = () => {
 };
 
 const styles = {
-    page:        { minHeight: "100vh", background: "#111", display: "flex", justifyContent: "center" },
+    page:        { background: "#111", display: "flex", justifyContent: "center" },
     column:      { width: "100%", maxWidth: "760px", minHeight: "100vh", background: "#1a1a1a", display: "flex", flexDirection: "column", boxShadow: "0 0 60px rgba(0,0,0,0.8)", borderLeft: "1px solid #2a2a2a", borderRight: "1px solid #2a2a2a" },
     header:      { background: "#322d2d", padding: "40px 32px 28px", borderBottom: "1px solid #3a3a3a", display: "flex", flexDirection: "column" },
     body:        { padding: "24px 32px" },

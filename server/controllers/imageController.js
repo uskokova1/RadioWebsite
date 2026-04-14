@@ -8,7 +8,7 @@ const uploadDir = path.join(__dirname, '..', 'uploads');
 
 const isImage = (name) => {
     const ext = path.extname(name).toLowerCase();
-    return ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.svg'].includes(ext);
+    return ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.svg', '.jfif'].includes(ext);
 };
 
 const fileStats = (name) => {

@@ -7,6 +7,7 @@ import ContactsButton from "@/components/ContactsButton.jsx";
 import EventsCalendar from "@/components/EventsCalendar.jsx";
 import { useWindowManager, WindowManager } from '@/context/WindowManager.jsx';
 
+
 const App = () => {
     const { addWindow, closeGroup, windows } = useWindowManager();
 
@@ -48,7 +49,11 @@ const App = () => {
     };
 
     return (
-        <div className='polka relative min-h-screen min-w-screen z-90'>
+        <div
+            //src='/MainBackground.png'
+            className='polka relative min-h-screen min-w-screen z-90'>
+            {/* <img src='/radio.png' className='absolute scale-50' /> */}
+
             <WindowManager />
 
             <House
