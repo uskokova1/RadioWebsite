@@ -15,6 +15,7 @@ import contactRouter from './routes/contactRoutes.js';
 import {generalRateLimiter} from "./middleware/rateLimiter.js";
 
 
+
 const app = express();
 const port = process.env.PORT || 4000;
 connectDB()
@@ -49,6 +50,12 @@ app.get('/api/stream/status', async (req, res) => {
     res.json({ success: false, message: err.message });
   }
 });
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
-})
+import https from 'https';
+import fs from 'fs';
+
+const privateKey = fs.readFileSync('./server/localhost+1-key.pem', 'utf8');
+const certificate = fs.readFileSync('./server/localhost+1.pem', 'utf8');
+https.createServer({
+  key: privateKey,
+  cert: certificate
+}, app).listen(8443);
