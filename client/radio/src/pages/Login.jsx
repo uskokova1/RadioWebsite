@@ -9,12 +9,16 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
 import { User, Mail, Lock } from "lucide-react"
+import {useWindowManager} from "@/context/WindowManager.jsx";
+import EmailVerify from "@/pages/EmailVerify.jsx";
+import ResetPassword from "@/pages/ResetPassword.jsx";
 
 const Login = () => {
 
     const navigate = useNavigate()
 
     const {backendUrl, setIsLoggedIn, getUserData, sendVerificationOtp} = useContext(AppContext)
+    const {addWindow, closeGroup} = useWindowManager()
 
     const [state, setState] = useState("Sign up")
     const [name, setName] = useState("")
@@ -38,6 +42,15 @@ const Login = () => {
                     getUserData()
                     sendVerificationOtp()
                     navigate('/email-verify')
+                    addWindow({
+                        windowName: 'Verify Email',
+                        spawnx: 500,
+                        spawny: 500,
+                            group: 'calendar',
+                            content: (
+                                    <EmailVerify />
+                                )}
+                    )
                 }else{
                     toast.error(data.message)
                 }
@@ -52,7 +65,15 @@ const Login = () => {
                 if(data.success){
                     setIsLoggedIn(true)
                     getUserData()
-                    navigate('/')
+                    addWindow({
+                        windowName: 'Login',
+                        spawnx: 500,
+                        spawny: 500,
+                        content: (
+                            <div className='p-5 bg-zinc-900' > login successful! </div>
+                        )}
+                    )
+                    closeGroup(5)
                 }else{
                     toast.error(data.message)
                 }
@@ -117,7 +138,16 @@ const Login = () => {
                                 </div>
 
                                 <p
-                                    onClick={()=> navigate('/reset-password')}
+                                    onClick={()=> {
+                                        addWindow({
+                                            windowName: 'Reset Password',
+                                            spawnx: 600, spawny: 500,
+                                            group: 5, //hardcoded login group xd
+                                            content: (
+                                                <ResetPassword />
+                                            )
+                                        });
+                                }}
                                     className="text-sm text-blue-400 cursor-pointer"
                                 >
                                     Forgot password?

@@ -5,7 +5,9 @@ import EmailVerify from "@/pages/EmailVerify.jsx";
 import BlogButton from "@/components/BlogButton.jsx";
 import ContactsButton from "@/components/ContactsButton.jsx";
 import EventsCalendar from "@/components/EventsCalendar.jsx";
+import EventsCalendar2 from "@/components/EventsCalandar2.jsx"
 import { useWindowManager, WindowManager } from '@/context/WindowManager.jsx';
+import LoginButton from "@/components/LoginButton.jsx";
 
 
 const App = () => {
@@ -51,10 +53,13 @@ const App = () => {
     return (
         <div
             //src='/MainBackground.png'
-            className='polka relative min-h-screen min-w-screen z-90'>
+            className='polka relative min-h-screen min-w-screen z-90 overflow-hidden'>
             {/* <img src='/radio.png' className='absolute scale-50' /> */}
 
+            <LoginButton />
             <WindowManager />
+
+            <EventsCalendar2 />
 
             <House
                 onClick={toggleHouseWindows}

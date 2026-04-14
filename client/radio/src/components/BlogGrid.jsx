@@ -36,7 +36,7 @@ const BlogGrid = ({ onVariableChange }) => {
     }
 
     return (
-        <div className="grid grid-cols-3 gap-2 p-3">
+        <div className="grid grid-cols-3 gap-2 p-3 bg-zinc-900 h-50 w-70 overflow-auto">
             {blogGroups.map((group) => (
                 <div
                     key={group._id}
@@ -44,7 +44,7 @@ const BlogGrid = ({ onVariableChange }) => {
                     className="flex flex-col items-center cursor-pointer hover:scale-105 transition-all spring-duration-300 spring-bounce-60"
                 >
                     {group.coverImage ? (
-                        <div className="w-full aspect-[4/3] rounded border border-zinc-700 overflow-hidden bg-zinc-800">
+                        <div className="w-full aspect-square rounded border border-zinc-700 overflow-hidden bg-zinc-800">
                             <img
                                 src={`${backendUrl}${group.coverImage}`}
                                 alt={group.name}
@@ -53,7 +53,7 @@ const BlogGrid = ({ onVariableChange }) => {
                             />
                         </div>
                     ) : (
-                        <div className="w-full aspect-[4/3] rounded flex items-center justify-center">
+                        <div className="w-full aspect-square rounded flex items-center justify-center">
                             <FolderOpen className="w-10 h-10 text-zinc-500" />
                         </div>
                     )}

@@ -12,17 +12,23 @@ import {
     InputOTPSeparator,
     InputOTPSlot,
 } from "@/components/ui/input-otp"
+import login from "@/pages/Login.jsx";
+import {useWindowManager} from "@/context/WindowManager.jsx";
 
 const EmailVerify = () => {
     axios.defaults.withCredentials = true;
     const navigate = useNavigate();
     const { backendUrl, isLoggedIn, userData, getUserData } = useContext(AppContext);
 
+    const {addWindoww, closeWindow} = useWindowManager();
+
     const [otpValue, setOtpValue] = useState("")
 
     useEffect(() => {
         if (isLoggedIn && userData && userData.isAccountVerified) {
             //navigate('/')
+            toast.success('Already Verified!');
+            closeGroup(5)
         }
     }, [isLoggedIn, userData])
 

@@ -8,14 +8,16 @@ const AdminDashboard = () => {
     const {userData, getUserData} = useContext(AppContext)
     const navigate = useNavigate()
 
-    useEffect(() => { if(!userData) getUserData(); }, [])
-
     useEffect(() => {
-        if (userData && userData.role !== 'admin') {
-            navigate('/')
-            toast.error('Not an admin')
+        if(!userData) {
+            getUserData();
         }
-    }, [userData])
+            if(!userData.isAdmin){
+                navigate('/')
+                toast.error('Not an admin')
+            }
+
+    }, [])
 
     const cards = [
         { title: 'User Management',     desc: 'View and manage all users',          path: '/admin/users'    },

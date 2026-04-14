@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { AppContext } from "../context/AppContext.jsx";
 import { toast } from "react-toastify";
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
 
 const treeStyles = {
     page:       { minHeight: "100vh", background: "#111", display: "flex", justifyContent: "center" },
@@ -47,6 +48,8 @@ function AdminBlogs() {
     const [showNewGroup, setShowNewGroup] = useState(false);
     const [newGroupName, setNewGroupName] = useState("");
     const [newGroupDesc, setNewGroupDesc] = useState("");
+    const navigate = useNavigate();
+
 
     // Editing state
     const [editingGroup, setEditingGroup] = useState(null); // group id
@@ -115,7 +118,9 @@ function AdminBlogs() {
         setDropTarget(null);
     };
 
-    useEffect(() => { fetchTreeData(); fetchImages(); }, []);
+    useEffect(() => {
+        fetchTreeData();
+        fetchImages(); }, []);
 
     const fetchTreeData = async () => {
         try {

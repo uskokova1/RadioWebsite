@@ -92,10 +92,7 @@ const BlogButton = () => {
                 spawnx: 300, spawny: 200,
                 group: BLOGS_GROUP,
                 content: (
-                    <div
-                        className='bg-zinc-900 w-72 min-h-32'>
-                        <BlogGrid onVariableChange={handleGroupSelect} />
-                    </div>
+                    <BlogGrid onVariableChange={handleGroupSelect} />
                 )
             });
         } else {
