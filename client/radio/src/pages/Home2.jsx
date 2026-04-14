@@ -51,9 +51,10 @@ const App = () => {
     return (
         <div className='relative min-h-screen min-w-screen overflow-hidden'>
             {/* First you load the static image that will stay behind the video */}
-             <div
-                 className="absolute inset-0 bg-cover bg-center"
-                 style={{ backgroundImage: "url('MainBackground.png')" }}
+             <img
+                 src="/MainBackground.png"
+                 alt=""
+                 className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
              />
             {/* Below is the code to play the video right away then disapear */}
             {!introFinished&& (
