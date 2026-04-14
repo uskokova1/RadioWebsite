@@ -1,20 +1,20 @@
 import React from 'react'
 import {Routes, Route} from 'react-router-dom'
-import Login from "./pages/Login.jsx";
-import EmailVerify from "./pages/EmailVerify.jsx";
-import ResetPassword from "./pages/ResetPassword.jsx";
+import Login from "@/pages/Login.jsx";
+import EmailVerify from "@/pages/EmailVerify.jsx";
+import ResetPassword from "@/pages/ResetPassword.jsx";
 import {ToastContainer} from "react-toastify";
 
 
-import Home from './pages/Home'
-import Home2 from './pages/Home2'
-import Account from './pages/Account'
-import NavBar from './components/NavBar'
-import Blog from './pages/Blog'
-import BlogGroups from './pages/BlogGroups'
-import Events from './pages/Events'
-import Contact from './pages/Contact'
-import Profile from './pages/Profile'
+import Home from '@/pages/Home'
+import Home2 from '@/pages/Home2'
+import Account from '@/pages/Account'
+import NavBar from '@/components/NavBar'
+import Blog from '@/pages/Blog'
+import BlogGroups from '@/pages/BlogGroups'
+import Events from '@/pages/Events'
+import Contact from '@/pages/Contact'
+import Profile from '@/pages/Profile'
 import ShowUsers from "@/pages/ShowUsers.jsx";
 import AdminDashboard from "@/pages/AdminDashboard.jsx";
 import AdminComments from "@/pages/AdminComments.jsx";

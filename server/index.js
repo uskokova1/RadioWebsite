@@ -59,8 +59,8 @@ seedDefaultBlogGroup()
 import https from 'https';
 import fs from 'fs';
 
-const privateKey = fs.readFileSync('./server/localhost-key.pem', 'utf8');
-const certificate = fs.readFileSync('./server/localhost.pem', 'utf8');
+const privateKey = fs.readFileSync('./server/localhost+1-key.pem', 'utf8');
+const certificate = fs.readFileSync('./server/localhost+1.pem', 'utf8');
 https.createServer({
   key: privateKey,
   cert: certificate

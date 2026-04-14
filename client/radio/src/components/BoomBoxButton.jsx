@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef, useContext } from "react";
 import { AppContext } from "../context/AppContext.jsx";
 import axios from "axios";
+import {useWindowManager} from "@/context/WindowManager.jsx";
+import Wigglie from "@/components/Wigglie.jsx";
 
 const STREAM_URL = "https://broadcast.shoutcheap.com/proxy/wsinradi/stream";
 const POLL_INTERVAL = 30000;
@@ -9,6 +11,8 @@ const POLL_INTERVAL = 30000;
 const BlogButton = () => {
 
     const { backendUrl } = useContext(AppContext);
+
+    const {addWindow} = useWindowManager()
 
     const [playing, setPlaying]   = useState(false);
     const [listeners, setListeners] = useState(null);
@@ -65,14 +69,41 @@ const BlogButton = () => {
 
     return (
         <div>
-            <img
-                src="/BoomBoxTransparent.png"
-                alt="BoomBoxTransparant"
-                draggable={false}
-                onClick={togglePlay}
-                className='absolute left-390 top-180 w-120 h-100 cursor-pointer select-none hover:scale-120 transition-all spring-duration-300 spring-bounce-60'
-            />
-            <audio ref={audioRef} />
+            {/*<img*/}
+            {/*    src="/BoomBoxTransparent.png"*/}
+            {/*    alt="BoomBoxTransparant"*/}
+            {/*    draggable={false}*/}
+            {/*    onClick={togglePlay}*/}
+            {/*    className='absolute left-390 top-180 w-120 h-100 cursor-pointer select-none hover:scale-105 transition-all spring-duration-300 spring-bounce-60'*/}
+            {/*/>*/}
+            {/*<audio ref={audioRef} />*/}
+
+            {playing ? (
+                <Wigglie>
+                    <img
+                        src="/BoomBoxTransparent.png"
+                        alt="BoomBoxTransparant"
+                        draggable={false}
+                        onClick={togglePlay}
+                        className='absolute left-290 top-130 h-70 w-auto cursor-pointer select-none hover:scale-105 transition-all spring-duration-300 spring-bounce-60'
+                    />
+                <audio ref={audioRef} />
+                </Wigglie>
+                )
+                :
+                (
+                <>
+                    <img
+                        src="/BoomBoxTransparent.png"
+                        alt="BoomBoxTransparant"
+                        draggable={false}
+                        onClick={togglePlay}
+                        className='absolute left-290 top-130 h-70 w-auto cursor-pointer select-none hover:scale-105 transition-all spring-duration-300 spring-bounce-60'
+                    />
+                    <audio ref={audioRef} />
+                </>
+            )}
+
 
             <div className="absolute left-600 top-300 text-white">
                 {loading && <p>Loading...</p>}
