@@ -1,5 +1,5 @@
 
-import BoomBoxImage from "../BoomBoxTransparant.png";
+import BoomBoxImage from "../../public/BoomBoxTransparent.png";
 
 const BlogButton = () => {
 
@@ -8,7 +8,7 @@ const BlogButton = () => {
     return (
         <div>
             <img
-                src={BoomBoxImage}
+                src={'BoomBoxTransparent.png'}
                 alt="BoomBoxTransparant"
                 draggable={false}
                 className='absolute left-410 top-205 w-120 h-100 cursor-pointer select-none hover:scale-120 transition-all spring-duration-300 spring-bounce-60'
