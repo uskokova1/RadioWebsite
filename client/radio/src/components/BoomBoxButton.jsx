@@ -41,7 +41,7 @@ const BlogButton = () => {
         return () => clearInterval(interval);
     }, []);
 
-    const togglePlay = () => {
+    const togglePlay = async () => {
         const audio = audioRef.current;
         if (!audio) return;
 
@@ -77,34 +77,31 @@ const BlogButton = () => {
             {/*    className='absolute left-390 top-180 w-120 h-100 cursor-pointer select-none hover:scale-105 transition-all spring-duration-300 spring-bounce-60'*/}
             {/*/>*/}
             {/*<audio ref={audioRef} />*/}
-
+        <div onClick={togglePlay}>
             {playing ? (
                 <Wigglie>
                     <img
-                        src="/BoomBoxTransparent.png"
+                        src="/boombox_0025.png"
                         alt="BoomBoxTransparant"
                         draggable={false}
-                        onClick={togglePlay}
                         className='absolute left-290 top-130 h-70 w-auto cursor-pointer select-none hover:scale-105 transition-all spring-duration-300 spring-bounce-60'
                     />
-                <audio ref={audioRef} />
                 </Wigglie>
                 )
                 :
                 (
                 <>
                     <img
-                        src="/BoomBoxTransparent.png"
-                        alt="BoomBoxTransparant"
+                        src="/boombox_0025.png"
+                        alt="boomBoxTransparant"
                         draggable={false}
-                        onClick={togglePlay}
-                        className='absolute left-290 top-130 h-70 w-auto cursor-pointer select-none hover:scale-105 transition-all spring-duration-300 spring-bounce-60'
+                    className='absolute top-60 -left-150 inset-0 justify-self-center h-full object-cover scale-60 cursor-pointer select-none hover:scale-61 transition-all spring-duration-300 spring-bounce-60'
                     />
-                    <audio ref={audioRef} />
                 </>
             )}
+        </div>
 
-
+            <audio ref={audioRef} />
             <div className="absolute left-600 top-300 text-white">
                 {loading && <p>Loading...</p>}
                 {!loading && playing && <p>Playing</p>}
