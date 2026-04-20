@@ -33,28 +33,22 @@ app.use('/api/contacts', contactRouter)
 app.use('/api/images',    imageRouter)
 app.use('/api/bloggroup', blogGroupRouter)
 
-
 app.use('/uploads', express.static('./server/uploads/'))
-/*
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-app.use('/uploads', express.static(join(__dirname, 'uploads')));
- */
 
 app.get('/', (req, res) => {})
-/*
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
-})
- */
-/*
-import {seedDefaultBlogGroup} from './scripts/seedDefaultBlogGroup.js'
-seedDefaultBlogGroup()
- */
+
+// radio metadata proxy
+app.get('/api/stream/status', async (req, res) => {
+  try {
+    const response = await fetch(`https://broadcast.shoutcheap.com/proxy/wsinradi/stream.xspf?_=${Date.now()}`);
+    const text = await response.text();
+    const listenersMatch = text.match(/Current Listeners: (\d+)/);
+    const listeners = listenersMatch ? parseInt(listenersMatch[1]) : null;
+    res.json({ success: true, listeners });
+  } catch (err) {
+    res.json({ success: false, message: err.message });
+  }
+});
 
 import https from 'https';
 import fs from 'fs';

@@ -1,14 +1,30 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AppContext } from "../context/AppContext.jsx";
 
+const STREAM_URL = "https://broadcast.shoutcheap.com/proxy/wsinradi/stream";
+
 function Home() {
     const [playing, setPlaying] = useState(false);
     const [events, setEvents]   = useState([]);
+    const audioRef = useRef(null);
     const navigate = useNavigate();
 
     const { backendUrl, userData } = useContext(AppContext);
+
+    const togglePlay = () => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        if (playing) {
+            audio.pause();
+            audio.src = ""; // fully disconnect the stream on stop
+        } else {
+            audio.src = STREAM_URL;
+            audio.play().catch(err => console.error("Stream error:", err));
+        }
+        setPlaying(!playing);
+    };
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -40,7 +56,6 @@ function Home() {
                     </div>
                     <div style={styles.heroBadge}>1590 AM</div>
 
-                    {/* Guard: userData can be false when not logged in */}
                     {userData && !userData.isAccountVerified && (
                         <button
                             onClick={() => navigate("/email-verify")}
@@ -60,10 +75,10 @@ function Home() {
                         Adanti Student Center! We bring you a <b>diverse mix of music, podcasts,
                         and student-led content,</b> making sure there's always something fresh to tune into.
                     </p>
-                    {/* db hook later: fetch station bio from /api/station/about */}
                 </div>
 
                 {/* LIVE PLAYER */}
+                <audio ref={audioRef} preload="none" />
                 <div style={styles.player}>
                     <div style={styles.playerLeft}>
                         <div style={{
@@ -76,20 +91,19 @@ function Home() {
                                 {playing ? "Live Stream — 1590 AM" : "Stream Offline"}
                             </p>
                             <p style={styles.playerSub}>
-                                {/* db hook later: fetch current track from /api/stream/nowplaying */}
-                                {playing ? "Now Playing: Nothing!" : "Tap to connect"}
+                                {playing ? "Now Playing: WSIN Radio" : "Tap to connect"}
                             </p>
                         </div>
                     </div>
                     <button
                         style={{ ...styles.playerBtn, background: playing ? "#c58484" : "#fa4040" }}
-                        onClick={() => setPlaying(!playing)}
+                        onClick={togglePlay}
                     >
                         {playing ? "■ STOP" : "▶ PLAY"}
                     </button>
                 </div>
 
-                {/* UPCOMING EVENTS — live from MongoDB, newest 3 */}
+                {/* UPCOMING EVENTS */}
                 <div style={styles.eventsSection}>
                     <div style={styles.eventsSectionHeader}>
                         <p style={styles.cardLabel}>Upcoming Events</p>
@@ -116,9 +130,9 @@ function Home() {
                 {/* BOTTOM NAV */}
                 <div style={styles.bottomNav}>
                     {userData ?
-                    <Link to="/profile" style={styles.navBtn}>
-                        My Account
-                    </Link> :
+                        <Link to="/profile" style={styles.navBtn}>
+                            My Account
+                        </Link> :
                         <Link to="/login" style={styles.navBtn}>
                             Log In
                         </Link>
@@ -263,7 +277,6 @@ const styles = {
         flexShrink: 0,
         transition: "background 0.2s ease",
     },
-    //Events Styling
     eventsSection: {
         padding: "24px 32px",
         borderTop: "1px solid #2a2a2a"
@@ -326,8 +339,6 @@ const styles = {
         margin: "0",
         letterSpacing: "1px"
     },
-
-
     bottomNav: {
         display: "flex",
         gap: "12px",
@@ -357,19 +368,3 @@ const styles = {
 };
 
 export default Home;
-
-/*
-import React from 'react'
-import NavBar from '../components/NavBar'
-import Header from "../components/Header.jsx";
-
-const Home = () => {
-    return (
-        <div className='flex flex-col items-center justify-center min-h-screen'>
-            <NavBar />
-            <Header />
-        </div>
-    )
-}
-export default Home
- */

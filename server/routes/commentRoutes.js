@@ -13,22 +13,28 @@ import { moderateComment } from '../middleware/commentModerator.js';
 
 const commentRouter = express.Router();
 
-// public
-commentRouter.get('/:targetType/:targetId', getComments);
+// specific routes MUST come before wildcard routes
 
-// admin — all comments + flagged filter via ?flagged=true
-commentRouter.get('/all', adminAuth, getAllComments);
+// admin
+commentRouter.get('/all',          adminAuth, getAllComments);
 
-// userAuth
-commentRouter.post('/:targetType/:targetId', userAuth, moderateComment, createComment);
-commentRouter.post('/:id/react',             userAuth, reactToComment);
-commentRouter.post('/:id/flag',              userAuth, flagComment);
+// react and flag — before /:targetType/:targetId wildcard
+commentRouter.post('/:id/react',   userAuth, reactToComment);
+commentRouter.post('/:id/flag',    userAuth, flagComment);
 
-// delete — userAuth checks ownership; admin route sets isAdmin flag
-commentRouter.delete('/:id',       userAuth, deleteComment);
+// admin delete — before /:id wildcard
 commentRouter.delete('/admin/:id', adminAuth, (req, res, next) => {
     req.body.isAdmin = true;
     next();
 }, deleteComment);
+
+// wildcard GET — public
+commentRouter.get('/:targetType/:targetId', getComments);
+
+// wildcard POST — create comment
+commentRouter.post('/:targetType/:targetId', userAuth, moderateComment, createComment);
+
+// delete own comment
+commentRouter.delete('/:id', userAuth, deleteComment);
 
 export default commentRouter;

@@ -1,32 +1,25 @@
-import { useContext, useEffect, useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { ScrollArea } from "@/components/ui/scroll-area.jsx";
-import { AppContext } from "@/context/AppContext.jsx";
-import { Button } from "@/components/ui/button.jsx";
-import { Textarea } from "@/components/ui/textarea.jsx";
-import { Flag, Trash2 } from "lucide-react"; // Lucide icons
+import { AppContext } from "../context/AppContext.jsx";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-function CommentSection({ targetType, targetId }) {
-    const { userData, backendUrl } = useContext(AppContext);
-    const isAdmin = userData?.isAdmin;
+export default function CommentSection({ targetType, targetId }) {
+    const { backendUrl, userData } = useContext(AppContext);
+    const isAdmin = userData && userData.role === 'admin';
 
-    const [comments, setComments] = useState([]);
-    const [text, setText] = useState("");
+    const [comments, setComments]     = useState([]);
+    const [text, setText]             = useState("");
     const [submitting, setSubmitting] = useState(false);
+    const [popping, setPopping]       = useState({});
 
-    useEffect(() => {
-        axios.defaults.withCredentials = true;
-        fetchComments();
-    }, [targetId]);
+    useEffect(() => { fetchComments(); }, [targetId]);
 
     const fetchComments = async () => {
         try {
             const { data } = await axios.get(`${backendUrl}/api/comments/${targetType}/${targetId}`);
             if (data.success) setComments(data.comments);
-        } catch (err) {
-            console.error(err.message);
-        }
+        } catch (err) { console.error(err.message); }
     };
 
     const handleSubmit = async (e) => {
@@ -36,51 +29,44 @@ function CommentSection({ targetType, targetId }) {
         try {
             const { data } = await axios.post(
                 `${backendUrl}/api/comments/${targetType}/${targetId}`,
-                { text },
-                { withCredentials: true }
+                { text }, { withCredentials: true }
             );
-            if (data.success) {
-                setComments([data.comment, ...comments]);
-                setText("");
-            } else {
-                toast.error(data.message);
-            }
-        } catch (err) {
-            toast.error(err.message);
-        } finally {
-            setSubmitting(false);
-        }
+            if (data.success) { setComments([data.comment, ...comments]); setText(""); }
+            else toast.error(data.message);
+        } catch (err) { toast.error(err.message); }
+        finally { setSubmitting(false); }
     };
 
     const handleReact = async (commentId, emoji) => {
         if (!userData) return toast.error("Login to react");
+
+        const key = `${commentId}:${emoji}`;
+        setPopping(p => ({ ...p, [key]: true }));
+        setTimeout(() => setPopping(p => ({ ...p, [key]: false })), 300);
+
         try {
             const { data } = await axios.post(
                 `${backendUrl}/api/comments/${commentId}/react`,
-                { emoji },
-                { withCredentials: true }
+                { emoji }, { withCredentials: true }
             );
             if (data.success) {
-                setComments(
-                    comments.map((c) => (c._id === commentId ? { ...c, reactions: data.reactions } : c))
-                );
+                setComments(comments.map(c =>
+                    c._id === commentId ? { ...c, reactions: data.reactions } : c
+                ));
+            } else {
+                toast.error(data.message);
             }
-        } catch (err) {
-            toast.error(err.message);
-        }
+        } catch (err) { toast.error(err.message); }
     };
 
     const handleFlag = async (commentId) => {
         try {
             const { data } = await axios.post(
                 `${backendUrl}/api/comments/${commentId}/flag`,
-                {},
-                { withCredentials: true }
+                {}, { withCredentials: true }
             );
-            data.success ? toast.success("Comment flagged") : toast.error(data.message);
-        } catch (err) {
-            toast.error(err.message);
-        }
+            data.success ? toast.success("Comment flagged for review") : toast.error(data.message);
+        } catch (err) { toast.error(err.message); }
     };
 
     const handleDelete = async (commentId) => {
@@ -90,94 +76,112 @@ function CommentSection({ targetType, targetId }) {
                 : `${backendUrl}/api/comments/${commentId}`;
             const { data } = await axios.delete(url, { withCredentials: true });
             if (data.success) {
-                setComments(comments.filter((c) => c._id !== commentId));
+                setComments(comments.filter(c => c._id !== commentId));
                 toast.success("Comment deleted");
-            } else {
-                toast.error(data.message);
-            }
-        } catch (err) {
-            toast.error(err.message);
-        }
+            } else toast.error(data.message);
+        } catch (err) { toast.error(err.message); }
     };
 
-    const formatDate = (d) =>
-        new Date(d).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-        });
+    const formatDate = (d) => new Date(d).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+    });
+
+    const hasReacted = (reaction) => {
+        if (!userData?._id) return false;
+        return reaction.users?.some(id => id.toString() === userData._id.toString());
+    };
 
     return (
-        <div className="flex-col">
-        <div className="flex-col border-t border-zinc-700 pt-4 bg-zinc-900 p-5 w-80">
-            <p className="justify-self-center text-xs tracking-widest text-zinc-500 mb-2 font-mono">
-                COMMENTS ({comments.length})
-            </p>
-            <ScrollArea className="h-[300px] rounded-md border border-zinc-700 p-3 mt-3">
-                {comments.length === 0 && (
-                    <p className="text-center text-zinc-500 text-sm py-5 font-mono tracking-wide">
-                        No comments yet. Be the first.
-                    </p>
-                )}
-                {comments.map((c) => (
-                    <div key={c._id} className="bg-zinc-900 border border-zinc-800 rounded-md p-3 mb-2">
-                        <div className="flex justify-between items-center mb-1">
-              <span className="text-xs text-zinc-500 font-mono tracking-wide">
-                {c.author?.username || "User"} · {formatDate(c.createdAt)}
-                  {c.flaggedBy?.length > 0 && (
-                      <span className="text-red-600 ml-2">
-                    <Flag className="inline w-3 h-3" /> {c.flaggedBy.length}
-                  </span>
-                  )}
-              </span>
+        <div style={cs.wrap}>
+            <style>{`
+                @keyframes pop {
+                    0%   { transform: scale(1); }
+                    40%  { transform: scale(1.35); }
+                    70%  { transform: scale(0.9); }
+                    100% { transform: scale(1); }
+                }
+                .reaction-pop { animation: pop 0.3s ease; }
+            `}</style>
 
-                            <div className="flex gap-1">
-                                {userData && !isAdmin && (
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="text-zinc-400 border-zinc-600 hover:text-red-500 hover:border-red-500"
-                                        onClick={() => handleFlag(c._id)}
-                                        title="Flag comment"
-                                    >
-                                        <Flag className="w-4 h-4" />
-                                    </Button>
+            <p style={cs.label}>COMMENTS ({comments.length})</p>
+
+            {userData ? (
+                <form onSubmit={handleSubmit} style={cs.form}>
+                    <input
+                        value={text}
+                        onChange={e => setText(e.target.value)}
+                        placeholder="Write a comment..."
+                        style={cs.input}
+                        maxLength={500}
+                    />
+                    <button type="submit" style={cs.submitBtn} disabled={submitting}>
+                        {submitting ? "..." : "Post"}
+                    </button>
+                </form>
+            ) : (
+                <p style={cs.loginHint}>Log in to leave a comment.</p>
+            )}
+
+            <ScrollArea className="h-[300px] rounded-md border border-zinc-700 p-3 mt-3">
+                {comments.length === 0 && <p style={cs.empty}>No comments yet. Be the first.</p>}
+                {comments.map(c => (
+                    <div key={c._id} style={cs.comment}>
+                        <div style={cs.commentHeader}>
+                            <span style={cs.commentMeta}>
+                                {c.author?.username || 'User'}&nbsp;·&nbsp;{formatDate(c.createdAt)}
+                                {c.flaggedBy?.length > 0 && isAdmin && (
+                                    <span style={cs.flagBadge}>&nbsp;⚑ {c.flaggedBy.length}</span>
                                 )}
-                                {(isAdmin || userData?._id === c.author?._id) && (
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="text-red-600 border-red-600 hover:bg-red-600 hover:text-white"
+                            </span>
+                            <div style={{ display: 'flex', gap: '5px' }}>
+                                {userData && !isAdmin && (
+                                    <button
+                                        title="Flag as inappropriate"
+                                        onClick={() => handleFlag(c._id)}
+                                        style={cs.iconBtn}
+                                    >⚑</button>
+                                )}
+                                {userData && (isAdmin || userData._id?.toString() === c.author?._id?.toString()) && (
+                                    <button
                                         onClick={() => handleDelete(c._id)}
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </Button>
+                                        style={{ ...cs.iconBtn, color: '#fa4040' }}
+                                    >✕</button>
                                 )}
                             </div>
                         </div>
 
-                        <p className="text-zinc-300 text-sm mb-2 leading-relaxed">{c.text}</p>
+                        <p style={cs.commentText}>{c.text}</p>
 
-                        {/* reactions */}
-                        <div className="flex gap-2 flex-wrap">
-                            {c.reactions?.map((r) => {
-                                const reacted = userData && r.users?.includes(userData._id);
+                        <div style={cs.reactions}>
+                            {c.reactions?.map(r => {
+                                const active = hasReacted(r);
+                                const key    = `${c._id}:${r.emoji}`;
+                                const isPop  = popping[key];
                                 return (
-                                    <Button
+                                    <button
                                         key={r.emoji}
-                                        size="sm"
-                                        variant="outline"
+                                        className={isPop ? 'reaction-pop' : ''}
                                         onClick={() => handleReact(c._id, r.emoji)}
-                                        className={`flex items-center gap-1 rounded-full px-2 py-1 text-sm ${
-                                            reacted
-                                                ? "bg-zinc-800 border-red-600 text-red-400"
-                                                : "bg-zinc-900 border-zinc-700 text-zinc-400"
-                                        }`}
+                                        style={{
+                                            ...cs.reactionBtn,
+                                            background:  active ? '#3d1f1f' : '#1a1a1a',
+                                            borderColor: active ? '#fa4040' : '#333',
+                                            color:       active ? '#fa4040' : '#888',
+                                        }}
+                                        title={active ? "Remove reaction" : "React"}
                                     >
-                                        {r.emoji} {r.users?.length > 0 && <span className="text-xs">{r.users.length}</span>}
-                                    </Button>
+                                        <span style={cs.reactionEmoji}>{r.emoji}</span>
+                                        {r.users?.length > 0 && (
+                                            <span style={{
+                                                ...cs.reactionCount,
+                                                color:      active ? '#fa4040' : '#777',
+                                                fontWeight: active ? 'bold' : 'normal',
+                                            }}>
+                                                {r.users.length}
+                                            </span>
+                                        )}
+                                    </button>
                                 );
                             })}
                         </div>
@@ -185,24 +189,25 @@ function CommentSection({ targetType, targetId }) {
                 ))}
             </ScrollArea>
         </div>
-            {userData && (
-                <form onSubmit={handleSubmit} className="flex gap-2 p-2 bg-zinc-900 border">
-                    <Textarea
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        placeholder="Write a comment..."
-                        className="flex-1 bg-zinc-900 text-zinc-100 border border-zinc-700 rounded-md px-3 py-2 text-sm resize-none focus:ring-1 focus:ring-red-600"
-                        maxLength={500}
-                    />
-                    <Button type="submit" disabled={submitting}
-                            className="right-0 h-auto [writing-mode:vertical-rl]
-                            bg-red-600 hover:bg-red-700 text-white text-lg px-4">
-                        {submitting ? "..." : "Post"}
-                    </Button>
-                </form>
-            )}
-        </div>
     );
 }
 
-export default CommentSection;
+const cs = {
+    wrap:         { marginTop: '16px', borderTop: '1px solid #2a2a2a', paddingTop: '16px' },
+    label:        { fontFamily: "'Courier New', monospace", fontSize: '9px', letterSpacing: '4px', color: '#555', margin: '0 0 10px 0' },
+    form:         { display: 'flex', gap: '8px', marginBottom: '4px' },
+    input:        { flex: 1, fontFamily: "'Courier New', monospace", fontSize: '12px', color: '#f5f0e8', background: '#1a1a1a', border: '1px solid #333', borderRadius: '4px', padding: '8px 10px', outline: 'none' },
+    submitBtn:    { fontFamily: "'Courier New', monospace", fontSize: '10px', letterSpacing: '1px', color: '#fff', background: '#fa4040', border: 'none', borderRadius: '4px', padding: '8px 14px', cursor: 'pointer' },
+    loginHint:    { fontFamily: "'Courier New', monospace", fontSize: '10px', color: '#555', letterSpacing: '1px', margin: '0 0 8px 0' },
+    empty:        { fontFamily: "'Courier New', monospace", fontSize: '11px', color: '#444', letterSpacing: '2px', textAlign: 'center', padding: '20px 0' },
+    comment:      { background: '#1e1e1e', border: '1px solid #2a2a2a', borderRadius: '6px', padding: '10px 12px', marginBottom: '8px' },
+    commentHeader:{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' },
+    commentMeta:  { fontFamily: "'Courier New', monospace", fontSize: '9px', letterSpacing: '2px', color: '#555' },
+    flagBadge:    { color: '#fa4040' },
+    commentText:  { fontFamily: "'Georgia', serif", fontSize: '13px', color: '#bbb', margin: '4px 0 10px 0', lineHeight: '1.5' },
+    reactions:    { display: 'flex', gap: '5px', flexWrap: 'wrap' },
+    reactionBtn:  { display: 'flex', alignItems: 'center', gap: '4px', border: '1px solid #333', borderRadius: '20px', padding: '3px 9px', cursor: 'pointer', transition: 'background 0.15s, border-color 0.15s', background: '#1a1a1a' },
+    reactionEmoji:{ fontSize: '14px', lineHeight: 1 },
+    reactionCount:{ fontFamily: "'Courier New', monospace", fontSize: '11px' },
+    iconBtn:      { background: 'transparent', border: '1px solid #333', borderRadius: '3px', color: '#555', fontSize: '10px', cursor: 'pointer', padding: '2px 6px', lineHeight: 1 },
+};
