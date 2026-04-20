@@ -1,9 +1,16 @@
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { AppContext } from "../context/AppContext.jsx";
 import Markdown from 'react-showdown';
+import { ChevronDown, ChevronUp, Plus, X, Pencil, Trash2, ArrowLeft } from "lucide-react";
+
+import { AppContext } from "../context/AppContext.jsx";
 import CommentSection from "../components/CommentSection.jsx";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 function Blog() {
     const { backendUrl, userData, blogGroups } = useContext(AppContext);
@@ -39,9 +46,10 @@ function Blog() {
     };
 
     useEffect(() => { fetchImages(); }, []);
-    useEffect(() => { if (selectedBlogGroup) fetchPosts(); }, [selectedBlogGroup]);
+    useEffect(() => { fetchPosts(); }, [selectedBlogGroup]);
 
     const fetchPosts = async () => {
+        setLoading(true);
         try {
             const url = selectedBlogGroup
                 ? `${backendUrl}/api/posts/blog/${selectedBlogGroup._id}`
@@ -54,35 +62,28 @@ function Blog() {
     };
 
     const resetForm = () => {
-        setTitle("");
-        setDescription("");
-        setSelectedImagePath(null);
-        setShowForm(false);
-        setEditingId(null);
+        setTitle(""); setDescription(""); setSelectedImagePath(null);
+        setShowForm(false); setEditingId(null);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!selectedBlogGroup) return toast.error("Select a blog group first");
         setSubmitting(true);
         try {
             const body = { title, description, image: selectedImagePath, blogGroupId: selectedBlogGroup._id };
-            let res;
-            if (editingId) {
-                res = await axios.put(`${backendUrl}/api/posts/${editingId}`, body, { withCredentials: true });
-            } else {
-                res = await axios.post(`${backendUrl}/api/posts`, body, { withCredentials: true });
-            }
+            const res = editingId
+                ? await axios.put(`${backendUrl}/api/posts/${editingId}`, body, { withCredentials: true })
+                : await axios.post(`${backendUrl}/api/posts`, body, { withCredentials: true });
+
             if (res.data.success) {
                 if (editingId) setPosts(posts.map(p => p._id === editingId ? res.data.post : p));
                 else setPosts([res.data.post, ...posts]);
                 toast.success(editingId ? "Post updated" : "Post created");
                 resetForm();
             } else toast.error(res.data.message);
-        } catch (err) {
-            toast.error(err.message);
-        } finally {
-            setSubmitting(false);
-        }
+        } catch (err) { toast.error(err.message); }
+        finally { setSubmitting(false); }
     };
 
     const handleEdit = (post) => {
@@ -97,231 +98,209 @@ function Blog() {
     const handleDelete = async (id) => {
         try {
             const { data } = await axios.delete(`${backendUrl}/api/posts/${id}`, { withCredentials: true });
-            if (data.success) { setPosts(posts.filter(p => p._id !== id)); toast.success("Post deleted"); if (expandedId === id) setExpandedId(null); }
-            else toast.error(data.message);
+            if (data.success) {
+                setPosts(posts.filter(p => p._id !== id));
+                toast.success("Post deleted");
+                if (expandedId === id) setExpandedId(null);
+            } else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
-    };
-
-    const selectGroup = (group) => {
-        setSelectedBlogGroup(group);
-        localStorage.setItem("selectedBlogGroup", JSON.stringify({ _id: group._id, name: group.name }));
     };
 
     const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    if (!selectedBlogGroup) {
-        return (
-            <div style={styles.page}>
-                <div style={styles.column}>
-                    <div style={styles.header}>
-                        <a href="/BlogGroups" style={styles.backBtn}>&larr; All Blog Groups</a>
-                        <p style={{ ...styles.eyebrow, marginTop: "16px" }}>ALL</p>
-                        <h2 style={styles.pageTitle}>WSIN Blogs</h2>
-                        <div style={styles.titleLine} />
-                    </div>
-                    <div style={styles.postList}>
-                        {loading && <p style={styles.emptyMsg}>Loading posts...</p>}
-                        {!loading && posts.length === 0 && <p style={styles.emptyMsg}>No posts yet.</p>}
-                        {posts.map(post => {
-                            const expanded = expandedId === post._id;
-                            const gName = blogGroups.find(g => g._id === post.blogGroup)?.name;
-                            return (
-                                <div key={post._id} style={styles.postCard}>
-                                    <div style={styles.postClickable} onClick={() => setExpandedId(expanded ? null : post._id)}>
-                                        <div>
-                                            {gName && <span style={styles.groupBadge}>{gName}</span>}
-                                            <p style={styles.postMeta}>{post.author?.username || 'WSIN'}&nbsp;·&nbsp;{formatDate(post.createdAt)}</p>
-                                            <h3 style={styles.postTitle}>{post.title}</h3>
-                                            {!expanded && <p style={styles.postDesc}>{post.description?.slice(0, 120)}{post.description?.length > 120 ? '...' : ''}</p>}
-                                        </div>
-                                        <span style={styles.expandIcon}>{expanded ? '▲' : '▼'}</span>
-                                    </div>
-                                    {expanded && (
-                                        <div style={styles.expandedBody}>
-                                            {post.image && <img className='aspect-square object-cover w-65' src={backendUrl + post.image} />}
-                                            <p style={styles.postDescFull}>{post.description}</p>
-                                            {isAdmin && (
-                                                <div style={styles.postActions}>
-                                                    <button style={styles.editBtn} onClick={() => handleEdit(post)}>Edit</button>
-                                                    <button style={styles.deleteBtn} onClick={() => handleDelete(post._id)}>Delete</button>
-                                                </div>
-                                            )}
-                                            <CommentSection targetType="post" targetId={post._id} />
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    const headerLabel = selectedBlogGroup ? selectedBlogGroup.name.toUpperCase() : "ALL";
+    const canPost = isAdmin && selectedBlogGroup;
 
     return (
-        <div style={styles.page}>
-            <div style={styles.column}>
-                <div style={styles.header}>
-                    <a href="/BlogGroups" style={styles.backBtn}>&larr; All Blog Groups</a>
-                    <button style={styles.backBtn} onClick={() => { setSelectedBlogGroup(null); setExpandedId(null); }}>
-                        &larr; Back to Groups
-                    </button>
-                    <p style={{ ...styles.eyebrow, marginTop: "16px" }}>{selectedBlogGroup.name.toUpperCase()}</p>
-                    <h2 style={styles.pageTitle}>WSIN Blogs</h2>
-                    <div style={styles.titleLine} />
-                </div>
-
-                {isAdmin && (
-                    <div style={styles.section}>
-                        <button style={{ ...styles.newPostBtn, ...(showForm ? styles.cancelBtn : {}) }}
-                                onClick={() => showForm ? resetForm() : setShowForm(true)}>
-                            {showForm ? "✕ Cancel" : "+ New Post"}
-                        </button>
+        <div className="w-full h-full bg-zinc-950 text-white">
+            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full">
+                <CardHeader className="border-b border-zinc-800 pb-4">
+                    <div className="flex items-center gap-2 mb-2">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => { setSelectedBlogGroup(null); setExpandedId(null); localStorage.removeItem("selectedBlogGroup"); }}
+                        >
+                            <ArrowLeft className="size-4" /> All Groups
+                        </Button>
                     </div>
-                )}
+                    <CardDescription className="uppercase tracking-widest text-xs text-red-500">
+                        {headerLabel}
+                    </CardDescription>
+                    <CardTitle className="text-2xl font-semibold">WSIN Blog</CardTitle>
+                </CardHeader>
 
-                {isAdmin && showForm && (
-                    <form onSubmit={handleSubmit} style={styles.form}>
-                        <p style={styles.formLabel}>{editingId ? "EDIT POST" : "NEW POST"}</p>
-                        <input type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} style={styles.input} required />
-                        <div>
-                            <p style={{ ...styles.formLabel, marginBottom: 8 }}>POST IMAGE (optional)</p>
-                            <div style={styles.imagePicker}>
-                                <div
-                                    style={{
-                                        ...styles.imagePickerItem,
-                                        ...(selectedImagePath === null ? styles.imagePickerSelected : {}),
-                                    }}
-                                    onClick={() => setSelectedImagePath(null)}
-                                >
-                                    None
-                                </div>
-                                {uploadedImages.map(img => (
-                                    <div
-                                        key={img.name}
-                                        style={{
-                                            ...styles.imagePickerItem,
-                                            ...(selectedImagePath === `/uploads/${img.name}` ? styles.imagePickerSelected : {}),
-                                        }}
-                                        onClick={() => setSelectedImagePath(`/uploads/${img.name}`)}
+                <CardContent className="pt-4 space-y-4">
+                    {canPost && (
+                        <Button
+                            variant={showForm ? "outline" : "default"}
+                            size="sm"
+                            onClick={() => showForm ? resetForm() : setShowForm(true)}
+                        >
+                            {showForm ? <><X className="size-4" /> Cancel</> : <><Plus className="size-4" /> New Post</>}
+                        </Button>
+                    )}
+
+                    {canPost && showForm && (
+                        <form onSubmit={handleSubmit} className="space-y-3 rounded-lg border border-zinc-800 bg-zinc-900/60 p-4">
+                            <p className="text-xs uppercase tracking-widest text-zinc-500">
+                                {editingId ? "Edit Post" : "New Post"}
+                            </p>
+
+                            <Input
+                                type="text"
+                                placeholder="Title"
+                                value={title}
+                                onChange={e => setTitle(e.target.value)}
+                                required
+                            />
+
+                            <div className="space-y-2">
+                                <p className="text-xs uppercase tracking-widest text-zinc-500">Image (optional)</p>
+                                <div className="flex flex-wrap gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedImagePath(null)}
+                                        className={[
+                                            "flex h-16 w-16 items-center justify-center rounded-md border text-xs",
+                                            selectedImagePath === null
+                                                ? "border-red-500 bg-red-500/15 text-red-400"
+                                                : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-600",
+                                        ].join(' ')}
                                     >
-                                        <img
-                                            src={`${backendUrl}/uploads/${img.name}`}
-                                            alt={img.name}
-                                            style={styles.imagePickerThumb}
-                                        />
-                                        <span style={styles.imagePickerName}>{img.name}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div>
-                            <p style={{ ...styles.formLabel, marginBottom: 8 }}>CONTENT <span style={{ color: "#444" }}>— Markdown supported</span></p>
-                            <div style={styles.editorWrap}>
-                                <textarea
-                                    placeholder="Write something..."
-                                    value={description}
-                                    onChange={e => setDescription(e.target.value)}
-                                    style={styles.editorTextarea}
-                                    required
-                                />
-                                <div className="prose prose-invert" style={styles.previewPane}>
-                                    {!description && <p style={{ color: "#444", fontFamily: "'Georgia', serif", fontSize: "14px" }}>Preview will appear here…</p>}
-                                    {description && (
-                                        <Markdown
-                                            markdown={description}
-                                            options={{ tables: true, strikethrough: true, ghCodeBlocks: true }}
-                                        />
-                                    )}
+                                        None
+                                    </button>
+                                    {uploadedImages.map(img => {
+                                        const selected = selectedImagePath === `/uploads/${img.name}`;
+                                        return (
+                                            <button
+                                                type="button"
+                                                key={img.name}
+                                                onClick={() => setSelectedImagePath(`/uploads/${img.name}`)}
+                                                className={[
+                                                    "relative h-16 w-16 overflow-hidden rounded-md border transition-all",
+                                                    selected
+                                                        ? "border-red-500 ring-2 ring-red-500/40"
+                                                        : "border-zinc-700 hover:border-zinc-500",
+                                                ].join(' ')}
+                                            >
+                                                <img
+                                                    src={`${backendUrl}/uploads/${img.name}`}
+                                                    alt={img.name}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
-                        </div>
-                        <button type="submit" style={styles.submitBtn} disabled={submitting}>
-                            {submitting ? "Saving..." : editingId ? "Save Changes" : "Post"}
-                        </button>
-                    </form>
-                )}
 
-                <div style={styles.postList}>
-                    {loading && <p style={styles.emptyMsg}>Loading posts...</p>}
-                    {!loading && posts.length === 0 && <p style={styles.emptyMsg}>No posts yet.</p>}
-                    {posts.map(post => {
-                        const expanded = expandedId === post._id;
-                        return (
-                            <div key={post._id} style={styles.postCard}>
-                                <div style={styles.postClickable} onClick={() => setExpandedId(expanded ? null : post._id)}>
-                                    <div>
-                                        <p style={styles.postMeta}>{post.author?.username || 'WSIN'}&nbsp;·&nbsp;{formatDate(post.createdAt)}</p>
-                                        <h3 style={styles.postTitle}>{post.title}</h3>
-                                        {!expanded && <p style={styles.postDesc}>{post.description?.slice(0, 120)}{post.description?.length > 120 ? '...' : ''}</p>}
+                            <div className="space-y-2">
+                                <p className="text-xs uppercase tracking-widest text-zinc-500">
+                                    Content <span className="text-zinc-600">· Markdown supported</span>
+                                </p>
+                                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                                    <Textarea
+                                        placeholder="Write something..."
+                                        value={description}
+                                        onChange={e => setDescription(e.target.value)}
+                                        className="min-h-[220px]"
+                                        required
+                                    />
+                                    <div className="prose prose-invert prose-sm max-w-none min-h-[220px] rounded-md border border-zinc-800 bg-zinc-900 p-3 overflow-auto">
+                                        {!description
+                                            ? <p className="text-zinc-600 italic">Preview will appear here…</p>
+                                            : <Markdown markdown={description} options={{ tables: true, strikethrough: true, ghCodeBlocks: true }} />
+                                        }
                                     </div>
-                                    <span style={styles.expandIcon}>{expanded ? '▲' : '▼'}</span>
                                 </div>
-                                {expanded && (
-                                    <div style={styles.expandedBody}>
-                                        {post.image && <img className='aspect-square object-cover w-65' src={backendUrl + post.image} />}
-                                        <div className="prose prose-invert" style={{ margin: "12px 0" }}>
-                                            <Markdown
-                                                markdown={post.description}
-                                                options={{ tables: true, strikethrough: true, ghCodeBlocks: true }}
-                                            />
-                                        </div>
-                                        {isAdmin && (
-                                            <div style={styles.postActions}>
-                                                <button style={styles.editBtn} onClick={() => handleEdit(post)}>Edit</button>
-                                                <button style={styles.deleteBtn} onClick={() => handleDelete(post._id)}>Delete</button>
-                                            </div>
-                                        )}
-                                        <CommentSection targetType="post" targetId={post._id} />
-                                    </div>
-                                )}
                             </div>
-                        );
-                    })}
-                </div>
-            </div>
+
+                            <div className="flex justify-end">
+                                <Button type="submit" disabled={submitting}>
+                                    {submitting ? "Saving..." : editingId ? "Save Changes" : "Post"}
+                                </Button>
+                            </div>
+                        </form>
+                    )}
+
+                    <ScrollArea className="h-[440px] pr-3">
+                        <div className="space-y-3">
+                            {loading && <p className="text-center text-xs text-zinc-500 py-8">Loading posts...</p>}
+                            {!loading && posts.length === 0 && (
+                                <p className="text-center text-xs text-zinc-500 py-8">No posts yet.</p>
+                            )}
+                            {posts.map(post => {
+                                const expanded = expandedId === post._id;
+                                const gName = blogGroups.find(g => g._id === post.blogGroup)?.name;
+                                return (
+                                    <Card key={post._id} size="sm" className="bg-zinc-900/60 ring-zinc-800">
+                                        <CardHeader
+                                            className="cursor-pointer"
+                                            onClick={() => setExpandedId(expanded ? null : post._id)}
+                                        >
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="min-w-0 flex-1">
+                                                    {gName && !selectedBlogGroup && (
+                                                        <span className="inline-block text-[10px] uppercase tracking-widest text-red-400 bg-red-500/10 border border-red-500/30 rounded px-1.5 py-0.5 mb-1">
+                                                            {gName}
+                                                        </span>
+                                                    )}
+                                                    <p className="text-xs text-zinc-500">
+                                                        {post.author?.username || 'WSIN'} · {formatDate(post.createdAt)}
+                                                    </p>
+                                                    <CardTitle className="text-base mt-1 break-words">{post.title}</CardTitle>
+                                                    {!expanded && post.description && (
+                                                        <p className="text-xs text-zinc-400 mt-1 line-clamp-2">
+                                                            {post.description.slice(0, 140)}
+                                                            {post.description.length > 140 ? '...' : ''}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                {expanded
+                                                    ? <ChevronUp className="size-4 text-zinc-500 shrink-0 mt-1" />
+                                                    : <ChevronDown className="size-4 text-zinc-500 shrink-0 mt-1" />
+                                                }
+                                            </div>
+                                        </CardHeader>
+
+                                        {expanded && (
+                                            <CardContent className="space-y-3 pt-0">
+                                                {post.image && (
+                                                    <img
+                                                        src={backendUrl + post.image}
+                                                        alt={post.title}
+                                                        className="w-full max-h-64 object-cover rounded-md"
+                                                    />
+                                                )}
+                                                <div className="prose prose-invert prose-sm max-w-none">
+                                                    <Markdown
+                                                        markdown={post.description}
+                                                        options={{ tables: true, strikethrough: true, ghCodeBlocks: true }}
+                                                    />
+                                                </div>
+                                                {isAdmin && (
+                                                    <div className="flex gap-2">
+                                                        <Button variant="outline" size="sm" onClick={() => handleEdit(post)}>
+                                                            <Pencil className="size-4" /> Edit
+                                                        </Button>
+                                                        <Button variant="destructive" size="sm" onClick={() => handleDelete(post._id)}>
+                                                            <Trash2 className="size-4" /> Delete
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                                <CommentSection targetType="post" targetId={post._id} />
+                                            </CardContent>
+                                        )}
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    </ScrollArea>
+                </CardContent>
+            </Card>
         </div>
     );
 }
-
-const styles = {
-    page:       { minHeight: "100vh", background: "#111", display: "flex", justifyContent: "center" },
-    column:     { width: "100%", maxWidth: "1100px", minHeight: "100vh", background: "#1a1a1a", display: "flex", flexDirection: "column", boxShadow: "0 0 60px rgba(0,0,0,0.8)", borderLeft: "1px solid #2a2a2a", borderRight: "1px solid #2a2a2a" },
-    header:     { background: "#322d2d", padding: "40px 32px 28px", borderBottom: "1px solid #3a3a3a" },
-    backBtn:    { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "1px", color: "#fa4040", background: "transparent", border: "1px solid #fc848444", borderRadius: "4px", padding: "6px 14px", cursor: "pointer", textDecoration: "none", display: "inline-block", marginBottom: "8px" },
-    groupBadge: { fontFamily: "'Courier New', monospace", fontSize: "9px", color: "#fa4040", background: "#241212", border: "1px solid #fc848433", borderRadius: "3px", padding: "1px 6px", marginRight: "6px" },
-    eyebrow:    { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "5px", color: "#fa4040", margin: "0 0 10px 0" },
-    pageTitle:  { fontFamily: "'Georgia', serif", fontSize: "48px", fontWeight: "bold", color: "#f5f0e8", margin: "0", letterSpacing: "-1px" },
-    titleLine:  { width: "40px", height: "3px", background: "#fa4040", marginTop: "16px" },
-    section:    { padding: "24px 32px 0" },
-    newPostBtn: { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "2px", color: "#fa4040", background: "#241212", border: "1px solid #fe979755", borderRadius: "4px", padding: "10px 20px", cursor: "pointer" },
-    cancelBtn:  { color: "#aaa", background: "#222", borderColor: "#444" },
-    form:       { margin: "20px 32px", background: "#222", border: "1px solid #333", borderRadius: "8px", padding: "20px", display: "flex", flexDirection: "column", gap: "12px" },
-    formLabel:  { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "4px", color: "#555", margin: "0" },
-    input:      { fontFamily: "'Courier New', monospace", fontSize: "13px", color: "#f5f0e8", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "10px 12px", outline: "none", width: "100%" },
-    textarea:   { fontFamily: "'Georgia', serif", fontSize: "14px", color: "#ccc", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "10px 12px", outline: "none", width: "100%", minHeight: "100px", resize: "vertical" },
-    editorWrap: { display: "flex", gap: "16px", alignItems: "flex-start" },
-    editorTextarea: { flex: 1, fontFamily: "'Courier New', monospace", fontSize: "13px", color: "#ccc", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "12px", outline: "none", minHeight: "280px", resize: "vertical" },
-    previewPane: { flex: 1, background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "12px", minHeight: "280px", overflowY: "auto" },
-    submitBtn:  { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "2px", color: "#fff", background: "#fa4040", border: "none", borderRadius: "4px", padding: "10px", cursor: "pointer", alignSelf: "flex-end" },
-    postList:   { padding: "20px 32px 48px", display: "flex", flexDirection: "column", gap: "12px" },
-    emptyMsg:   { fontFamily: "'Courier New', monospace", fontSize: "12px", color: "#444", letterSpacing: "2px", textAlign: "center", marginTop: "40px" },
-    postCard:   { background: "#222", border: "1px solid #2e2e2e", borderRadius: "8px", overflow: "hidden" },
-    postClickable: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "20px", cursor: "pointer" },
-    expandIcon: { fontFamily: "'Courier New', monospace", fontSize: "10px", color: "#555", flexShrink: 0, paddingTop: "4px" },
-    expandedBody:  { padding: "0 20px 20px" },
-    postMeta:   { fontFamily: "'Courier New', monospace", fontSize: "9px", letterSpacing: "4px", color: "#444", margin: "0 0 8px 0" },
-    postTitle:  { fontFamily: "'Georgia', serif", fontSize: "20px", color: "#f5f0e8", margin: "0 0 6px 0", fontWeight: "bold" },
-    postDesc:   { fontFamily: "'Georgia', serif", fontSize: "13px", color: "#666", lineHeight: "1.5", margin: "0" },
-    postDescFull:{ fontFamily: "'Georgia', serif", fontSize: "14px", color: "#888", lineHeight: "1.6", margin: "0 0 16px 0" },
-    postActions:{ display: "flex", gap: "8px", marginBottom: "16px" },
-    imagePicker: { display: "flex", flexWrap: "wrap", gap: "8px", padding: "8px" },
-    imagePickerItem: { width: "70px", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", cursor: "pointer", padding: "4px", border: "1px solid #333", borderRadius: "4px", background: "#1a1a1a" },
-    imagePickerSelected: { borderColor: "#fa4040", background: "#241212" },
-    imagePickerThumb: { width: "60px", height: "60px", objectFit: "cover", borderRadius: "3px" },
-    imagePickerName: { fontSize: "8px", fontFamily: "'Courier New', monospace", color: "#888", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "64px" },
-    editBtn:    { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#fa4040", background: "transparent", border: "1px solid #fc848444", borderRadius: "3px", padding: "6px 12px", cursor: "pointer" },
-    deleteBtn:  { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#888", background: "transparent", border: "1px solid #333", borderRadius: "3px", padding: "6px 12px", cursor: "pointer" },
-};
 
 export default Blog;
