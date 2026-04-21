@@ -69,12 +69,17 @@ const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, grou
                 className="border-amber-50 border-2 bg-white rounded-md"
                 ref={setTarget}
                 style={{
-                    backgroundColor: 'rgba(255, 50, 47, 0.50)',
-                    backdropFilter: 'blur(10px)',
+                    backgroundColor: 'rgba(255, 50, 47, 0.0)',
+                    backdropFilter: 'blur(16px)',
                     border: '1px solid rgba(255, 255, 255, 0.3)'
                 }}
             >
                 <div
+                    style={{
+                        backgroundColor: 'rgba(255, 50, 47, 0.5)',
+                        backdropFilter: 'blur(16px)',
+                        border: '1px solid rgba(255, 255, 255, 0.3)'
+                    }}
                     className="flex-col align-top w-full h-8 rounded-t-md relative cursor-move"
                     onMouseEnter={(e) => {
                         setDragTarget(e.currentTarget);

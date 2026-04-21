@@ -39,10 +39,16 @@ const ContactsButton = () => {
                 addWindow({
                     windowName: member.name,
                     content: (
-                        <Card className="flex flex-col px-2 rounded-none w-50">
+                        <Card
+                            style={{
+                                backgroundColor: 'rgba(255, 50, 47, 0.0)',
+                                backdropFilter: 'blur(16px)',
+                                border: '1px solid rgba(255, 255, 255, 0.3)'
+                            }}
+                            className="flex flex-col px-2 rounded-none w-50">
                             <div className="flex m-auto justify-center">
                                 {member.image ? (
-                                    <img className="aspect-square object-cover w-80" src={`${backendUrl}${member.image}`} alt={member.name} />
+                                    <img className="rounded-2xl aspect-square object-cover w-80" src={`${backendUrl}${member.image}`} alt={member.name} />
                                 ) : (
                                     <Avatar className="w-16 h-16 rounded-full bg-zinc-900 flex-row m-auto justify-center">
                                         <p className="text-lg font-semibold text-white m-auto">{member.initials || '?'}</p>

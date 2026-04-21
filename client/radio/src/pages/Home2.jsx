@@ -94,7 +94,7 @@ const App = () => {
                     {/*    className='absolute left-5 top-15 hover:scale-110 transition-all spring-duration-300 spring-bounce-60'*/}
                     {/*/>*/}
                     <BlogButton />
-                    <BoomBoxButton/>
+                    {/*<BoomBoxButton/>*/}
                     <ContactsButton />
                     {/*<EventsCalendar />*/}
                 </div>

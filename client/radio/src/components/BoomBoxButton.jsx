@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useContext } from "react";
 import { AppContext } from "../context/AppContext.jsx";
 import axios from "axios";
@@ -8,7 +7,7 @@ import Wigglie from "@/components/Wigglie.jsx";
 const STREAM_URL = "https://broadcast.shoutcheap.com/proxy/wsinradi/stream";
 const POLL_INTERVAL = 30000;
 
-const BlogButton = () => {
+const BoomBoxButton = () => {
 
     const { backendUrl } = useContext(AppContext);
 
@@ -112,4 +111,4 @@ const BlogButton = () => {
     );
 };
 
-export default BlogButton;
+export default BoomBoxButton;

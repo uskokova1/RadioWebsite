@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useWindowManager, WindowManager } from '@/context/WindowManager.jsx';
+import {ScrollArea} from "@/components/ui/scroll-area.jsx";
+import MarkdownView from "react-showdown";
 
 const HomeButton = () => {
     const { addWindow, closeGroup, windows } = useWindowManager();
@@ -14,11 +16,22 @@ const HomeButton = () => {
             closeGroup(HOUSE_GROUP);
         } else {
             addWindow({
-                windowName: 'Child1',
-                content: <div className='text-4xl text-black w-full h-auto'>Child 1 Content</div>,
-                spawnx: 150,
-                spawny: 590,
+                windowName: 'Home',
+                spawnx: window.innerWidth/3,
+                spawny: window.innerHeight/3,
                 group: HOUSE_GROUP,
+                content: (
+                    <div>
+                        <img className='absolute right-0 top-0 scale-50'
+                            src='/shirtlogo.png' />
+                        <MarkdownView
+                            markdown={
+                            "#WSIN, the radio station at SCSU!"
+                            }
+                            className='h-50 text-4xl text-red-500 justify-self-center'>
+                        </MarkdownView>
+                    </div>
+                )
             });
         }
     };

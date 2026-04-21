@@ -111,7 +111,13 @@ function CommentSection({ targetType, targetId }) {
 
     return (
         <div className="flex-col">
-        <div className="flex-col border-t border-zinc-700 pt-4 bg-zinc-900 p-5 w-80">
+        <div
+            style={{
+                backgroundColor: 'rgba(0, 0,0, 0.1)',
+                backdropFilter: 'blur(55px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)'
+            }}
+            className="flex-col border-t  p-5 w-80">
             <p className="justify-self-center text-xs tracking-widest text-zinc-500 mb-2 font-mono">
                 COMMENTS ({comments.length})
             </p>
@@ -186,7 +192,13 @@ function CommentSection({ targetType, targetId }) {
             </ScrollArea>
         </div>
             {userData && (
-                <form onSubmit={handleSubmit} className="flex gap-2 p-2 bg-zinc-900 border">
+                <form
+                    style={{
+                    backgroundColor: 'rgba(0, 0,0, 0.1)',
+                    backdropFilter: 'blur(55px)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)'
+                }}
+                    onSubmit={handleSubmit} className="flex gap-2 p-2 border">
                     <Textarea
                         value={text}
                         onChange={(e) => setText(e.target.value)}

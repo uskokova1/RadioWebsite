@@ -89,10 +89,16 @@ const ResetPassword = () => {
     }
 
     return (
-        <div className="flex justify-center bg-zinc-950 w-full h-full">
+        <div className="flex justify-center  w-full h-full">
                     {/* EMAIL STEP */}
                     {!isEmailSent &&
-                        <Card className="w-full max-w-md bg-zinc-900 border-zinc-800 text-white">
+                        <Card
+                            style={{
+                                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                backdropFilter: 'blur(55px)',
+                                border: '1px solid rgba(255, 255, 255, 0.3)'
+                            }}
+                            className="w-full max-w-md bg-zinc-900 border-zinc-800 text-white">
 
                             <CardHeader>
                                 <CardTitle className="text-center">
