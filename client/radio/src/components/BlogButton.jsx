@@ -101,13 +101,13 @@ const BlogButton = () => {
     };
 
     return (
-        <button
+        <div
             onClick={handleToggle}
             title="Blog"
-            className="absolute left-5 top-[300px] z-[200] flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
+            className="w-14 h-14 cursor-pointer transition-transform hover:scale-110 shrink-0"
         >
-            <Book className="size-6" />
-        </button>
+            <video autoPlay muted loop src="/clipboard.webm" className="w-full h-full" />
+        </div>
     );
 };
 
