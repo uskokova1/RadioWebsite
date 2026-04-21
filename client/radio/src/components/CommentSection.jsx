@@ -105,27 +105,10 @@ export default function CommentSection({ targetType, targetId }) {
                 .reaction-pop { animation: pop 0.3s ease; }
             `}</style>
 
-            <p className="text-xs uppercase tracking-widest text-zinc-500">
+            <p className="text-xs uppercase tracking-widest text-zinc-500 mx-3">
                 Comments ({comments.length})
             </p>
 
-            {userData ? (
-                <form onSubmit={handleSubmit} className="flex gap-2">
-                    <Input
-                        value={text}
-                        onChange={e => setText(e.target.value)}
-                        placeholder="Write a comment..."
-                        maxLength={500}
-                        className="flex-1"
-                    />
-                    <Button type="submit" disabled={submitting || !text.trim()}>
-                        <Send className="size-4" />
-                        {submitting ? "..." : "Post"}
-                    </Button>
-                </form>
-            ) : (
-                <p className="text-xs text-zinc-500">Log in to leave a comment.</p>
-            )}
 
             <ScrollArea className="h-[260px] rounded-md border border-zinc-800 p-2">
                 {comments.length === 0 && (
@@ -214,6 +197,23 @@ export default function CommentSection({ targetType, targetId }) {
                     ))}
                 </div>
             </ScrollArea>
+            {userData ? (
+                <form onSubmit={handleSubmit} className="flex gap-2 m-3">
+                    <textarea
+                        value={text}
+                        onChange={e => setText(e.target.value)}
+                        placeholder="Write a comment..."
+                        maxLength={500}
+                        className="flex-1 bg-zinc-800 p-1 rounded-xl"
+                    />
+                    <Button type="submit" disabled={submitting || !text.trim()}>
+                        <Send className="size-4" />
+                        {submitting ? "..." : "Post"}
+                    </Button>
+                </form>
+            ) : (
+                <p className="text-xs text-zinc-500">Log in to leave a comment.</p>
+            )}
         </div>
     );
 }

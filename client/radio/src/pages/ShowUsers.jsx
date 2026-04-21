@@ -6,11 +6,20 @@ import { LayoutGrid, List } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 const ShowUsers = () => {
     const { backendUrl, userData, getUserData } = useContext(AppContext);
     const [allUsers, setAllUsers] = useState([]);
     const [viewMode, setViewMode] = useState('grid');
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredUsers = allUsers.filter(user => {
+        const query = searchQuery.toLowerCase();
+        return user.username.toLowerCase().includes(query) || 
+               user.email.toLowerCase().includes(query);
+    });
 
     useEffect(() => { if (!userData) getUserData(); }, []);
 
@@ -48,9 +57,18 @@ const ShowUsers = () => {
                 </CardHeader>
 
                 <CardContent className="pt-4 flex-1 min-h-0 flex flex-col gap-3">
-                    <div className="flex items-center justify-between shrink-0">
+                    <div className="flex items-center justify-between shrink-0 gap-2">
+                        <div className="relative flex-1 max-w-xs">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-500" />
+                            <Input
+                                placeholder="Search users..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-9 h-8 bg-zinc-900 border-zinc-800 text-xs"
+                            />
+                        </div>
                         <span className="text-xs uppercase tracking-widest text-zinc-500">
-                            {allUsers.length} user{allUsers.length !== 1 ? 's' : ''}
+                            {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''}
                         </span>
                         <div className="flex gap-1 rounded-md border border-zinc-800 bg-zinc-900 p-1">
                             <Button
@@ -75,7 +93,7 @@ const ShowUsers = () => {
                     <ScrollArea className="flex-1 min-h-0 pr-3">
                         {viewMode === 'grid' ? (
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                {allUsers.map((user) => {
+                                {filteredUsers.map((user) => {
                                     const isAdminUser = user.role === 'admin';
                                     return (
                                         <Card key={user._id || user.email} size="sm" className="bg-zinc-900/60 ring-zinc-800">
@@ -105,7 +123,7 @@ const ShowUsers = () => {
                                     <span>Email</span>
                                     <span>Role</span>
                                 </div>
-                                {allUsers.map((user, i) => (
+                                {filteredUsers.map((user, i) => (
                                     <div
                                         key={user._id || user.email || i}
                                         className={[

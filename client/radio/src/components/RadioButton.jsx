@@ -6,12 +6,9 @@ import Radio from '@/pages/Radio.jsx';
 
 const RadioButton = () => {
     const { addWindow, closeGroup, windows } = useWindowManager();
-    const { open, setOpen } = useState(false);
 
     const handleToggle = () => {
-        if (open) {
-            setOpen(!open);
-        } else {
+
             addWindow({
                 windowName: 'WSIN Radio',
                 spawnx: 400, spawny: 160,
@@ -21,7 +18,7 @@ const RadioButton = () => {
                     </div>
                 ),
             });
-        }
+
     };
 
     return (

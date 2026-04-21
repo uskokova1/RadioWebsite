@@ -104,7 +104,8 @@ const AdminContacts = () => {
                     </Button>
 
                     {showForm && (
-                        <form onSubmit={handleSubmit} className="space-y-3 rounded-lg border border-zinc-800 bg-zinc-900/60 p-4">
+                        <ScrollArea className="h-[400px] pr-3 rounded-lg border border-zinc-800 bg-zinc-900/60 p-4">
+                        <form onSubmit={handleSubmit} className="space-y-3">
                             <p className="text-xs uppercase tracking-widest text-zinc-500">
                                 {editingId ? 'Edit Contact' : 'New Contact'}
                             </p>
@@ -156,6 +157,7 @@ const AdminContacts = () => {
                                 </Button>
                             </div>
                         </form>
+                        </ScrollArea>
                     )}
 
                     <ScrollArea className="h-[340px] pr-3">

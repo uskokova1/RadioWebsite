@@ -12,8 +12,11 @@ import Login from '@/pages/Login.jsx';
 
 import { CONTACTS_GROUP, buildContactWindows } from '@/components/ContactsButton.jsx';
 import {Book} from "lucide-react";
+import { motion } from 'motion/react';
+
 
 const BLOGS_GROUP = 1;
+const HOME_GROUP = 6;
 const LOGIN_GROUP = 5;
 
 // ─── Drag engine ─────────────────────────────────────────────────────────────
@@ -65,7 +68,19 @@ function DraggableIcon({ src, title, initialX, initialY, onActivate }) {
             className="w-24 h-24 select-none cursor-grab active:cursor-grabbing drop-shadow-2xl
                        transition-filter hover:drop-shadow-[0_0_12px_rgba(244,63,94,0.5)]"
         >
-            <video autoPlay muted loop src={src} className="w-full h-full" draggable={false} />
+            <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 50, mass: 1, damping:5}}
+            >
+                <video autoPlay
+                       muted
+                       loop
+                       src={src}
+                       className="w-full h-full hover:scale-116
+                       transition-transform spring-duration-300 spring-bounce-60"
+                       draggable={false} />
+            </motion.div>
         </div>
     );
 }
@@ -146,23 +161,31 @@ export function FloatingBlog() {
         closeGroup(whichGroupOpen.current);
         whichGroupOpen.current = post._id;
 
+        if(post.image){
+            addWindow({
+                windowName: post.title,
+                spawnx: window.innerWidth/6, spawny: window.innerHeight/4,
+                group: post._id,
+                content: <img className='aspect-square object-cover w-65' draggable={false} src={backendUrl + post.image} />
+            });
+        }
         addWindow({
-            windowName: post.title, spawnx: 200, spawny: 80, group: post._id,
-            content: <img className="aspect-square object-cover w-65" draggable={false}
-                          src={backendUrl + post.image} alt={post.title} />,
+            windowName: post.title,
+            spawnx: window.innerWidth*2/6, spawny: window.innerHeight/4,
+            group: post._id,
+            content: <MarkdownView className='prose prose-invert bg-zinc-900 w-70 p-3' markdown={post.description} />
         });
         addWindow({
-            windowName: post.title, spawnx: 500, spawny: 150, group: post._id,
-            content: <MarkdownView className="prose prose-invert bg-zinc-900 w-70 p-3"
-                                   markdown={post.description} />,
+            windowName: post.title,
+            spawnx: window.innerWidth*3/6, spawny: window.innerHeight*2/5,
+            group: post._id,
+            content: <CommentSection targetType="post" targetId={post._id} />
         });
         addWindow({
-            windowName: post.title, spawnx: 200, spawny: 350, group: post._id,
-            content: <CommentSection targetType="post" targetId={post._id} />,
-        });
-        addWindow({
-            windowName: 'Navigation', spawnx: 200, spawny: 530, group: post._id,
-            content: <BlogNavWindow post={post} posts={posts} onNavigate={(p) => openPost(p, posts)} />,
+            windowName: 'Navigation',
+            spawnx: window.innerWidth*3/6, spawny: window.innerHeight/4,
+            group: post._id,
+            content: <BlogNavWindow post={post} posts={posts} onNavigate={(p) => openPost(p, posts)} />
         });
     };
 
@@ -238,6 +261,41 @@ export function FloatingLogin() {
             title="Login — drag me!"
             initialX={920}
             initialY={55}
+            onActivate={toggle}
+        />
+    );
+}
+
+// ─── Floating Home ───────────────────────────────────────────────────────────
+export function FloatingHome() {
+    const { addWindow, closeGroup, windows } = useWindowManager();
+
+    const toggle = () => {
+        if (windows.some(w => w.group === HOME_GROUP)) {
+            closeGroup(HOME_GROUP);
+        } else {
+            addWindow({
+                windowName: 'Home', spawnx: 300, spawny: 200, group: HOME_GROUP,
+                content: (
+                    <div className='w-100'>
+                        <p>
+                            Welcome to <b>WSIN,</b> Southern Connecticut State University's
+                            student-run radio station, broadcasting straight from Room 210 in the
+                            Adanti Student Center! We bring you a <b>diverse mix of music, podcasts,
+                            and student-led content,</b> making sure there's always something fresh to tune into.
+                        </p>
+                    </div>
+                ),
+            });
+        }
+    };
+
+    return (
+        <DraggableIcon
+            src="/earth.webm"
+            title="Home — drag me!"
+            initialX={920}
+            initialY={355}
             onActivate={toggle}
         />
     );
