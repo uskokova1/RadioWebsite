@@ -1,73 +1,62 @@
-import React, { useState } from 'react';
-import { House } from 'lucide-react';
-import Login from '@/pages/Login.jsx';
-import EmailVerify from "@/pages/EmailVerify.jsx";
-import BlogButton from "@/components/BlogButton.jsx";
-import ContactsButton from "@/components/ContactsButton.jsx";
-import EventsCalendar from "@/components/EventsCalendar.jsx";
-import EventsCalendar2 from "@/components/EventsCalandar2.jsx"
-import { useWindowManager, WindowManager } from '@/context/WindowManager.jsx';
-import LoginButton from "@/components/LoginButton.jsx";
+import React, { useContext } from 'react';
+import { Disc3 } from 'lucide-react';
 
+import BlogButton from '@/components/BlogButton.jsx';
+import ContactsButton from '@/components/ContactsButton.jsx';
+import EventsCalendar from '@/components/EventsCalendar.jsx';
+import EventsCalendar2 from '@/components/EventsCalandar2.jsx';
+import ProfileButton from '@/components/ProfileButton.jsx';
+import AccountButton from '@/components/AccountButton.jsx';
+import RadioButton from '@/components/RadioButton.jsx';
+import EventsFormButton from '@/components/EventsFormButton.jsx';
+import AdminButton from '@/components/AdminButton.jsx';
+import AuthButton from '@/components/AuthButton.jsx';
+
+import { WindowManager } from '@/context/WindowManager.jsx';
+import { AppContext } from '@/context/AppContext.jsx';
 
 const App = () => {
-    const { addWindow, closeGroup, windows } = useWindowManager();
-
-    // Group ID for the "House" windows
-    const HOUSE_GROUP = 3;
-
-
-    const toggleHouseWindows = () => {
-        // Check if any House window is open
-        const groupOpen = windows.some(win => win.group === HOUSE_GROUP);
-
-        if (groupOpen) {
-            // Close all windows in this group
-            closeGroup(HOUSE_GROUP);
-        } else {
-            // Open all windows in this group
-            addWindow({
-                windowName: 'Login',
-                content: <Login />,
-                spawnx: 50,
-                spawny: 90,
-                group: HOUSE_GROUP,
-            });
-            addWindow({
-                windowName: 'EmailVerify',
-                content: <EmailVerify />,
-                spawnx: 350,
-                spawny: 290,
-                group: HOUSE_GROUP,
-            });
-            addWindow({
-                windowName: 'Child1',
-                content: <div className='text-4xl text-black w-full h-auto'>Child 1 Content</div>,
-                spawnx: 150,
-                spawny: 590,
-                group: HOUSE_GROUP,
-            });
-        }
-    };
+    const { userData } = useContext(AppContext);
+    const isAdmin = userData && userData.role === 'admin';
 
     return (
-        <div
-            //src='/MainBackground.png'
-            className='polka relative min-h-screen min-w-screen z-90 overflow-hidden'>
-            {/* <img src='/radio.png' className='absolute scale-50' /> */}
+        <div className='polka relative min-h-screen min-w-screen z-90 overflow-hidden'>
 
-            <LoginButton />
             <WindowManager />
 
+            {/* Brand chip top-left */}
+            <div className="absolute left-5 top-3 flex items-center gap-2 text-zinc-300 select-none pointer-events-none">
+                <Disc3 className="size-5 text-red-500" />
+                <span className="text-xs uppercase tracking-[0.3em] font-semibold">WSIN</span>
+            </div>
+
+            {/* Existing buttons */}
+            <EventsCalendar />     {/* top-35 */}
+            <ContactsButton />     {/* top-45 */}
+            <BlogButton />         {/* top-75 */}
+
+            {/* New page access buttons (conditional on login) */}
+            <ProfileButton />      {/* top-135 */}
+            <AccountButton />      {/* top-165 */}
+            <RadioButton />        {/* top-195 */}
+            <EventsFormButton />   {/* top-225 */}
+
+            {/* Admin-only */}
+            <AdminButton />        {/* top-255 */}
+
+            {/* Secondary calendar widget */}
             <EventsCalendar2 />
 
-            <House
-                onClick={toggleHouseWindows}
-                className='absolute left-5 top-15 hover:scale-110 transition-all spring-duration-300 spring-bounce-60'
-            />
-            <BlogButton />
-            <ContactsButton />
-            <EventsCalendar />
+            {/* Floating auth button bottom-right */}
+            <AuthButton />
+
+            {/* Status chip top-right */}
+            <div className="absolute top-3 right-5 flex items-center gap-2 text-xs text-zinc-400">
+                <span className={`inline-block size-2 rounded-full ${userData ? 'bg-green-500' : 'bg-zinc-600'}`} />
+                {userData
+                    ? <span><span className="text-zinc-300 font-medium">{userData.username || 'User'}</span>{isAdmin && <span className="ml-1 text-red-400">· admin</span>}</span>
+                    : <span>Not signed in</span>}
+            </div>
         </div>
     );
 };

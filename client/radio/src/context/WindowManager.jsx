@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import Moveable from 'react-moveable';
 import { motion, AnimatePresence } from 'motion/react';
 import { SquareX } from 'lucide-react';
@@ -12,7 +12,7 @@ export const WindowManagerProvider = ({ children }) => {
     const [windows, setWindows] = useState([]);
 
     const addWindow = (windowProps) => {
-        const id = crypto.randomUUID(); // unique id
+        const id = crypto.randomUUID();
         setWindows(prev => [...prev, { id, ...windowProps, zIndex: prev.length + 1 }]);
     };
 
@@ -42,10 +42,10 @@ export const WindowManagerProvider = ({ children }) => {
 };
 
 // --- WINDOW COMPONENT ---
-const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, group  }) => {
-    const { closeGroup, removeWindow, bringToFront } = useWindowManager();
-    const [target, setTarget] = useState(null);
-    const [dragTarget, setDragTarget] = useState(null);
+const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, group }) => {
+    const { closeGroup, bringToFront } = useWindowManager();
+    const windowRef = useRef(null);
+    const dragHandleRef = useRef(null);
 
     return (
         <div
@@ -56,33 +56,32 @@ const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, grou
                 left: spawnx,
                 zIndex: zIndex,
             }}
-            onMouseEnter={(e) => {
-                setTarget(e.currentTarget);
-            }}
             className="flex-col relative"
+            onMouseDown={() => bringToFront(id)}
         >
             <motion.div
-                initial={{ scaleY: 0.5 }}
-                animate={{ scaleY: 1 }}
-                exit={{ scaleY: 0 }}
-                transition={{ type: 'spring', duration: 0.5 }}
-                className="border-amber-50 border-2 bg-white rounded-md"
-                ref={setTarget}
+                initial={{ scaleY: 0.5, opacity: 0 }}
+                animate={{ scaleY: 1, opacity: 1 }}
+                exit={{ scaleY: 0, opacity: 0 }}
+                transition={{ type: 'spring', duration: 0.4 }}
+                ref={windowRef}
+                className="rounded-lg overflow-hidden shadow-2xl"
                 style={{
-                    backgroundColor: 'rgba(255, 50, 47, 0.50)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)'
+                    backgroundColor: 'rgba(9, 9, 11, 0.92)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(244, 63, 94, 0.35)',
                 }}
             >
                 <div
-                    className="flex-col align-top w-full h-8 rounded-t-md relative cursor-move"
-                    onMouseEnter={(e) => {
-                        setDragTarget(e.currentTarget);
-                    }}
+                    ref={dragHandleRef}
+                    className="flex items-center justify-between h-8 px-3 cursor-move select-none bg-zinc-900/80 border-b border-zinc-800"
                 >
-                    <h1 className="px-4 py-1">{windowName}</h1>
+                    <h1 className="text-xs uppercase tracking-widest text-zinc-300 font-medium">
+                        {windowName}
+                    </h1>
                     <SquareX
-                        className="absolute right-0 top-0 scale-140 m-1 bg-transparent cursor-pointer"
+                        className="size-4 text-zinc-400 hover:text-red-500 cursor-pointer transition-colors"
+                        onMouseDown={e => e.stopPropagation()}
                         onClick={() => closeGroup(group)}
                     />
                 </div>
@@ -90,20 +89,14 @@ const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, grou
             </motion.div>
 
             <Moveable
-                target={target}
-                dragTarget={dragTarget}
+                target={windowRef}
+                dragTarget={dragHandleRef}
                 draggable={true}
                 origin={false}
                 hideDefaultLines={true}
                 onDragStart={() => bringToFront(id)}
-                bounds={{"left":0,"top":0,"right":500,"bottom":500}}
                 onDrag={e => {
                     e.target.style.transform = e.transform;
-                }}
-                onResize={e => {
-                    e.target.style.width = `${e.width}px`;
-                    e.target.style.height = `${e.height}px`;
-                    e.target.style.transform = e.drag.transform;
                 }}
             />
         </div>

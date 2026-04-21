@@ -1,62 +1,32 @@
 import React, { useState, useEffect, useContext } from "react";
-import { AppContext } from "../context/AppContext.jsx";
+import { AppContext } from "@/context/AppContext.jsx";
 import { toast } from "react-toastify";
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
+import {
+    Folder, FolderOpen, FileText, Plus, Pencil, Trash2,
+    Save, X, ChevronDown, ChevronRight,
+} from "lucide-react";
 
-const treeStyles = {
-    page:       { minHeight: "100vh", background: "#111", display: "flex", justifyContent: "center" },
-    column:     { width: "100%", maxWidth: "1100px", minHeight: "100vh", background: "#1a1a1a", display: "flex", flexDirection: "column", boxShadow: "0 0 60px rgba(0,0,0,0.8)", borderLeft: "1px solid #2a2a2a", borderRight: "1px solid #2a2a2a" },
-    header:     { background: "#322d2d", padding: "40px 32px 28px", borderBottom: "1px solid #3a3a3a" },
-    eyebrow:    { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "5px", color: "#fa4040", margin: "0 0 10px 0" },
-    pageTitle:  { fontFamily: "'Georgia', serif", fontSize: "48px", fontWeight: "bold", color: "#f5f0e8", margin: "0", letterSpacing: "-1px" },
-    titleLine:  { width: "40px", height: "3px", background: "#fa4040", marginTop: "16px" },
-    body:       { padding: "24px 32px 48px" },
-    // tree items
-    treeItem:   { borderBottom: "1px solid #222" },
-    groupRow:   { display: "flex", alignItems: "center", gap: "8px", padding: "12px 16px", cursor: "pointer", background: "#1e1e1e", borderRadius: "4px" },
-    groupRowHover: { background: "#261212" },
-    fileRow:    { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px", background: "#191919", borderRadius: "4px", marginTop: "4px" },
-    icon:       { fontSize: "16px", flexShrink: 0, width: "20px", textAlign: "center", userSelect: "none" },
-    name:       { fontFamily: "'Georgia', serif", fontSize: "16px", color: "#f5f0e8", flex: 1 },
-    desc:       { fontFamily: "'Georgia', serif", fontSize: "12px", color: "#666", flex: 2 },
-    postTitle:  { fontFamily: "'Georgia', serif", fontSize: "14px", color: "#ccc", flex: 1 },
-    postMeta:   { fontFamily: "'Courier New', monospace", fontSize: "9px", color: "#555", marginRight: "12px" },
-    // buttons
-    btnSmall:   { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "1px", color: "#fa4040", background: "transparent", border: "1px solid #fc848444", borderRadius: "3px", padding: "4px 10px", cursor: "pointer" },
-    btnDelete:  { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "1px", color: "#888", background: "transparent", border: "1px solid #444", borderRadius: "3px", padding: "4px 10px", cursor: "pointer" },
-    btnAdd:     { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "1px", color: "#fa4040", background: "#241212", border: "1px solid #fe979755", borderRadius: "3px", padding: "4px 10px", cursor: "pointer" },
-    // forms
-    formInline: { background: "#222", border: "1px solid #333", borderRadius: "4px", padding: "12px", marginTop: "6px", display: "flex", flexDirection: "column", gap: "8px" },
-    formRow:    { display: "flex", gap: "8px" },
-    input:      { fontFamily: "'Courier New', monospace", fontSize: "12px", color: "#f5f0e8", background: "#1a1a1a", border: "1px solid #333", borderRadius: "3px", padding: "6px 10px", outline: "none", flex: 1 },
-    textarea:   { fontFamily: "'Courier New', monospace", fontSize: "12px", color: "#ccc", background: "#1a1a1a", border: "1px solid #333", borderRadius: "3px", padding: "8px 10px", outline: "none", resize: "vertical", minHeight: "60px" },
-    editorWrap: { display: "flex", gap: "8px" },
-    submitBtn:  { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "1px", color: "#fff", background: "#fa4040", border: "none", borderRadius: "3px", padding: "6px 14px", cursor: "pointer", alignSelf: "flex-end" },
-    saveBtn:    { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "1px", color: "#fff", background: "#fa4040", border: "none", borderRadius: "3px", padding: "4px 12px", cursor: "pointer" },
-    cancelBtn:  { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "1px", color: "#aaa", background: "#222", border: "1px solid #444", borderRadius: "3px", padding: "4px 12px", cursor: "pointer" },
-    // other
-    emptyMsg:   { fontFamily: "'Courier New', monospace", fontSize: "12px", color: "#444", letterSpacing: "2px", textAlign: "center", padding: "40px 0" },
-    label:      { fontFamily: "'Courier New', monospace", fontSize: "9px", letterSpacing: "3px", color: "#555" },
-    arrow:      { fontFamily: "'Courier New', monospace", fontSize: "12px", color: "#555", width: "16px", textAlign: "center", userSelect: "none" },
-};
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 function AdminBlogs() {
-    const { backendUrl, userData, blogGroups, fetchBlogGroups } = useContext(AppContext);
-    const [treeData, setTreeData] = useState([]); // { group, posts[], expanded }
+    const { backendUrl, userData, getUserData } = useContext(AppContext);
+
+    const [treeData, setTreeData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showNewGroup, setShowNewGroup] = useState(false);
     const [newGroupName, setNewGroupName] = useState("");
     const [newGroupDesc, setNewGroupDesc] = useState("");
-    const navigate = useNavigate();
 
-
-    // Editing state
-    const [editingGroup, setEditingGroup] = useState(null); // group id
+    const [editingGroup, setEditingGroup] = useState(null);
     const [editGroupName, setEditGroupName] = useState("");
     const [editGroupDesc, setEditGroupDesc] = useState("");
-    const [createPostGroup, setCreatePostGroup] = useState(null); // group id
-    const [editingPost, setEditingPost] = useState(null); // post id
+    const [createPostGroup, setCreatePostGroup] = useState(null);
+    const [editingPost, setEditingPost] = useState(null);
     const [editPostTitle, setEditPostTitle] = useState("");
     const [editPostDesc, setEditPostDesc] = useState("");
     const [newPostTitle, setNewPostTitle] = useState("");
@@ -64,15 +34,17 @@ function AdminBlogs() {
     const [uploadedImages, setUploadedImages] = useState([]);
     const [currImg, setCurrImg] = useState(null);
 
-    // Drag state
-    const [draggingPost, setDraggingPost] = useState(null); // post id being dragged
-    const [dropTarget, setDropTarget] = useState(null);    // group id being hovered
+    const [draggingPost, setDraggingPost] = useState(null);
+    const [dropTarget, setDropTarget] = useState(null);
 
-    const handleDragStart = (e, post) => {
-        e.dataTransfer.setData("text/plain", JSON.stringify({ postId: post._id, fromGroupId: post.blogGroup }));
-        e.dataTransfer.effectAllowed = "move";
-        setDraggingPost(post._id);
-    };
+    useEffect(() => { if (!userData) getUserData(); }, []);
+
+    useEffect(() => {
+        if (userData && userData.role === 'admin') {
+            fetchTreeData();
+            fetchImages();
+        }
+    }, [userData]);
 
     const fetchImages = async () => {
         try {
@@ -80,47 +52,6 @@ function AdminBlogs() {
             if (data.success) setUploadedImages(data.images);
         } catch (err) { console.error(err.message); }
     };
-
-
-    const handleDragEnter = (e, groupId) => {
-        e.preventDefault();
-        setDropTarget(groupId);
-    };
-
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-    };
-
-    const handleDrop = async (e, targetGroupId) => {
-        e.preventDefault();
-        setDropTarget(null);
-        setDraggingPost(null);
-        try {
-            const { postId, fromGroupId } = JSON.parse(e.dataTransfer.getData("text/plain"));
-            if (fromGroupId === targetGroupId) return; // dropped on same group
-            const { data } = await axios.put(
-                `${backendUrl}/api/posts/${postId}`,
-                { blogGroupId: targetGroupId },
-                { withCredentials: true }
-            );
-            if (data.success) {
-                toast.success("Post moved");
-                fetchTreeData();
-            } else toast.error(data.message);
-        } catch (err) {
-            toast.error(err.message);
-        }
-    };
-
-    const handleDragEnd = () => {
-        setDraggingPost(null);
-        setDropTarget(null);
-    };
-
-    useEffect(() => {
-        fetchTreeData();
-        fetchImages(); }, []);
 
     const fetchTreeData = async () => {
         try {
@@ -137,17 +68,40 @@ function AdminBlogs() {
         }
     };
 
+    const handleDragStart = (e, post) => {
+        e.dataTransfer.setData("text/plain", JSON.stringify({ postId: post._id, fromGroupId: post.blogGroup }));
+        e.dataTransfer.effectAllowed = "move";
+        setDraggingPost(post._id);
+    };
+    const handleDragEnter = (e, groupId) => { e.preventDefault(); setDropTarget(groupId); };
+    const handleDragOver  = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; };
+    const handleDragEnd   = () => { setDraggingPost(null); setDropTarget(null); };
+    const handleDrop = async (e, targetGroupId) => {
+        e.preventDefault();
+        setDropTarget(null);
+        setDraggingPost(null);
+        try {
+            const { postId, fromGroupId } = JSON.parse(e.dataTransfer.getData("text/plain"));
+            if (fromGroupId === targetGroupId) return;
+            const { data } = await axios.put(
+                `${backendUrl}/api/posts/${postId}`,
+                { blogGroupId: targetGroupId },
+                { withCredentials: true }
+            );
+            if (data.success) { toast.success("Post moved"); fetchTreeData(); }
+            else toast.error(data.message);
+        } catch (err) { toast.error(err.message); }
+    };
+
     // ---- Group CRUD ----
     const handleCreateGroup = async (e) => {
         e.preventDefault();
         if (!newGroupName.trim()) return;
         try {
-            const { data } = await axios.post(`${backendUrl}/api/bloggroup`, { name: newGroupName, description: newGroupDesc, coverImage: currImg}, { withCredentials: true });
+            const { data } = await axios.post(`${backendUrl}/api/bloggroup`, { name: newGroupName, description: newGroupDesc, coverImage: currImg }, { withCredentials: true });
             if (data._id) {
                 toast.success("Blog group created");
-                setNewGroupName("");
-                setNewGroupDesc("");
-                setShowNewGroup(false);
+                setNewGroupName(""); setNewGroupDesc(""); setCurrImg(null); setShowNewGroup(false);
                 fetchTreeData();
             } else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
@@ -157,21 +111,16 @@ function AdminBlogs() {
         if (!confirm("Delete this blog group and ALL its posts?")) return;
         try {
             const { data } = await axios.delete(`${backendUrl}/api/bloggroup/${id}`, { withCredentials: true });
-            if (data.message) {
-                toast.success("Group deleted");
-                fetchTreeData();
-            } else toast.error(data.message);
+            if (data.message) { toast.success("Group deleted"); fetchTreeData(); }
+            else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
     };
 
     const handleSaveGroup = async (id) => {
         try {
             const { data } = await axios.put(`${backendUrl}/api/bloggroup/${id}`, { name: editGroupName, description: editGroupDesc, coverImage: currImg }, { withCredentials: true });
-            if (data._id) {
-                toast.success("Group updated");
-                setEditingGroup(null);
-                fetchTreeData();
-            } else toast.error(data.message);
+            if (data._id) { toast.success("Group updated"); setEditingGroup(null); fetchTreeData(); }
+            else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
     };
 
@@ -186,9 +135,7 @@ function AdminBlogs() {
             const { data } = await axios.post(`${backendUrl}/api/posts`, { title: newPostTitle, description: newPostDesc, blogGroupId: groupId }, { withCredentials: true });
             if (data.success) {
                 toast.success("Post created");
-                setNewPostTitle("");
-                setNewPostDesc("");
-                setCreatePostGroup(null);
+                setNewPostTitle(""); setNewPostDesc(""); setCreatePostGroup(null);
                 fetchTreeData();
             } else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
@@ -198,209 +145,270 @@ function AdminBlogs() {
         if (!confirm("Delete this post?")) return;
         try {
             const { data } = await axios.delete(`${backendUrl}/api/posts/${postId}`, { withCredentials: true });
-            if (data.success) {
-                toast.success("Post deleted");
-                fetchTreeData();
-            } else toast.error(data.message);
+            if (data.success) { toast.success("Post deleted"); fetchTreeData(); }
+            else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
     };
 
     const handleSavePost = async (postId) => {
         try {
             const { data } = await axios.put(`${backendUrl}/api/posts/${postId}`, { title: editPostTitle, description: editPostDesc }, { withCredentials: true });
-            if (data.success) {
-                toast.success("Post updated");
-                setEditingPost(null);
-                fetchTreeData();
-            } else toast.error(data.message);
+            if (data.success) { toast.success("Post updated"); setEditingPost(null); fetchTreeData(); }
+            else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
     };
 
     const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
 
-    return (
-        <div style={treeStyles.page}>
-            <div style={treeStyles.column}>
-                <div style={treeStyles.header}>
-                    <p style={treeStyles.eyebrow}>ADMIN · BLOG MANAGEMENT</p>
-                    <h2 style={treeStyles.pageTitle}>Blogs</h2>
-                    <div style={treeStyles.titleLine} />
-                </div>
+    const isAdmin = userData && userData.role === 'admin';
+    if (!isAdmin) {
+        return <div className="w-full h-full bg-zinc-950 text-zinc-400 p-4 text-sm">Admins only.</div>;
+    }
 
-                <div style={treeStyles.body}>
-                    {loading && <p style={treeStyles.emptyMsg}>Loading...</p>}
-
-                    {/* Create new group form */}
-                    <div style={treeStyles.treeItem}>
-                        <div style={treeStyles.groupRow} onClick={() => setShowNewGroup(!showNewGroup)}>
-                            <span style={treeStyles.arrow}>{showNewGroup ? "▼" : "▶"}</span>
-                            <span style={treeStyles.icon}>+</span>
-                            <span style={{ ...treeStyles.name, color: "#fa4040" }}>New Blog Group</span>
-                        </div>
-                        {showNewGroup && (
-                            <form onSubmit={handleCreateGroup} style={{ ...treeStyles.formInline, marginLeft: "28px" }}>
-                                <input style={treeStyles.input} placeholder="Group name" value={newGroupName} onChange={e => setNewGroupName(e.target.value)} required />
-                                <textarea style={treeStyles.textarea} placeholder="Description (optional)" value={newGroupDesc} onChange={e => setNewGroupDesc(e.target.value)} />
-                                <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                                    <button type="button" style={treeStyles.cancelBtn} onClick={() => { setShowNewGroup(false); setNewGroupName(""); setNewGroupDesc(""); }}>Cancel</button>
-                                    <button type="submit" style={treeStyles.saveBtn}>Create</button>
-                                </div>
-                            </form>
-                        )}
-                    </div>
-
-                    {/* Tree */}
-                    {!loading && treeData.length === 0 && <p style={treeStyles.emptyMsg}>No blog groups found.</p>}
-
-                    {treeData.map(({ group, posts, expanded }) => {
-                        const isEditing = editingGroup === group._id;
-                        const isCreatingPost = createPostGroup === group._id;
-
-                        return (
-                            <div key={group._id} style={treeStyles.treeItem}>
-                                {/* Group row */}
-                                <div
-                                    style={treeStyles.groupRow}
-                                    onDragOver={handleDragOver}
-                                    onDrop={e => handleDrop(e, group._id)}
-                                    onClick={() => !isEditing && toggleGroup(group._id)}
-                                    onMouseEnter={e => {
-                                        if (isEditing) return;
-                                        e.currentTarget.style.background = dropTarget === group._id ? "#302010" : "#261212";
-                                    }}
-                                    onMouseLeave={e => {
-                                        e.currentTarget.style.background = "#1e1e1e";
-                                    }}
-                                >
-                                    <span style={treeStyles.arrow}>{expanded ? "▼" : "▶"}</span>
-                                    <span style={treeStyles.icon}>{expanded ? "📂" : "📁"}</span>
-                                    <span style={treeStyles.name}>{group.name}</span>
-                                    <span style={treeStyles.desc}>{group.description}</span>
-                                    <span style={treeStyles.label}>{posts.length} posts</span>
-                                    <button style={treeStyles.btnSmall} onClick={e => { e.stopPropagation(); setEditingGroup(group._id); setEditGroupName(group.name); setEditGroupDesc(group.description); }}>Edit</button>
-                                    <button style={treeStyles.btnDelete} onClick={e => { e.stopPropagation(); handleDeleteGroup(group._id); }}>Delete</button>
-                                </div>
-
-                                {/* Group inline edit */}
-                                {isEditing && (
-                                    <div style={{ ...treeStyles.formInline, marginLeft: "28px" }}>
-                                        <input style={treeStyles.input} placeholder="Group name" value={editGroupName} onChange={e => setEditGroupName(e.target.value)} required />
-                                        <textarea style={treeStyles.textarea} placeholder="Description" value={editGroupDesc} onChange={e => setEditGroupDesc(e.target.value)} />
-                                        <div className='flex flex-row'>
-                                        {uploadedImages.map(img => (
-                                            <div
-                                                key={img.name}
-                                                style={{... styles.imagePickerItem,
-                                                    ...('/uploads/'+img.name === currImg ? styles.imagePickerSelected : {}),}}
-                                                className='flex-row'
-                                                onClick={() => {setCurrImg(`/uploads/${img.name}`); console.log(currImg)}}
-                                            >
-                                                <img src={`${backendUrl}/uploads/${img.name}`} alt={img.name} />
-                                            </div>
-                                        ))}
-                                        </div>
-                                        <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                                            <button style={treeStyles.cancelBtn} onClick={() => setEditingGroup(null)}>Cancel</button>
-                                            <button style={treeStyles.saveBtn} onClick={() => handleSaveGroup(group._id)}>Save</button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Posts */}
-                                {expanded && posts.map(post => {
-                                    const isEditingPost = editingPost === post._id;
-                                    const isDragging = draggingPost === post._id;
-                                    return (
-                                        <div
-                                            key={post._id}
-                                            draggable={!isEditingPost}
-                                            onDragStart={e => handleDragStart(e, post)}
-                                            onDragEnd={handleDragEnd}
-                                            style={{
-                                                ...treeStyles.fileRow,
-                                                marginLeft: "48px",
-                                                cursor: isDragging ? "grabbing" : "grab",
-                                                opacity: isDragging ? 0.4 : 1,
-                                                border: "1px solid transparent",
-                                            }}
-                                            onMouseEnter={e => { if (!isEditingPost) e.currentTarget.style.borderColor = "#fa4040"; }}
-                                            onMouseLeave={e => { e.currentTarget.style.borderColor = "transparent"; }}
-                                        >
-                                            {isEditingPost ? (
-                                                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
-                                                    <input style={treeStyles.input} value={editPostTitle} onChange={e => setEditPostTitle(e.target.value)} placeholder="Title" />
-                                                    <textarea style={treeStyles.textarea} value={editPostDesc} onChange={e => setEditPostDesc(e.target.value)} placeholder="Content" />
-                                                    <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                                                        <button style={treeStyles.cancelBtn} onClick={() => setEditingPost(null)}>Cancel</button>
-                                                        <button style={treeStyles.saveBtn} onClick={() => handleSavePost(post._id)}>Save</button>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    <span style={treeStyles.icon}>📄</span>
-                                                    <span style={treeStyles.postTitle}>&nbsp;{post.title}</span>
-                                                    <span style={treeStyles.postMeta}>{formatDate(post.createdAt)}</span>
-                                                    <button style={treeStyles.btnSmall} onClick={() => { setEditingPost(post._id); setEditPostTitle(post.title); setEditPostDesc(post.description); }}>Edit</button>
-                                                    <button style={treeStyles.btnDelete} onClick={() => handleDeletePost(post._id)}>Delete</button>
-                                                </>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-
-                                {/* New post form */}
-                                {expanded && isCreatingPost && (
-                                    <div style={{ ...treeStyles.formInline, marginLeft: "48px" }}>
-                                        <div style={treeStyles.label}>NEW POST IN {group.name.toUpperCase()}</div>
-                                        <input style={treeStyles.input} placeholder="Post title" value={newPostTitle} onChange={e => setNewPostTitle(e.target.value)} required />
-                                        <textarea style={treeStyles.textarea} placeholder="Post content" value={newPostDesc} onChange={e => setNewPostDesc(e.target.value)} required />
-                                        <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-                                            <button style={treeStyles.cancelBtn} onClick={() => { setCreatePostGroup(null); setNewPostTitle(""); setNewPostDesc(""); }}>Cancel</button>
-                                            <button style={treeStyles.saveBtn} onClick={() => handleCreatePost(group._id)}>Create</button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {expanded && !isCreatingPost && (
-                                    <div style={{ marginLeft: "48px", padding: "6px 0" }}>
-                                        <button style={treeStyles.btnAdd} onClick={() => setCreatePostGroup(group._id)}>+ Add Post</button>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
+    const ImagePicker = ({ value, onChange }) => (
+        <div className="space-y-2">
+            <p className="text-xs uppercase tracking-widest text-zinc-500">
+                Cover image <span className="text-zinc-600">· optional</span>
+            </p>
+            <div className="flex flex-wrap gap-2">
+                <button
+                    type="button"
+                    onClick={() => onChange(null)}
+                    className={[
+                        "flex h-12 w-12 items-center justify-center rounded-md border text-[10px]",
+                        !value
+                            ? "border-red-500 bg-red-500/15 text-red-400"
+                            : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-600",
+                    ].join(' ')}
+                >
+                    None
+                </button>
+                {uploadedImages.map(img => {
+                    const path = `/uploads/${img.name}`;
+                    const selected = value === path;
+                    return (
+                        <button
+                            type="button"
+                            key={img.name}
+                            onClick={() => onChange(path)}
+                            className={[
+                                "h-12 w-12 overflow-hidden rounded-md border",
+                                selected ? "border-red-500 ring-2 ring-red-500/40" : "border-zinc-700 hover:border-zinc-500",
+                            ].join(' ')}
+                        >
+                            <img src={`${backendUrl}${path}`} alt={img.name} className="h-full w-full object-cover" />
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );
+
+    return (
+        <div className="w-full h-full bg-zinc-950 text-white">
+            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full">
+                <CardHeader className="border-b border-zinc-800 pb-4">
+                    <CardDescription className="uppercase tracking-widest text-xs text-red-500">
+                        WSIN Admin
+                    </CardDescription>
+                    <CardTitle className="text-2xl font-semibold">Blog Groups</CardTitle>
+                </CardHeader>
+
+                <CardContent className="pt-4 space-y-3">
+                    <Button
+                        size="sm"
+                        variant={showNewGroup ? "outline" : "default"}
+                        onClick={() => {
+                            if (showNewGroup) {
+                                setShowNewGroup(false); setNewGroupName(""); setNewGroupDesc(""); setCurrImg(null);
+                            } else setShowNewGroup(true);
+                        }}
+                    >
+                        {showNewGroup ? <><X className="size-4" /> Cancel</> : <><Plus className="size-4" /> New Group</>}
+                    </Button>
+
+                    {showNewGroup && (
+                        <form onSubmit={handleCreateGroup} className="space-y-3 rounded-lg border border-zinc-800 bg-zinc-900/60 p-4">
+                            <p className="text-xs uppercase tracking-widest text-zinc-500">New Blog Group</p>
+                            <Input placeholder="Group name" value={newGroupName} onChange={e => setNewGroupName(e.target.value)} required />
+                            <Textarea placeholder="Description (optional)" value={newGroupDesc} onChange={e => setNewGroupDesc(e.target.value)} className="min-h-[80px]" />
+                            <ImagePicker value={currImg} onChange={setCurrImg} />
+                            <div className="flex justify-end gap-2">
+                                <Button type="button" variant="outline" size="sm"
+                                    onClick={() => { setShowNewGroup(false); setNewGroupName(""); setNewGroupDesc(""); setCurrImg(null); }}>
+                                    Cancel
+                                </Button>
+                                <Button type="submit" size="sm">Create</Button>
+                            </div>
+                        </form>
+                    )}
+
+                    <ScrollArea className="h-[360px] pr-3">
+                        {loading && <p className="text-center text-xs text-zinc-500 py-8">Loading...</p>}
+                        {!loading && treeData.length === 0 && (
+                            <p className="text-center text-xs text-zinc-500 py-8">No blog groups yet.</p>
+                        )}
+
+                        <div className="space-y-2">
+                            {treeData.map(({ group, posts, expanded }) => {
+                                const isEditing = editingGroup === group._id;
+                                const isCreatingPost = createPostGroup === group._id;
+                                const isDropTarget = dropTarget === group._id;
+
+                                return (
+                                    <div
+                                        key={group._id}
+                                        className={[
+                                            "rounded-lg border bg-zinc-900/60 overflow-hidden",
+                                            isDropTarget ? "border-red-500 ring-2 ring-red-500/30" : "border-zinc-800",
+                                        ].join(' ')}
+                                        onDragEnter={e => handleDragEnter(e, group._id)}
+                                        onDragOver={handleDragOver}
+                                        onDrop={e => handleDrop(e, group._id)}
+                                    >
+                                        {/* Group row */}
+                                        <div className="flex items-center gap-2 p-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => !isEditing && toggleGroup(group._id)}
+                                                className="flex items-center gap-2 flex-1 min-w-0 text-left"
+                                            >
+                                                {expanded
+                                                    ? <ChevronDown className="size-4 text-zinc-500 shrink-0" />
+                                                    : <ChevronRight className="size-4 text-zinc-500 shrink-0" />}
+                                                {expanded
+                                                    ? <FolderOpen className="size-4 text-red-400 shrink-0" />
+                                                    : <Folder className="size-4 text-red-400 shrink-0" />}
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-sm font-semibold text-white truncate">{group.name}</p>
+                                                    {group.description && (
+                                                        <p className="text-[10px] text-zinc-500 truncate">{group.description}</p>
+                                                    )}
+                                                </div>
+                                                <span className="text-[10px] uppercase tracking-widest text-zinc-500 bg-zinc-900 border border-zinc-800 rounded px-2 py-0.5 shrink-0">
+                                                    {posts.length} {posts.length === 1 ? 'post' : 'posts'}
+                                                </span>
+                                            </button>
+                                            <div className="flex gap-1 shrink-0">
+                                                <Button variant="outline" size="icon-xs" title="Edit"
+                                                    onClick={() => {
+                                                        setEditingGroup(group._id);
+                                                        setEditGroupName(group.name);
+                                                        setEditGroupDesc(group.description || '');
+                                                        setCurrImg(group.coverImage || null);
+                                                    }}>
+                                                    <Pencil />
+                                                </Button>
+                                                <Button variant="destructive" size="icon-xs" title="Delete"
+                                                    onClick={() => handleDeleteGroup(group._id)}>
+                                                    <Trash2 />
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {/* Group edit form */}
+                                        {isEditing && (
+                                            <div className="border-t border-zinc-800 p-3 space-y-3 bg-zinc-950/40">
+                                                <Input placeholder="Group name" value={editGroupName} onChange={e => setEditGroupName(e.target.value)} required />
+                                                <Textarea placeholder="Description" value={editGroupDesc} onChange={e => setEditGroupDesc(e.target.value)} className="min-h-[60px]" />
+                                                <ImagePicker value={currImg} onChange={setCurrImg} />
+                                                <div className="flex justify-end gap-2">
+                                                    <Button variant="outline" size="sm" onClick={() => setEditingGroup(null)}>
+                                                        <X className="size-4" /> Cancel
+                                                    </Button>
+                                                    <Button size="sm" onClick={() => handleSaveGroup(group._id)}>
+                                                        <Save className="size-4" /> Save
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Posts */}
+                                        {expanded && (
+                                            <div className="border-t border-zinc-800 p-2 space-y-1.5 bg-zinc-950/40">
+                                                {posts.map(post => {
+                                                    const isEditingPost = editingPost === post._id;
+                                                    const isDragging = draggingPost === post._id;
+                                                    if (isEditingPost) {
+                                                        return (
+                                                            <div key={post._id} className="rounded-md border border-zinc-800 bg-zinc-900/60 p-3 space-y-2 ml-4">
+                                                                <Input value={editPostTitle} onChange={e => setEditPostTitle(e.target.value)} placeholder="Title" />
+                                                                <Textarea value={editPostDesc} onChange={e => setEditPostDesc(e.target.value)} placeholder="Content" className="min-h-[80px]" />
+                                                                <div className="flex justify-end gap-2">
+                                                                    <Button variant="outline" size="sm" onClick={() => setEditingPost(null)}>
+                                                                        <X className="size-4" /> Cancel
+                                                                    </Button>
+                                                                    <Button size="sm" onClick={() => handleSavePost(post._id)}>
+                                                                        <Save className="size-4" /> Save
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return (
+                                                        <div
+                                                            key={post._id}
+                                                            draggable
+                                                            onDragStart={e => handleDragStart(e, post)}
+                                                            onDragEnd={handleDragEnd}
+                                                            className={[
+                                                                "flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-900/60 p-2 ml-4 cursor-grab hover:border-red-500/60 transition-colors",
+                                                                isDragging ? "opacity-40 cursor-grabbing" : "",
+                                                            ].join(' ')}
+                                                        >
+                                                            <FileText className="size-3.5 text-zinc-500 shrink-0" />
+                                                            <span className="text-sm text-zinc-200 truncate flex-1">{post.title}</span>
+                                                            <span className="text-[10px] uppercase tracking-widest text-zinc-500 shrink-0">
+                                                                {formatDate(post.createdAt)}
+                                                            </span>
+                                                            <Button variant="outline" size="icon-xs" title="Edit"
+                                                                onClick={() => { setEditingPost(post._id); setEditPostTitle(post.title); setEditPostDesc(post.description); }}>
+                                                                <Pencil />
+                                                            </Button>
+                                                            <Button variant="destructive" size="icon-xs" title="Delete"
+                                                                onClick={() => handleDeletePost(post._id)}>
+                                                                <Trash2 />
+                                                            </Button>
+                                                        </div>
+                                                    );
+                                                })}
+
+                                                {/* New post form */}
+                                                {isCreatingPost ? (
+                                                    <div className="rounded-md border border-zinc-800 bg-zinc-900/60 p-3 space-y-2 ml-4">
+                                                        <p className="text-[10px] uppercase tracking-widest text-zinc-500">
+                                                            New post in {group.name}
+                                                        </p>
+                                                        <Input placeholder="Post title" value={newPostTitle} onChange={e => setNewPostTitle(e.target.value)} required />
+                                                        <Textarea placeholder="Post content" value={newPostDesc} onChange={e => setNewPostDesc(e.target.value)} className="min-h-[80px]" required />
+                                                        <div className="flex justify-end gap-2">
+                                                            <Button variant="outline" size="sm"
+                                                                onClick={() => { setCreatePostGroup(null); setNewPostTitle(""); setNewPostDesc(""); }}>
+                                                                <X className="size-4" /> Cancel
+                                                            </Button>
+                                                            <Button size="sm" onClick={() => handleCreatePost(group._id)}>
+                                                                <Plus className="size-4" /> Create
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="ml-4">
+                                                        <Button variant="outline" size="sm" onClick={() => setCreatePostGroup(group._id)}>
+                                                            <Plus className="size-4" /> Add Post
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </ScrollArea>
+                </CardContent>
+            </Card>
+        </div>
+    );
 }
-const styles = {
-    page:        { minHeight: "100vh", background: "#111", display: "flex", justifyContent: "center" },
-    column:      { width: "100%", maxWidth: "760px", minHeight: "100vh", background: "#1a1a1a", display: "flex", flexDirection: "column", boxShadow: "0 0 60px rgba(0,0,0,0.8)", borderLeft: "1px solid #2a2a2a", borderRight: "1px solid #2a2a2a" },
-    header:      { background: "#322d2d", padding: "40px 32px 28px", borderBottom: "1px solid #3a3a3a", display: "flex", flexDirection: "column" },
-    body:        { padding: "24px 32px" },
-    newBtn:      { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "2px", color: "#fa4040", background: "#241212", border: "1px solid #fa404055", borderRadius: "4px", padding: "10px 20px", cursor: "pointer" },
-    cancelBtn:   { color: "#aaa", background: "#222", borderColor: "#444" },
-    form:        { margin: "16px 0", background: "#222", border: "1px solid #333", borderRadius: "8px", padding: "20px", display: "flex", flexDirection: "column", gap: "10px" },
-    formLabel:   { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "4px", color: "#555", margin: "0" },
-    input:       { fontFamily: "'Courier New', monospace", fontSize: "13px", color: "#f5f0e8", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "10px 12px", outline: "none", width: "100%" },
-    submitBtn:   { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "2px", color: "#fff", background: "#fa4040", border: "none", borderRadius: "4px", padding: "10px", cursor: "pointer", alignSelf: "flex-end" },
-    list:        { marginTop: "24px", display: "flex", flexDirection: "column", gap: "10px" },
-    empty:       { fontFamily: "'Courier New', monospace", fontSize: "11px", color: "#444", letterSpacing: "2px", textAlign: "center", padding: "40px 0" },
-    card:        { background: "#222", border: "1px solid #2e2e2e", borderRadius: "8px", padding: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" },
-    cardLeft:    { display: "flex", gap: "16px", alignItems: "center" },
-    avatar:      { width: "48px", height: "48px", borderRadius: "50%", background: "#322d2d", border: "2px solid #fa4040", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
-    avatarText:  { fontFamily: "'Courier New', monospace", fontSize: "14px", color: "#fa4040", fontWeight: "bold" },
-    avatarImg:   { width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover" },
-    cardName:    { fontFamily: "'Georgia', serif", fontSize: "15px", color: "#f5f0e8", margin: "0 0 2px 0", fontWeight: "bold" },
-    cardPos:     { fontFamily: "'Courier New', monospace", fontSize: "9px", color: "#666", letterSpacing: "2px", margin: "0 0 2px 0" },
-    cardEmail:   { fontFamily: "'Courier New', monospace", fontSize: "10px", color: "#555", margin: "0" },
-    cardActions: { display: "flex", gap: "8px" },
-    editBtn:     { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#fa4040", background: "transparent", border: "1px solid #fa404044", borderRadius: "3px", padding: "6px 12px", cursor: "pointer" },
-    deleteBtn:   { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#888", background: "transparent", border: "1px solid #333", borderRadius: "3px", padding: "6px 12px", cursor: "pointer" },
-    imagePicker: { display: "flex", flexWrap: "wrap", gap: "8px", padding: "8px" },
-    imagePickerItem: { width: "48px", height: "48px", cursor: "pointer", padding: "2px", border: "2px solid #333", borderRadius: "50%", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", background: "#1a1a1a" },
-    imagePickerSelected: { borderColor: "#fa4040", background: "#241212" },
-    imageThumb:  { width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" },
-};
+
 export default AdminBlogs;

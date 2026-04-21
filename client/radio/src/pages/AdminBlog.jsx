@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '@/context/AppContext.jsx';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { ArrowLeft } from 'lucide-react';
+import { Plus, X, Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const AdminBlog = () => {
     const { backendUrl, userData, getUserData } = useContext(AppContext);
-    const navigate = useNavigate();
 
     const [posts, setPosts]             = useState([]);
     const [loading, setLoading]         = useState(true);
@@ -19,9 +23,9 @@ const AdminBlog = () => {
     const [expandedId, setExpandedId]   = useState(null);
 
     useEffect(() => { if (!userData) getUserData(); }, []);
+
     useEffect(() => {
-        if (userData && userData.role !== 'admin') { navigate('/'); toast.error('Not an admin'); }
-        else if (userData) fetchPosts();
+        if (userData && userData.role === 'admin') fetchPosts();
     }, [userData]);
 
     const fetchPosts = async () => {
@@ -67,121 +71,120 @@ const AdminBlog = () => {
 
     const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-    return (
-        <div style={styles.page}>
-            <div style={styles.column}>
-                <div style={styles.header}>
-                    <p className='flex text-red-500 text-xl font-bold'>WSIN RADIO</p>
-                    <button onClick={() => navigate('/admin')} className='flex rounded-3xl p-1 px-2 m-1 bg-red-500 w-fit align-middle'>
-                        <ArrowLeft /> Back
-                    </button>
-                    <h2 className='m-auto p-5 flex text-white text-6xl font-bold'>Blog Management</h2>
-                </div>
+    const isAdmin = userData && userData.role === 'admin';
+    if (!isAdmin) {
+        return <div className="w-full h-full bg-zinc-950 text-zinc-400 p-4 text-sm">Admins only.</div>;
+    }
 
-                <div style={styles.body}>
-                    <button
-                        style={{ ...styles.newBtn, ...(showForm ? styles.cancelBtnStyle : {}) }}
+    return (
+        <div className="w-full h-full bg-zinc-950 text-white">
+            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full">
+                <CardHeader className="border-b border-zinc-800 pb-4">
+                    <CardDescription className="uppercase tracking-widest text-xs text-red-500">
+                        WSIN Admin
+                    </CardDescription>
+                    <CardTitle className="text-2xl font-semibold">Blog Management</CardTitle>
+                </CardHeader>
+
+                <CardContent className="pt-4 space-y-3">
+                    <Button
+                        size="sm"
+                        variant={showForm ? "outline" : "default"}
                         onClick={() => showForm ? resetForm() : setShowForm(true)}
                     >
-                        {showForm ? '✕ Cancel' : '+ New Post'}
-                    </button>
+                        {showForm ? <><X className="size-4" /> Cancel</> : <><Plus className="size-4" /> New Post</>}
+                    </Button>
 
                     {showForm && (
-                        <form onSubmit={handleSubmit} style={styles.form}>
-                            <p style={styles.formLabel}>{editingId ? 'EDITING POST' : 'NEW POST'}</p>
-                            <input
+                        <form onSubmit={handleSubmit} className="space-y-3 rounded-lg border border-zinc-800 bg-zinc-900/60 p-4">
+                            <p className="text-xs uppercase tracking-widest text-zinc-500">
+                                {editingId ? 'Edit Post' : 'New Post'}
+                            </p>
+                            <Input
                                 placeholder="Post Title"
                                 value={title}
                                 onChange={e => setTitle(e.target.value)}
-                                style={styles.input}
                                 required
                             />
-                            <textarea
+                            <Textarea
                                 placeholder="Write something..."
                                 value={description}
                                 onChange={e => setDescription(e.target.value)}
-                                style={styles.textarea}
+                                className="min-h-[120px]"
                                 required
                             />
-                            <button type="submit" style={styles.submitBtn} disabled={submitting}>
-                                {submitting ? 'Saving...' : editingId ? 'Save Changes' : 'Publish Post'}
-                            </button>
+                            <div className="flex justify-end">
+                                <Button type="submit" disabled={submitting}>
+                                    {submitting ? 'Saving...' : editingId ? 'Save Changes' : 'Publish Post'}
+                                </Button>
+                            </div>
                         </form>
                     )}
 
-                    <div style={styles.statsBar}>
-                        <span style={styles.statChip}>{posts.length} POSTS</span>
-                    </div>
-
-                    {loading && <p style={styles.empty}>Loading...</p>}
-                    {!loading && posts.length === 0 && <p style={styles.empty}>No posts yet.</p>}
-
-                    <div style={styles.list}>
-                        {posts.map(post => {
-                            const expanded = expandedId === post._id;
-                            return (
-                                <div key={post._id} style={styles.card}>
-                                    <div style={styles.cardRow}>
-                                        <div style={styles.cardLeft} onClick={() => setExpandedId(expanded ? null : post._id)}>
-                                            <div style={styles.cardDot} />
-                                            <div>
-                                                <p style={styles.cardTitle}>{post.title}</p>
-                                                <p style={styles.cardMeta}>
-                                                    {post.author?.username || 'WSIN'} · {formatDate(post.createdAt)}
-                                                </p>
+                    <div>
+                        <p className="text-xs uppercase tracking-widest text-zinc-500 mb-2">
+                            {posts.length} post{posts.length !== 1 ? 's' : ''}
+                        </p>
+                        <ScrollArea className="h-[320px] pr-3">
+                            {loading && <p className="text-center text-xs text-zinc-500 py-8">Loading...</p>}
+                            {!loading && posts.length === 0 && (
+                                <p className="text-center text-xs text-zinc-500 py-8">No posts yet.</p>
+                            )}
+                            <div className="space-y-2">
+                                {posts.map(post => {
+                                    const expanded = expandedId === post._id;
+                                    return (
+                                        <div
+                                            key={post._id}
+                                            className="rounded-lg border border-zinc-800 bg-zinc-900/60 overflow-hidden"
+                                        >
+                                            <div className="flex items-center gap-3 p-3">
+                                                <button
+                                                    type="button"
+                                                    className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                                                    onClick={() => setExpandedId(expanded ? null : post._id)}
+                                                >
+                                                    <div className="size-1.5 rounded-full bg-red-500 shrink-0" />
+                                                    <div className="min-w-0">
+                                                        <p className="text-sm font-semibold text-white truncate">{post.title}</p>
+                                                        <p className="text-[10px] uppercase tracking-widest text-zinc-500 truncate">
+                                                            {post.author?.username || 'WSIN'} · {formatDate(post.createdAt)}
+                                                        </p>
+                                                    </div>
+                                                </button>
+                                                <div className="flex gap-1 shrink-0">
+                                                    <Button variant="outline" size="icon-xs" title="Edit" onClick={() => handleEdit(post)}>
+                                                        <Pencil />
+                                                    </Button>
+                                                    <Button variant="destructive" size="icon-xs" title="Delete" onClick={() => handleDelete(post._id)}>
+                                                        <Trash2 />
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon-xs"
+                                                        onClick={() => setExpandedId(expanded ? null : post._id)}
+                                                    >
+                                                        {expanded ? <ChevronUp /> : <ChevronDown />}
+                                                    </Button>
+                                                </div>
                                             </div>
+                                            {expanded && (
+                                                <div className="border-t border-zinc-800 px-4 py-3">
+                                                    <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                                                        {post.description}
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
-                                        <div style={styles.cardActions}>
-                                            <button style={styles.editBtn} onClick={() => handleEdit(post)}>Edit</button>
-                                            <button style={styles.deleteBtn} onClick={() => handleDelete(post._id)}>Delete</button>
-                                            <span style={styles.chevron} onClick={() => setExpandedId(expanded ? null : post._id)}>
-                                                {expanded ? '▲' : '▼'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    {expanded && (
-                                        <div style={styles.cardExpanded}>
-                                            <p style={styles.cardDesc}>{post.description}</p>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
+                                    );
+                                })}
+                            </div>
+                        </ScrollArea>
                     </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
         </div>
     );
-};
-
-const styles = {
-    page:           { minHeight: "100vh", background: "#111", display: "flex", justifyContent: "center" },
-    column:         { width: "100%", maxWidth: "760px", minHeight: "100vh", background: "#1a1a1a", display: "flex", flexDirection: "column", boxShadow: "0 0 60px rgba(0,0,0,0.8)", borderLeft: "1px solid #2a2a2a", borderRight: "1px solid #2a2a2a" },
-    header:         { background: "#322d2d", padding: "40px 32px 28px", borderBottom: "1px solid #3a3a3a", display: "flex", flexDirection: "column" },
-    body:           { padding: "24px 32px" },
-    newBtn:         { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "2px", color: "#fa4040", background: "#241212", border: "1px solid #fa404055", borderRadius: "4px", padding: "10px 20px", cursor: "pointer" },
-    cancelBtnStyle: { color: "#aaa", background: "#222", borderColor: "#444" },
-    form:           { margin: "16px 0", background: "#222", border: "1px solid #333", borderRadius: "8px", padding: "20px", display: "flex", flexDirection: "column", gap: "10px" },
-    formLabel:      { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "4px", color: "#555", margin: "0" },
-    input:          { fontFamily: "'Courier New', monospace", fontSize: "13px", color: "#f5f0e8", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "10px 12px", outline: "none", width: "100%" },
-    textarea:       { fontFamily: "'Georgia', serif", fontSize: "14px", color: "#ccc", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "10px 12px", outline: "none", width: "100%", minHeight: "100px", resize: "vertical" },
-    submitBtn:      { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "2px", color: "#fff", background: "#fa4040", border: "none", borderRadius: "4px", padding: "10px", cursor: "pointer", alignSelf: "flex-end" },
-    statsBar:       { display: "flex", gap: "10px", margin: "20px 0 12px 0" },
-    statChip:       { fontFamily: "'Courier New', monospace", fontSize: "9px", letterSpacing: "3px", color: "#555", background: "#222", border: "1px solid #2e2e2e", borderRadius: "3px", padding: "4px 10px" },
-    empty:          { fontFamily: "'Courier New', monospace", fontSize: "11px", color: "#444", letterSpacing: "2px", textAlign: "center", padding: "40px 0" },
-    list:           { display: "flex", flexDirection: "column", gap: "8px" },
-    card:           { background: "#222", border: "1px solid #2e2e2e", borderRadius: "8px", overflow: "hidden" },
-    cardRow:        { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px" },
-    cardLeft:       { display: "flex", alignItems: "center", gap: "12px", cursor: "pointer", flex: 1, minWidth: 0 },
-    cardDot:        { width: "6px", height: "6px", borderRadius: "50%", background: "#fa4040", flexShrink: 0 },
-    cardTitle:      { fontFamily: "'Georgia', serif", fontSize: "15px", color: "#f5f0e8", margin: "0 0 2px 0", fontWeight: "bold", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "380px" },
-    cardMeta:       { fontFamily: "'Courier New', monospace", fontSize: "9px", letterSpacing: "2px", color: "#555", margin: "0" },
-    cardActions:    { display: "flex", gap: "6px", alignItems: "center", flexShrink: 0 },
-    editBtn:        { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "1px", color: "#fa4040", background: "transparent", border: "1px solid #fa404044", borderRadius: "3px", padding: "4px 10px", cursor: "pointer" },
-    deleteBtn:      { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "1px", color: "#888", background: "transparent", border: "1px solid #333", borderRadius: "3px", padding: "4px 10px", cursor: "pointer" },
-    chevron:        { fontFamily: "'Courier New', monospace", fontSize: "10px", color: "#555", cursor: "pointer", padding: "0 4px" },
-    cardExpanded:   { padding: "0 16px 16px 34px", borderTop: "1px solid #2a2a2a" },
-    cardDesc:       { fontFamily: "'Georgia', serif", fontSize: "13px", color: "#888", lineHeight: "1.6", margin: "12px 0 0 0" },
 };
 
 export default AdminBlog;

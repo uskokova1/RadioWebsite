@@ -1,10 +1,27 @@
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { AppContext } from "../context/AppContext.jsx";
-import { Calendar } from "@/components/ui/calendar";
 import Markdown from 'react-showdown';
+import { ChevronDown, ChevronUp, Plus, X, Pencil, Trash2, Check, Clock, CalendarDays } from "lucide-react";
+
+import { AppContext } from "../context/AppContext.jsx";
 import CommentSection from "../components/CommentSection.jsx";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Calendar } from "@/components/ui/calendar";
+
+const DAYS = [
+    { short: 'Mon', val: 'mon' },
+    { short: 'Tue', val: 'tue' },
+    { short: 'Wed', val: 'wed' },
+    { short: 'Thu', val: 'thu' },
+    { short: 'Fri', val: 'fri' },
+    { short: 'Sat', val: 'sat' },
+    { short: 'Sun', val: 'sun' },
+];
 
 function Events() {
     const { backendUrl, userData } = useContext(AppContext);
@@ -37,12 +54,6 @@ function Events() {
         finally { setLoading(false); }
     };
 
-    const resetForm = () => {
-        setTitle(""); setDescription(""); setSelectedImagePath(null);
-        setEventDates([]); setRecurrence('none'); setRepeatDays([]);
-        setEventTime(''); setShowForm(false); setEditingId(null);
-    };
-
     const fetchImages = async () => {
         try {
             const { data } = await axios.get(backendUrl + '/api/images', { withCredentials: true });
@@ -50,28 +61,34 @@ function Events() {
         } catch (err) { console.error(err.message); }
     };
 
+    const resetForm = () => {
+        setTitle(""); setDescription(""); setSelectedImagePath(null);
+        setEventDates([]); setRecurrence('none'); setRepeatDays([]);
+        setEventTime(''); setShowForm(false); setEditingId(null);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
         try {
             const body = {
-                title,
-                description,
+                title, description,
                 image: selectedImagePath,
                 dates: recurrence !== 'none' ? [] : eventDates,
                 recurrence,
                 repeatDays: recurrence !== 'none' ? repeatDays : [],
                 time: eventTime || null,
             };
-            if (editingId !== null) {
-                const { data } = await axios.put(`${backendUrl}/api/events/${editingId}`, body, { withCredentials: true });
-                if (data.success) { setEvents(events.map(ev => ev._id === editingId ? data.event : ev)); toast.success("Event updated"); resetForm(); }
-                else toast.error(data.message);
-            } else {
-                const { data } = await axios.post(`${backendUrl}/api/events`, body, { withCredentials: true });
-                if (data.success) { setEvents([data.event, ...events]); toast.success("Event created"); resetForm(); }
-                else toast.error(data.message);
-            }
+            const res = editingId
+                ? await axios.put(`${backendUrl}/api/events/${editingId}`, body, { withCredentials: true })
+                : await axios.post(`${backendUrl}/api/events`, body, { withCredentials: true });
+
+            if (res.data.success) {
+                if (editingId) setEvents(events.map(ev => ev._id === editingId ? res.data.event : ev));
+                else setEvents([res.data.event, ...events]);
+                toast.success(editingId ? "Event updated" : "Event created");
+                resetForm();
+            } else toast.error(res.data.message);
         } catch (err) { toast.error(err.message); }
         finally { setSubmitting(false); }
     };
@@ -92,8 +109,11 @@ function Events() {
     const handleDelete = async (id) => {
         try {
             const { data } = await axios.delete(`${backendUrl}/api/events/${id}`, { withCredentials: true });
-            if (data.success) { setEvents(events.filter(ev => ev._id !== id)); toast.success("Event deleted"); if (expandedId === id) setExpandedId(null); }
-            else toast.error(data.message);
+            if (data.success) {
+                setEvents(events.filter(ev => ev._id !== id));
+                toast.success("Event deleted");
+                if (expandedId === id) setExpandedId(null);
+            } else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
     };
 
@@ -117,9 +137,7 @@ function Events() {
                             : [...(ev.rsvps || []), userId],
                     };
                 }));
-            } else {
-                toast.error(data.message);
-            }
+            } else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
         finally { setRsvpLoading(null); }
     };
@@ -132,307 +150,323 @@ function Events() {
     const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     return (
-        <div style={styles.page}>
-            <div style={styles.column}>
-                <div style={styles.header}>
-                    <p style={styles.eyebrow}>WSIN RADIO</p>
-                    <h2 style={styles.pageTitle}>Events</h2>
-                    <div style={styles.titleLine} />
-                    <p style={styles.headerSub}>What's happening at the station.</p>
-                </div>
+        <div className="w-full h-full bg-zinc-950 text-white">
+            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full">
+                <CardHeader className="border-b border-zinc-800 pb-4">
+                    <CardDescription className="uppercase tracking-widest text-xs text-red-500">
+                        WSIN RADIO
+                    </CardDescription>
+                    <CardTitle className="text-2xl font-semibold">Events</CardTitle>
+                    <p className="text-xs text-zinc-500 mt-1">What's happening at the station.</p>
+                </CardHeader>
 
-                {isAdmin && (
-                    <div style={styles.section}>
-                        <button style={{ ...styles.newBtn, ...(showForm ? styles.cancelBtn : {}) }}
-                                onClick={() => showForm ? resetForm() : (setShowForm(true), fetchImages())}>
-                            {showForm ? "✕ Cancel" : "+ New Event"}
-                        </button>
-                    </div>
-                )}
+                <CardContent className="pt-4 space-y-4">
+                    {isAdmin && (
+                        <Button
+                            variant={showForm ? "outline" : "default"}
+                            size="sm"
+                            onClick={() => showForm ? resetForm() : (setShowForm(true), fetchImages())}
+                        >
+                            {showForm ? <><X className="size-4" /> Cancel</> : <><Plus className="size-4" /> New Event</>}
+                        </Button>
+                    )}
 
-                {isAdmin && showForm && (
-                    <form onSubmit={handleSubmit} style={styles.form}>
-                        <p style={styles.formLabel}>{editingId ? "EDIT EVENT" : "NEW EVENT"}</p>
-                        <input type="text" placeholder="Event Title" value={title} onChange={e => setTitle(e.target.value)} style={styles.input} required />
+                    {isAdmin && showForm && (
+                        <form onSubmit={handleSubmit} className="space-y-3 rounded-lg border border-zinc-800 bg-zinc-900/60 p-4">
+                            <p className="text-xs uppercase tracking-widest text-zinc-500">
+                                {editingId ? "Edit Event" : "New Event"}
+                            </p>
 
-                        <div>
-                            <p style={{ ...styles.formLabel, marginBottom: 8 }}>EVENT SCHEDULE</p>
-                            {recurrence === 'weekly' ? (
-                                <div style={{ display: "flex", gap: "6px", padding: "6px 0" }}>
-                                    {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => {
-                                        const val = d.toLowerCase();
-                                        const selected = repeatDays.includes(val);
+                            <Input
+                                type="text"
+                                placeholder="Event Title"
+                                value={title}
+                                onChange={e => setTitle(e.target.value)}
+                                required
+                            />
+
+                            {/* Schedule */}
+                            <div className="space-y-2">
+                                <p className="text-xs uppercase tracking-widest text-zinc-500">Schedule</p>
+                                {recurrence === 'weekly' ? (
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {DAYS.map(d => {
+                                            const selected = repeatDays.includes(d.val);
+                                            return (
+                                                <button
+                                                    key={d.val}
+                                                    type="button"
+                                                    onClick={() => setRepeatDays(prev =>
+                                                        prev.includes(d.val)
+                                                            ? prev.filter(x => x !== d.val)
+                                                            : [...prev, d.val]
+                                                    )}
+                                                    className={[
+                                                        "rounded-md border px-3 py-1.5 text-xs uppercase tracking-widest transition-colors",
+                                                        selected
+                                                            ? "border-red-500 bg-red-500/15 text-red-400"
+                                                            : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-600",
+                                                    ].join(' ')}
+                                                >
+                                                    {d.short}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="rounded-md border border-zinc-800 bg-zinc-900 p-2 flex justify-center">
+                                        <Calendar
+                                            mode="multiple"
+                                            selected={eventDates}
+                                            onSelect={setEventDates}
+                                            className="rounded-md border-0 text-white"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Repeats */}
+                            <div className="space-y-2">
+                                <p className="text-xs uppercase tracking-widest text-zinc-500">Repeats</p>
+                                <Button
+                                    type="button"
+                                    variant={recurrence === 'weekly' ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => setRecurrence(recurrence === 'weekly' ? 'none' : 'weekly')}
+                                >
+                                    Weekly
+                                </Button>
+                            </div>
+
+                            {/* Time */}
+                            <div className="space-y-2">
+                                <p className="text-xs uppercase tracking-widest text-zinc-500">
+                                    Time <span className="text-zinc-600">· optional</span>
+                                </p>
+                                <Input
+                                    type="time"
+                                    value={eventTime}
+                                    onChange={e => setEventTime(e.target.value)}
+                                    className="w-40"
+                                />
+                            </div>
+
+                            {/* Image */}
+                            <div className="space-y-2">
+                                <p className="text-xs uppercase tracking-widest text-zinc-500">
+                                    Image <span className="text-zinc-600">· optional</span>
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedImagePath(null)}
+                                        className={[
+                                            "flex h-16 w-16 items-center justify-center rounded-md border text-xs",
+                                            selectedImagePath === null
+                                                ? "border-red-500 bg-red-500/15 text-red-400"
+                                                : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-600",
+                                        ].join(' ')}
+                                    >
+                                        None
+                                    </button>
+                                    {uploadedImages.map(img => {
+                                        const selected = selectedImagePath === `/uploads/${img.name}`;
                                         return (
                                             <button
-                                                key={d}
                                                 type="button"
-                                                onClick={() => setRepeatDays(prev => prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val])}
-                                                style={{
-                                                    ...styles.dayChip,
-                                                    background:  selected ? "#241212" : "#1a1a1a",
-                                                    borderColor: selected ? "#fa4040" : "#333",
-                                                    color:       selected ? "#fa4040" : "#666",
-                                                }}
+                                                key={img.name}
+                                                onClick={() => setSelectedImagePath(`/uploads/${img.name}`)}
+                                                className={[
+                                                    "relative h-16 w-16 overflow-hidden rounded-md border transition-all",
+                                                    selected
+                                                        ? "border-red-500 ring-2 ring-red-500/40"
+                                                        : "border-zinc-700 hover:border-zinc-500",
+                                                ].join(' ')}
                                             >
-                                                {d}
+                                                <img
+                                                    src={`${backendUrl}/uploads/${img.name}`}
+                                                    alt={img.name}
+                                                    className="h-full w-full object-cover"
+                                                />
                                             </button>
                                         );
                                     })}
                                 </div>
-                            ) : (
-                                <div style={{ display: "flex", justifyContent: "center", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "8px" }}>
-                                    <Calendar
-                                        mode="multiple"
-                                        selected={eventDates}
-                                        onSelect={setEventDates}
-                                        className="rounded-md border-0 text-white"
+                            </div>
+
+                            {/* Description */}
+                            <div className="space-y-2">
+                                <p className="text-xs uppercase tracking-widest text-zinc-500">
+                                    Description <span className="text-zinc-600">· Markdown supported</span>
+                                </p>
+                                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                                    <Textarea
+                                        placeholder="Describe the event..."
+                                        value={description}
+                                        onChange={e => setDescription(e.target.value)}
+                                        className="min-h-[180px]"
+                                        required
                                     />
+                                    <div className="prose prose-invert prose-sm max-w-none min-h-[180px] rounded-md border border-zinc-800 bg-zinc-900 p-3 overflow-auto">
+                                        {!description
+                                            ? <p className="text-zinc-600 italic">Preview will appear here…</p>
+                                            : <Markdown markdown={description} options={{ tables: true, strikethrough: true, ghCodeBlocks: true }} />
+                                        }
+                                    </div>
                                 </div>
+                            </div>
+
+                            <div className="flex justify-end">
+                                <Button type="submit" disabled={submitting}>
+                                    {submitting ? "Saving..." : editingId ? "Save Changes" : "Post Event"}
+                                </Button>
+                            </div>
+                        </form>
+                    )}
+
+                    <ScrollArea className="h-[380px] pr-3">
+                        <div className="space-y-3">
+                            {loading && <p className="text-center text-xs text-zinc-500 py-8">Loading events...</p>}
+                            {!loading && events.length === 0 && (
+                                <p className="text-center text-xs text-zinc-500 py-8">No events yet. Check back soon.</p>
                             )}
-                        </div>
+                            {events.map(ev => {
+                                const expanded = expandedId === ev._id;
+                                const going    = isGoing(ev);
+                                const count    = ev.rsvps?.length || 0;
 
-                        <div>
-                            <p style={{ ...styles.formLabel, marginBottom: 8 }}>REPEATS</p>
-                            <div style={styles.recurrenceRow}>
-                                {[{ value: 'weekly', label: 'Weekly' }].map(opt => (
-                                    <button
-                                        key={opt.value}
-                                        type="button"
-                                        onClick={() => setRecurrence(recurrence === opt.value ? 'none' : opt.value)}
-                                        style={{
-                                            ...styles.recurrenceBtn,
-                                            background:  recurrence === opt.value ? "#241212" : "#1a1a1a",
-                                            borderColor: recurrence === opt.value ? "#fa4040" : "#333",
-                                            color:       recurrence === opt.value ? "#fa4040" : "#666",
-                                        }}
-                                    >
-                                        {opt.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div>
-                            <p style={{ ...styles.formLabel, marginBottom: 8 }}>EVENT TIME (optional)</p>
-                            <input type="time" value={eventTime} onChange={e => setEventTime(e.target.value)} style={styles.input} />
-                        </div>
-
-                        <div>
-                            <p style={{ ...styles.formLabel, marginBottom: 8 }}>EVENT IMAGE (optional)</p>
-                            <div style={styles.imagePicker}>
-                                <div
-                                    style={{ ...styles.imagePickerItem, ...(selectedImagePath === null ? styles.imagePickerSelected : {}) }}
-                                    onClick={() => setSelectedImagePath(null)}
-                                >
-                                    None
-                                </div>
-                                {uploadedImages.map(img => (
-                                    <div
-                                        key={img.name}
-                                        style={{ ...styles.imagePickerItem, ...(selectedImagePath === `/uploads/${img.name}` ? styles.imagePickerSelected : {}) }}
-                                        onClick={() => setSelectedImagePath(`/uploads/${img.name}`)}
-                                    >
-                                        <img src={`${backendUrl}/uploads/${img.name}`} alt={img.name} style={styles.imagePickerThumb} />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div>
-                            <p style={{ ...styles.formLabel, marginBottom: 8 }}>DESCRIPTION <span style={{ color: "#444" }}>— Markdown supported</span></p>
-                            <div style={styles.editorWrap}>
-                                <textarea
-                                    placeholder="Describe the event..."
-                                    value={description}
-                                    onChange={e => setDescription(e.target.value)}
-                                    style={styles.editorTextarea}
-                                    required
-                                />
-                                <div className="prose prose-invert" style={styles.previewPane}>
-                                    {!description && <p style={{ color: "#444", fontFamily: "'Georgia', serif", fontSize: "14px" }}>Preview will appear here…</p>}
-                                    {description && (
-                                        <Markdown
-                                            markdown={description}
-                                            options={{ tables: true, strikethrough: true, ghCodeBlocks: true }}
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" style={styles.submitBtn} disabled={submitting}>
-                            {submitting ? "Saving..." : editingId ? "Save Changes" : "Post Event"}
-                        </button>
-                    </form>
-                )}
-
-                <div style={styles.list}>
-                    {loading && <p style={styles.emptyMsg}>Loading events...</p>}
-                    {!loading && events.length === 0 && <p style={styles.emptyMsg}>No events yet. Check back soon.</p>}
-                    {events.map(ev => {
-                        const expanded = expandedId === ev._id;
-                        const going    = isGoing(ev);
-                        const count    = ev.rsvps?.length || 0;
-
-                        return (
-                            <div key={ev._id} style={styles.card}>
-                                <div style={styles.cardClickable} onClick={() => setExpandedId(expanded ? null : ev._id)}>
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                        <p style={styles.cardMeta}>{ev.author?.username || 'WSIN'}&nbsp;·&nbsp;{formatDate(ev.createdAt)}</p>
-                                        <h3 style={styles.cardTitle}>{ev.title}</h3>
-                                        {!expanded && <p style={styles.cardDesc}>{ev.description?.slice(0, 120)}{ev.description?.length > 120 ? '...' : ''}</p>}
-                                    </div>
-                                    <div style={styles.cardRight}>
-                                        {count > 0 && (
-                                            <div style={{
-                                                ...styles.rsvpBadge,
-                                                background:  going ? '#1a2e1a' : '#1e1e1e',
-                                                borderColor: going ? '#4caf50' : '#333',
-                                                color:       going ? '#4caf50' : '#555',
-                                            }}>
-                                                {going ? '✓' : '◎'} {count}
+                                return (
+                                    <Card key={ev._id} size="sm" className="bg-zinc-900/60 ring-zinc-800">
+                                        <CardHeader
+                                            className="cursor-pointer"
+                                            onClick={() => setExpandedId(expanded ? null : ev._id)}
+                                        >
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-xs text-zinc-500">
+                                                        {ev.author?.username || 'WSIN'} · {formatDate(ev.createdAt)}
+                                                    </p>
+                                                    <CardTitle className="text-base mt-1 break-words">{ev.title}</CardTitle>
+                                                    {!expanded && ev.description && (
+                                                        <p className="text-xs text-zinc-400 mt-1 line-clamp-2">
+                                                            {ev.description.slice(0, 140)}
+                                                            {ev.description.length > 140 ? '...' : ''}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-col items-end gap-1 shrink-0">
+                                                    {count > 0 && (
+                                                        <span className={[
+                                                            "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs",
+                                                            going
+                                                                ? "border-green-500/60 bg-green-500/10 text-green-400"
+                                                                : "border-zinc-700 bg-zinc-900 text-zinc-400",
+                                                        ].join(' ')}>
+                                                            {going ? <Check className="size-3" /> : null} {count}
+                                                        </span>
+                                                    )}
+                                                    {expanded
+                                                        ? <ChevronUp className="size-4 text-zinc-500" />
+                                                        : <ChevronDown className="size-4 text-zinc-500" />
+                                                    }
+                                                </div>
                                             </div>
-                                        )}
-                                        <span style={styles.expandIcon}>{expanded ? '▲' : '▼'}</span>
-                                    </div>
-                                </div>
+                                        </CardHeader>
 
-                                {expanded && (
-                                    <div style={styles.expandedBody}>
-                                        {(ev.image || (ev.dates && ev.dates.length > 0) || (ev.recurrence && ev.recurrence !== 'none')) && (
-                                            <div style={styles.eventMeta}>
+                                        {expanded && (
+                                            <CardContent className="space-y-3 pt-0">
                                                 {ev.image && (
                                                     <img
                                                         src={`${backendUrl}${ev.image}`}
                                                         alt={ev.title}
-                                                        className="aspect-square object-cover w-65 rounded-lg mb-3"
+                                                        className="w-full max-h-64 object-cover rounded-md"
                                                     />
                                                 )}
-                                                {((ev.dates && ev.dates.length > 0) || (ev.recurrence && ev.recurrence !== 'none')) && (
-                                                    <div style={styles.eventDayRow}>
-                                                        {ev.dates && ev.dates.length > 0 && (
-                                                            <span style={styles.dateBadge}>{formatDate(ev.dates[0])}</span>
-                                                        )}
-                                                        {ev.recurrence === 'weekly' && ev.repeatDays && ev.repeatDays.length > 0 && (
-                                                            <div style={{ display: "flex", gap: "4px" }}>
-                                                                {ev.repeatDays.map(d => (
-                                                                    <span key={d} style={styles.dayBadge}>{d.charAt(0).toUpperCase() + d.slice(1)}</span>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                        {ev.recurrence && ev.recurrence !== 'none' && (
-                                                            <span style={styles.recurrenceBadge}>{ev.recurrence.toUpperCase()}</span>
+
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    {ev.dates && ev.dates.length > 0 && (
+                                                        <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-red-400 bg-red-500/10 border border-red-500/30 rounded px-2 py-0.5">
+                                                            <CalendarDays className="size-3" /> {formatDate(ev.dates[0])}
+                                                        </span>
+                                                    )}
+                                                    {ev.recurrence === 'weekly' && ev.repeatDays?.map(d => (
+                                                        <span key={d} className="text-[10px] uppercase tracking-widest text-red-400 bg-red-500/10 border border-red-500/30 rounded px-2 py-0.5">
+                                                            {d}
+                                                        </span>
+                                                    ))}
+                                                    {ev.recurrence && ev.recurrence !== 'none' && (
+                                                        <span className="text-[10px] uppercase tracking-widest text-zinc-400 bg-zinc-800 border border-zinc-700 rounded px-2 py-0.5">
+                                                            {ev.recurrence}
+                                                        </span>
+                                                    )}
+                                                    {ev.time && (
+                                                        <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-zinc-300 bg-zinc-800 border border-zinc-700 rounded px-2 py-0.5">
+                                                            <Clock className="size-3" /> {ev.time}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div className="prose prose-invert prose-sm max-w-none">
+                                                    <Markdown
+                                                        markdown={ev.description}
+                                                        options={{ tables: true, strikethrough: true, ghCodeBlocks: true }}
+                                                    />
+                                                </div>
+
+                                                {/* RSVP */}
+                                                <div className="flex items-center justify-between rounded-md border border-zinc-800 bg-zinc-900 p-3">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-xs text-zinc-400">
+                                                            {count === 0
+                                                                ? "No RSVPs yet"
+                                                                : `${count} ${count === 1 ? 'person' : 'people'} going`}
+                                                        </span>
+                                                        {going && (
+                                                            <span className="text-[10px] uppercase tracking-widest text-green-400">
+                                                                You're going
+                                                            </span>
                                                         )}
                                                     </div>
+                                                    {userData ? (
+                                                        <Button
+                                                            size="sm"
+                                                            variant={going ? "outline" : "default"}
+                                                            disabled={rsvpLoading === ev._id}
+                                                            onClick={() => handleRsvp(ev._id)}
+                                                            className={going ? "border-green-500/50 text-green-400 hover:bg-green-500/10" : "bg-red-500 hover:bg-red-600 text-white"}
+                                                        >
+                                                            {rsvpLoading === ev._id ? '...' : going ? (<><Check className="size-4" /> Going</>) : 'RSVP'}
+                                                        </Button>
+                                                    ) : (
+                                                        <span className="text-[10px] uppercase tracking-widest text-zinc-500">
+                                                            Log in to RSVP
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {isAdmin && (
+                                                    <div className="flex gap-2">
+                                                        <Button variant="outline" size="sm" onClick={() => handleEdit(ev)}>
+                                                            <Pencil className="size-4" /> Edit
+                                                        </Button>
+                                                        <Button variant="destructive" size="sm" onClick={() => handleDelete(ev._id)}>
+                                                            <Trash2 className="size-4" /> Delete
+                                                        </Button>
+                                                    </div>
                                                 )}
-                                            </div>
+
+                                                <CommentSection targetType="event" targetId={ev._id} />
+                                            </CardContent>
                                         )}
-
-                                        <div className="prose prose-invert" style={styles.markdownBody}>
-                                            <Markdown
-                                                markdown={ev.description}
-                                                options={{ tables: true, strikethrough: true, ghCodeBlocks: true }}
-                                            />
-                                        </div>
-
-                                        <div style={styles.rsvpSection}>
-                                            <div style={styles.rsvpInfo}>
-                                                <span style={styles.rsvpCount}>
-                                                    {count === 0
-                                                        ? "No RSVPs yet"
-                                                        : `${count} ${count === 1 ? 'person' : 'people'} going`}
-                                                </span>
-                                                {going && <span style={styles.rsvpYouBadge}>You're going!</span>}
-                                            </div>
-                                            {userData ? (
-                                                <button
-                                                    style={{
-                                                        ...styles.rsvpBtn,
-                                                        background:  going ? '#1a2e1a' : '#fa4040',
-                                                        borderColor: going ? '#4caf50' : '#fa4040',
-                                                        color:       going ? '#4caf50' : '#fff',
-                                                    }}
-                                                    onClick={() => handleRsvp(ev._id)}
-                                                    disabled={rsvpLoading === ev._id}
-                                                >
-                                                    {rsvpLoading === ev._id ? '...' : going ? '✓ Going — Cancel' : 'RSVP'}
-                                                </button>
-                                            ) : (
-                                                <span style={styles.rsvpLoginHint}>Log in to RSVP</span>
-                                            )}
-                                        </div>
-
-                                        {isAdmin && (
-                                            <div style={styles.cardActions}>
-                                                <button style={styles.editBtn} onClick={() => handleEdit(ev)}>Edit</button>
-                                                <button style={styles.deleteBtn} onClick={() => handleDelete(ev._id)}>Delete</button>
-                                            </div>
-                                        )}
-
-                                        <CommentSection targetType="event" targetId={ev._id} />
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    </ScrollArea>
+                </CardContent>
+            </Card>
         </div>
     );
 }
-
-const styles = {
-    page:        { minHeight: "100vh", background: "#111", display: "flex", justifyContent: "center" },
-    column:      { width: "100%", maxWidth: "1100px", minHeight: "100vh", background: "#1a1a1a", display: "flex", flexDirection: "column", boxShadow: "0 0 60px rgba(0,0,0,0.8)", borderLeft: "1px solid #2a2a2a", borderRight: "1px solid #2a2a2a" },
-    header:      { background: "#322d2d", padding: "40px 32px 28px", borderBottom: "1px solid #3a3a3a" },
-    eyebrow:     { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "5px", color: "#fa4040", margin: "0 0 10px 0" },
-    pageTitle:   { fontFamily: "'Georgia', serif", fontSize: "48px", fontWeight: "bold", color: "#f5f0e8", margin: "0", letterSpacing: "-1px" },
-    titleLine:   { width: "40px", height: "3px", background: "#fa4040", marginTop: "16px" },
-    headerSub:   { fontFamily: "'Courier New', monospace", fontSize: "11px", color: "#555", letterSpacing: "2px", margin: "14px 0 0 0" },
-    section:     { padding: "24px 32px 0" },
-    newBtn:      { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "2px", color: "#fa4040", background: "#241212", border: "1px solid #fa404055", borderRadius: "4px", padding: "10px 20px", cursor: "pointer" },
-    cancelBtn:   { color: "#aaa", background: "#222", borderColor: "#444" },
-    form:        { margin: "20px 32px", background: "#222", border: "1px solid #333", borderRadius: "8px", padding: "20px", display: "flex", flexDirection: "column", gap: "12px" },
-    formLabel:   { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "4px", color: "#555", margin: "0" },
-    input:       { fontFamily: "'Courier New', monospace", fontSize: "13px", color: "#f5f0e8", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "10px 12px", outline: "none", width: "100%" },
-    submitBtn:   { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "2px", color: "#fff", background: "#fa4040", border: "none", borderRadius: "4px", padding: "10px", cursor: "pointer", alignSelf: "flex-end" },
-    list:        { padding: "20px 32px 48px", display: "flex", flexDirection: "column", gap: "12px" },
-    emptyMsg:    { fontFamily: "'Courier New', monospace", fontSize: "12px", color: "#444", letterSpacing: "2px", textAlign: "center", marginTop: "40px" },
-    card:        { background: "#222", border: "1px solid #2e2e2e", borderRadius: "8px", overflow: "hidden" },
-    cardClickable:{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "20px", cursor: "pointer", gap: "12px" },
-    cardRight:   { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px", flexShrink: 0 },
-    expandIcon:  { fontFamily: "'Courier New', monospace", fontSize: "10px", color: "#555" },
-    rsvpBadge:   { fontFamily: "'Courier New', monospace", fontSize: "9px", letterSpacing: "1px", border: "1px solid", borderRadius: "20px", padding: "3px 8px" },
-    expandedBody:{ padding: "0 20px 20px" },
-    cardMeta:    { fontFamily: "'Courier New', monospace", fontSize: "9px", letterSpacing: "4px", color: "#444", margin: "0 0 8px 0" },
-    cardTitle:   { fontFamily: "'Georgia', serif", fontSize: "20px", color: "#f5f0e8", margin: "0 0 6px 0", fontWeight: "bold" },
-    cardDesc:    { fontFamily: "'Georgia', serif", fontSize: "13px", color: "#666", lineHeight: "1.5", margin: "0" },
-    cardDescFull:{ fontFamily: "'Georgia', serif", fontSize: "14px", color: "#888", lineHeight: "1.6", margin: "0 0 16px 0" },
-    cardActions: { display: "flex", gap: "8px", marginBottom: "16px" },
-    editBtn:     { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#fa4040", background: "transparent", border: "1px solid #fa404044", borderRadius: "3px", padding: "6px 12px", cursor: "pointer" },
-    deleteBtn:   { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#888", background: "transparent", border: "1px solid #333", borderRadius: "3px", padding: "6px 12px", cursor: "pointer" },
-    dayChip:     { fontFamily: "'Courier New', monospace", fontSize: "9px", letterSpacing: "1px", border: "1px solid #333", borderRadius: "4px", padding: "6px 10px", cursor: "pointer" },
-    recurrenceRow: { display: "flex", flexWrap: "wrap", gap: "6px", padding: "4px" },
-    recurrenceBtn: { fontFamily: "'Courier New', monospace", fontSize: "9px", letterSpacing: "1px", border: "1px solid #333", borderRadius: "4px", padding: "6px 10px", cursor: "pointer" },
-    recurrenceBadge: { fontFamily: "'Courier New', monospace", fontSize: "8px", letterSpacing: "1px", color: "#fc8484", background: "#1f1515", border: "1px solid #fa404022", borderRadius: "3px", padding: "3px 6px" },
-    dayBadge: { fontFamily: "'Courier New', monospace", fontSize: "8px", letterSpacing: "1px", color: "#fa4040", background: "#241212", border: "1px solid #fa404044", borderRadius: "3px", padding: "3px 6px" },
-    imagePicker: { display: "flex", flexWrap: "wrap", gap: "8px", padding: "8px" },
-    imagePickerItem: { width: "60px", height: "60px", cursor: "pointer", padding: "2px", border: "2px solid #333", borderRadius: "4px", overflow: "hidden" },
-    imagePickerSelected: { borderColor: "#fa4040", background: "#241212" },
-    imagePickerThumb: { width: "100%", height: "100%", objectFit: "cover", borderRadius: "3px" },
-    editorWrap:  { display: "flex", gap: "16px", alignItems: "flex-start" },
-    editorTextarea: { flex: 1, fontFamily: "'Courier New', monospace", fontSize: "13px", color: "#ccc", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "12px", outline: "none", minHeight: "280px", resize: "vertical" },
-    previewPane: { flex: 1, minHeight: "280px", overflowY: "auto", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "12px" },
-    eventMeta:   { marginBottom: "16px", display: "flex", flexDirection: "column", gap: "8px" },
-    eventDayRow: { display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" },
-    dateBadge:   { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "1px", color: "#fa4040", background: "#241212", border: "1px solid #fa404044", borderRadius: "3px", padding: "4px 10px" },
-    markdownBody:{ marginBottom: "16px" },
-    rsvpSection: { display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1a1a1a", border: "1px solid #2a2a2a", borderRadius: "6px", padding: "12px 16px", marginBottom: "16px" },
-    rsvpInfo:    { display: "flex", flexDirection: "column", gap: "4px" },
-    rsvpCount:   { fontFamily: "'Courier New', monospace", fontSize: "11px", color: "#666", letterSpacing: "1px" },
-    rsvpYouBadge:{ fontFamily: "'Courier New', monospace", fontSize: "9px", letterSpacing: "2px", color: "#4caf50" },
-    rsvpBtn:     { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", border: "1px solid", borderRadius: "4px", padding: "8px 16px", cursor: "pointer", transition: "all 0.2s ease", flexShrink: 0 },
-    rsvpLoginHint:{ fontFamily: "'Courier New', monospace", fontSize: "9px", color: "#444", letterSpacing: "2px" },
-};
 
 export default Events;

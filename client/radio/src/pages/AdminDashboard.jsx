@@ -1,67 +1,116 @@
-import React, { useContext, useEffect } from 'react'
-import { AppContext } from '@/context/AppContext.jsx'
-import { useNavigate } from "react-router-dom"
-import { toast } from "react-toastify"
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import React, { useContext, useEffect } from 'react';
+import { AppContext } from '@/context/AppContext.jsx';
+import { useWindowManager } from '@/context/WindowManager.jsx';
+import { toast } from 'react-toastify';
+import { Users, CalendarPlus, Pencil, Flag, Mail, Image as ImageIcon } from 'lucide-react';
+
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+
+import ShowUsers from '@/pages/ShowUsers.jsx';
+import AdminEvents from '@/pages/AdminEvents.jsx';
+import AdminBlog from '@/pages/AdminBlog.jsx';
+import AdminComments from '@/pages/AdminComments.jsx';
+import AdminContacts from '@/pages/AdminContacts.jsx';
+import AdminImages from '@/pages/AdminImages.jsx';
 
 const AdminDashboard = () => {
-    const { userData, getUserData } = useContext(AppContext)
-    const navigate = useNavigate()
+    const { userData, getUserData } = useContext(AppContext);
+    const { addWindow, closeGroup, windows } = useWindowManager();
 
     useEffect(() => {
-        if (!userData) {
-            getUserData();
+        if (!userData) getUserData();
+    }, []);
+
+    const isAdmin = userData && userData.role === 'admin';
+
+    useEffect(() => {
+        if (userData && !isAdmin) {
+            toast.error('Not an admin');
         }
-        if (!userData?.isAdmin) {
-            navigate('/')
-            toast.error('Not an admin')
+    }, [userData, isAdmin]);
+
+    const openPanel = (groupId, name, content) => {
+        const open = windows.some(w => w.group === groupId);
+        if (open) {
+            closeGroup(groupId);
+            return;
         }
-    }, [])
+        addWindow({
+            windowName: name,
+            spawnx: 420, spawny: 120,
+            group: groupId,
+            content: <div className="w-[640px] h-[560px]">{content}</div>,
+        });
+    };
 
     const cards = [
-        { title: 'User Management',    desc: 'View and manage all users',      path: '/admin/users',    icon: '◉' },
-        { title: 'Event Management',   desc: 'Create and edit events',          path: '/admin/events',   icon: '◈' },
-        { title: 'Blog Management',    desc: 'Create and edit blog posts',      path: '/admin/blog',     icon: '✎' },
-        { title: 'Comment Moderation', desc: 'Review and remove comments',      path: '/admin/comments', icon: '⚑' },
-        { title: 'Manage Contacts',    desc: 'Add, edit, and remove contacts',  path: '/admin/contacts', icon: '✉' },
-        { title: 'Image Manager',      desc: 'Upload and delete images',        path: '/admin/images',   icon: '▦' },
+        { title: 'User Management',    desc: 'View and manage all users',    groupId: 'admin-users',    icon: Users,       Component: ShowUsers },
+        { title: 'Event Management',   desc: 'Create and edit events',        groupId: 'admin-events',   icon: CalendarPlus, Component: AdminEvents },
+        { title: 'Blog Management',    desc: 'Create and edit blog posts',    groupId: 'admin-blog',     icon: Pencil,      Component: AdminBlog },
+        { title: 'Comment Moderation', desc: 'Review and remove comments',    groupId: 'admin-comments', icon: Flag,        Component: AdminComments },
+        { title: 'Manage Contacts',    desc: 'Add, edit and remove contacts', groupId: 'admin-contacts', icon: Mail,        Component: AdminContacts },
+        { title: 'Image Manager',      desc: 'Upload and delete images',      groupId: 'admin-images',   icon: ImageIcon,   Component: AdminImages },
     ];
 
-    return (
-        <div style={styles.page}>
-            <div style={styles.column}>
-                <div style={styles.header}>
-                    <p className='flex text-red-500 text-xl font-bold'>WSIN RADIO</p>
-                    <h2 className='m-auto p-5 flex text-white text-6xl font-bold'>Admin Panel</h2>
-                    <p style={styles.headerSub}>Logged in as {userData?.name}</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-8">
-                    {cards.map(card => (
-                        <Card
-                            key={card.path}
-                            onClick={() => navigate(card.path)}
-                            className="bg-zinc-900 border-zinc-800 text-white cursor-pointer transition-all duration-300 hover:scale-105 hover:border-red-500"
-                        >
-                            <CardHeader>
-                                <div style={styles.cardIcon}>{card.icon}</div>
-                                <CardTitle>{card.title}</CardTitle>
-                                <CardDescription className="text-zinc-400">{card.desc}</CardDescription>
-                            </CardHeader>
-                        </Card>
-                    ))}
-                </div>
+    if (!isAdmin) {
+        return (
+            <div className="w-full h-full bg-zinc-950 text-white">
+                <Card className="w-full max-w-none rounded-none border-0 bg-zinc-950 h-full">
+                    <CardHeader className="border-b border-zinc-800 pb-4">
+                        <CardDescription className="uppercase tracking-widest text-xs text-red-500">
+                            Admin
+                        </CardDescription>
+                        <CardTitle className="text-2xl font-semibold">Access denied</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                        <p className="text-sm text-zinc-400">You must be an administrator to view this page.</p>
+                    </CardContent>
+                </Card>
             </div>
+        );
+    }
+
+    return (
+        <div className="w-full h-full bg-zinc-950 text-white">
+            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full">
+                <CardHeader className="border-b border-zinc-800 pb-4">
+                    <CardDescription className="uppercase tracking-widest text-xs text-red-500">
+                        WSIN Admin
+                    </CardDescription>
+                    <CardTitle className="text-2xl font-semibold">Admin Panel</CardTitle>
+                    <p className="text-xs text-zinc-500 mt-1">
+                        Signed in as <span className="text-zinc-300">{userData?.username || userData?.name}</span>
+                    </p>
+                </CardHeader>
+
+                <CardContent className="pt-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {cards.map(card => {
+                            const Icon = card.icon;
+                            return (
+                                <button
+                                    key={card.groupId}
+                                    type="button"
+                                    onClick={() => openPanel(card.groupId, card.title, <card.Component />)}
+                                    className="group text-left rounded-lg border border-zinc-800 bg-zinc-900/60 p-4 transition-all hover:border-red-500 hover:bg-red-500/5"
+                                >
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-md border border-red-500/40 bg-red-500/10 text-red-400 shrink-0 group-hover:bg-red-500/20">
+                                            <Icon className="size-5" />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-semibold text-white truncate">{card.title}</p>
+                                            <p className="text-xs text-zinc-400 line-clamp-2">{card.desc}</p>
+                                        </div>
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </CardContent>
+            </Card>
         </div>
-    )
-}
+    );
+};
 
-const styles = {
-    page:      { minHeight: "100vh", background: "#111", display: "flex", justifyContent: "center" },
-    column:    { width: "100%", maxWidth: "760px", minHeight: "100vh", background: "#1a1a1a", display: "flex", flexDirection: "column", boxShadow: "0 0 60px rgba(0,0,0,0.8)", borderLeft: "1px solid #2a2a2a", borderRight: "1px solid #2a2a2a" },
-    header:    { background: "#322d2d", padding: "40px 32px 28px", borderBottom: "1px solid #3a3a3a", justifyContent: "center", display: "flex", flexDirection: "column" },
-    headerSub: { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "3px", color: "#888", textAlign: "center", margin: "0" },
-    cardIcon:  { fontSize: "20px", color: "#fa4040", marginBottom: "8px" },
-}
-
-export default AdminDashboard
+export default AdminDashboard;

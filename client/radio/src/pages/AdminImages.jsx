@@ -1,29 +1,25 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '@/context/AppContext.jsx';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { ArrowLeft } from 'lucide-react';
+import { Upload, Trash2 } from 'lucide-react';
+
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const AdminImages = () => {
     const { backendUrl, userData, getUserData } = useContext(AppContext);
-    const navigate = useNavigate();
 
-    const [images, setImages] = useState([]);
-    const [uploading, setUploading] = useState(false);
+    const [images, setImages]         = useState([]);
+    const [uploading, setUploading]   = useState(false);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
 
     useEffect(() => { if (!userData) getUserData(); }, []);
 
     useEffect(() => {
-        if (userData && userData.role !== 'admin') {
-            navigate('/');
-            toast.error('Not an admin');
-        } else if (userData) {
-            fetchImages();
-        }
+        if (userData && userData.role === 'admin') fetchImages();
     }, [userData]);
 
     const fetchImages = async () => {
@@ -32,7 +28,6 @@ const AdminImages = () => {
             if (data.success) setImages(data.images);
             else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
-        console.log(images);
     };
 
     const handleFileChange = (e) => {
@@ -59,15 +54,11 @@ const AdminImages = () => {
                 setSelectedFile(null);
                 e.target.reset();
                 fetchImages();
-            } else {
-                toast.error(data.message);
-            }
+            } else toast.error(data.message);
         } catch (err) {
             console.error(err);
             toast.error(err.message);
-        } finally {
-            setUploading(false);
-        }
+        } finally { setUploading(false); }
     };
 
     const handleDelete = async (name) => {
@@ -77,9 +68,7 @@ const AdminImages = () => {
             if (data.success) {
                 setImages(prev => prev.filter(img => img.name !== name));
                 toast.success('Image deleted');
-            } else {
-                toast.error(data.message);
-            }
+            } else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
     };
 
@@ -93,84 +82,85 @@ const AdminImages = () => {
         month: 'short', day: 'numeric', year: 'numeric',
     });
 
-    return (
-        <div style={styles.page}>
-            <div style={styles.column}>
-                <div style={styles.header}>
-                    <p className='flex text-red-500 text-xl font-bold'>WSIN RADIO</p>
-                    <button onClick={() => navigate('/admin')}
-                            className='flex rounded-3xl p-1 px-2 m-1 bg-red-500 w-fit align-middle'>
-                        <ArrowLeft /> Back
-                    </button>
-                    <h2 className='m-auto p-5 flex text-white text-6xl font-bold'>Manage Images</h2>
-                </div>
+    const isAdmin = userData && userData.role === 'admin';
+    if (!isAdmin) {
+        return <div className="w-full h-full bg-zinc-950 text-zinc-400 p-4 text-sm">Admins only.</div>;
+    }
 
-                <div style={styles.body}>
-                    {/* Upload form */}
-                    <form onSubmit={handleUpload} style={styles.uploadForm}>
-                        <p style={styles.formLabel}>UPLOAD IMAGE</p>
+    return (
+        <div className="w-full h-full bg-zinc-950 text-white">
+            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full">
+                <CardHeader className="border-b border-zinc-800 pb-4">
+                    <CardDescription className="uppercase tracking-widest text-xs text-red-500">
+                        WSIN Admin
+                    </CardDescription>
+                    <CardTitle className="text-2xl font-semibold">Manage Images</CardTitle>
+                </CardHeader>
+
+                <CardContent className="pt-4 space-y-4">
+                    <form onSubmit={handleUpload} className="space-y-3 rounded-lg border border-zinc-800 bg-zinc-900/60 p-4">
+                        <p className="text-xs uppercase tracking-widest text-zinc-500">Upload Image</p>
                         <input
                             type="file"
                             accept="image/*"
                             onChange={handleFileChange}
-                            style={styles.fileInput}
+                            className="block w-full text-sm text-zinc-300 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:uppercase file:tracking-widest file:font-medium file:bg-red-500/15 file:text-red-400 hover:file:bg-red-500/25 bg-zinc-900 rounded-md border border-zinc-800 p-2"
                         />
                         {previewUrl && (
-                            <div style={styles.preview}>
-                                <img src={previewUrl} alt="Preview" style={styles.previewImg} />
+                            <div className="rounded-md border border-zinc-800 bg-zinc-900 p-2">
+                                <img src={previewUrl} alt="Preview" className="w-full max-h-44 object-contain rounded" />
                             </div>
                         )}
-                        <button type="submit" style={styles.uploadBtn} disabled={uploading || !selectedFile}>
-                            {uploading ? 'Uploading...' : 'Upload'}
-                        </button>
+                        <div className="flex justify-end">
+                            <Button type="submit" disabled={uploading || !selectedFile}>
+                                <Upload className="size-4" />
+                                {uploading ? 'Uploading...' : 'Upload'}
+                            </Button>
+                        </div>
                     </form>
 
-                    {/* Image list */}
-                    <p style={{ ...styles.formLabel, marginTop: '28px' }}>UPLOADED IMAGES ({images.length})</p>
-                    <ScrollArea style={{ marginTop: 12 }}>
-                        {images.length === 0 && <p style={styles.empty}>No images uploaded yet.</p>}
-                        <div style={styles.grid}>
-                            {images.map(img => (
-                                <div key={img.name} style={styles.imageCard}>
-                                    <img
-                                        src={`${backendUrl}/uploads/${img.name}`}
-                                        alt={img.name}
-                                        style={styles.thumb}
-                                    />
-                                    <div style={styles.imageCardInfo}>
-                                        <p style={styles.imageName}>{img.name}</p>
-                                        <p style={styles.imageMeta}>{formatSize(img.size)} · {formatDate(img.createdAt)}</p>
+                    <div>
+                        <p className="text-xs uppercase tracking-widest text-zinc-500 mb-2">
+                            Uploaded Images ({images.length})
+                        </p>
+                        <ScrollArea className="h-[300px] pr-3">
+                            <div className="space-y-2">
+                                {images.length === 0 && (
+                                    <p className="text-center text-xs text-zinc-500 py-8">No images uploaded yet.</p>
+                                )}
+                                {images.map(img => (
+                                    <div
+                                        key={img.name}
+                                        className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/60 p-3"
+                                    >
+                                        <img
+                                            src={`${backendUrl}/uploads/${img.name}`}
+                                            alt={img.name}
+                                            className="h-14 w-14 object-cover rounded-md border border-zinc-800 shrink-0"
+                                        />
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-xs text-zinc-200 truncate">{img.name}</p>
+                                            <p className="text-[10px] uppercase tracking-widest text-zinc-500">
+                                                {formatSize(img.size)} · {formatDate(img.createdAt)}
+                                            </p>
+                                        </div>
+                                        <Button
+                                            variant="destructive"
+                                            size="icon-xs"
+                                            onClick={() => handleDelete(img.name)}
+                                            title="Delete"
+                                        >
+                                            <Trash2 />
+                                        </Button>
                                     </div>
-                                    <button style={styles.deleteBtn} onClick={() => handleDelete(img.name)}>Delete</button>
-                                </div>
-                            ))}
-                        </div>
-                    </ScrollArea>
-                </div>
-            </div>
+                                ))}
+                            </div>
+                        </ScrollArea>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
-};
-
-const styles = {
-    page:        { background: "#111", display: "flex", justifyContent: "center" },
-    column:      { width: "100%", maxWidth: "760px", minHeight: "100vh", background: "#1a1a1a", display: "flex", flexDirection: "column", boxShadow: "0 0 60px rgba(0,0,0,0.8)", borderLeft: "1px solid #2a2a2a", borderRight: "1px solid #2a2a2a" },
-    header:      { background: "#322d2d", padding: "40px 32px 28px", borderBottom: "1px solid #3a3a3a", display: "flex", flexDirection: "column" },
-    body:        { padding: "24px 32px" },
-    uploadForm:  { background: "#222", border: "1px solid #333", borderRadius: "8px", padding: "20px", display: "flex", flexDirection: "column", gap: "10px" },
-    formLabel:   { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "4px", color: "#555", margin: "0" },
-    fileInput:   { fontFamily: "'Courier New', monospace", fontSize: "12px", color: "#888", background: "#1a1a1a", border: "1px solid #333", borderRadius: "4px", padding: "8px 12px" },
-    preview:     { width: "100%", display: "flex", justifyContent: "center", background: "#111", borderRadius: "4px", overflow: "hidden" },
-    previewImg:  { maxWidth: "100%", maxHeight: "200px", objectFit: "contain" },
-    uploadBtn:   { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "2px", color: "#fff", background: "#fa4040", border: "none", borderRadius: "4px", padding: "10px", cursor: "pointer", alignSelf: "flex-end" },
-    empty:       { fontFamily: "'Courier New', monospace", fontSize: "11px", color: "#444", letterSpacing: "2px", textAlign: "center", padding: "40px 0" },
-    grid:        { display: "flex", flexDirection: "column", gap: "10px" },
-    imageCard:   { background: "#222", border: "1px solid #2e2e2e", borderRadius: "8px", padding: "12px", display: "flex", alignItems: "center", gap: "16px" },
-    thumb:       { width: "64px", height: "64px", objectFit: "cover", borderRadius: "4px", border: "1px solid #333", flexShrink: 0 },
-    imageCardInfo: { flex: 1, minWidth: 0 },
-    imageName:   { fontFamily: "'Courier New', monospace", fontSize: "11px", color: "#bbb", margin: "0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-    imageMeta:   { fontFamily: "'Courier New', monospace", fontSize: "9px", color: "#555", margin: "4px 0 0", letterSpacing: "1px" },
-    deleteBtn:   { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#888", background: "transparent", border: "1px solid #333", borderRadius: "3px", padding: "6px 12px", cursor: "pointer", flexShrink: 0 },
 };
 
 export default AdminImages;

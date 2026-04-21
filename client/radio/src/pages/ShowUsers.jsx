@@ -1,26 +1,21 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { AppContext } from '@/context/AppContext.jsx';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import axios from 'axios';
-import { ArrowLeft, LayoutGrid, List } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { LayoutGrid, List } from 'lucide-react';
+
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const ShowUsers = () => {
     const { backendUrl, userData, getUserData } = useContext(AppContext);
     const [allUsers, setAllUsers] = useState([]);
-    const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
-    const navigate = useNavigate();
+    const [viewMode, setViewMode] = useState('grid');
 
     useEffect(() => { if (!userData) getUserData(); }, []);
 
     useEffect(() => {
-        if (userData && userData.role !== 'admin') {
-            navigate('/');
-            toast.error('Not an admin');
-        } else if (userData) {
-            getUsers();
-        }
+        if (userData && userData.role === 'admin') getUsers();
     }, [userData]);
 
     const getUsers = async () => {
@@ -31,117 +26,115 @@ const ShowUsers = () => {
         } catch (err) { console.log(err); }
     };
 
-    const roleColor = (role) => role === 'admin' ? '#fa4040' : '#555';
+    const isAdmin = userData && userData.role === 'admin';
+    if (!isAdmin) {
+        return (
+            <div className="w-full h-full bg-zinc-950 text-white p-4 text-sm text-zinc-400">
+                Admins only.
+            </div>
+        );
+    }
+
+    const initial = (name) => (name || '?').charAt(0).toUpperCase();
 
     return (
-        <div style={styles.page}>
-            <div style={styles.column}>
-                <div style={styles.header}>
-                    <p className='flex text-red-500 text-xl font-bold'>WSIN RADIO</p>
-                    <button onClick={() => navigate('/admin')}
-                            className='flex left-0 rounded-3xl p-1 px-2 m-1 bg-red-500 w-fit align-middle'>
-                        <ArrowLeft /> Back
-                    </button>
-                    <h2 className='m-auto p-5 flex text-white text-6xl font-bold'>All Users</h2>
-                </div>
+        <div className="w-full h-full bg-zinc-950 text-white">
+            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full">
+                <CardHeader className="border-b border-zinc-800 pb-4">
+                    <CardDescription className="uppercase tracking-widest text-xs text-red-500">
+                        WSIN Admin
+                    </CardDescription>
+                    <CardTitle className="text-2xl font-semibold">All Users</CardTitle>
+                </CardHeader>
 
-                <div style={styles.body}>
-                    {/* toolbar */}
-                    <div style={styles.toolbar}>
-                        <span style={styles.count}>{allUsers.length} USERS</span>
-                        <div style={styles.toggleGroup}>
-                            <button
+                <CardContent className="pt-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs uppercase tracking-widest text-zinc-500">
+                            {allUsers.length} user{allUsers.length !== 1 ? 's' : ''}
+                        </span>
+                        <div className="flex gap-1 rounded-md border border-zinc-800 bg-zinc-900 p-1">
+                            <Button
+                                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                                size="icon-xs"
                                 onClick={() => setViewMode('grid')}
-                                style={{ ...styles.toggleBtn, ...(viewMode === 'grid' ? styles.toggleActive : {}) }}
                                 title="Grid view"
                             >
-                                <LayoutGrid size={14} />
-                            </button>
-                            <button
+                                <LayoutGrid />
+                            </Button>
+                            <Button
+                                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                                size="icon-xs"
                                 onClick={() => setViewMode('list')}
-                                style={{ ...styles.toggleBtn, ...(viewMode === 'list' ? styles.toggleActive : {}) }}
                                 title="List view"
                             >
-                                <List size={14} />
-                            </button>
+                                <List />
+                            </Button>
                         </div>
                     </div>
 
-                    {/* GRID VIEW */}
-                    {viewMode === 'grid' && (
-                        <div style={styles.grid}>
-                            {Array.from({ length: Math.ceil(allUsers.length / 3) }).map((_, rowIndex) => (
-                                <div key={rowIndex} className="flex gap-4 mb-4">
-                                    {allUsers.slice(rowIndex * 3, rowIndex * 3 + 3).map((user, index) => (
-                                        <Card key={index} className="flex-1 bg-zinc-900 border-zinc-800 text-white transition-all duration-300 ease-in-out hover:flex-[1.1] cursor-pointer">
-                                            <CardHeader className='flex-col justify-center'>
-                                                <div style={styles.gridAvatar}>
-                                                    {user.username[0].toUpperCase()}
+                    <ScrollArea className="h-[400px] pr-3">
+                        {viewMode === 'grid' ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                {allUsers.map((user) => {
+                                    const isAdminUser = user.role === 'admin';
+                                    return (
+                                        <Card key={user._id || user.email} size="sm" className="bg-zinc-900/60 ring-zinc-800">
+                                            <CardContent className="p-4 flex flex-col items-center gap-2">
+                                                <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-red-500 bg-zinc-900 text-red-400 font-semibold">
+                                                    {initial(user.username)}
                                                 </div>
-                                                <CardTitle className='m-auto text-center'>{user.username}</CardTitle>
-                                                <CardDescription className="text-zinc-400 text-center">{user.email}</CardDescription>
-                                            </CardHeader>
-                                            <CardContent className='flex justify-center'>
-                                                <span style={{ ...styles.roleBadge, color: roleColor(user.role), borderColor: roleColor(user.role) + '44' }}>
-                                                    {user.role.toUpperCase()}
+                                                <p className="text-sm font-medium text-white truncate w-full text-center">{user.username}</p>
+                                                <p className="text-[10px] text-zinc-500 truncate w-full text-center">{user.email}</p>
+                                                <span className={[
+                                                    "inline-block text-[9px] uppercase tracking-widest rounded border px-2 py-0.5",
+                                                    isAdminUser
+                                                        ? "text-red-400 bg-red-500/10 border-red-500/40"
+                                                        : "text-zinc-400 bg-zinc-800 border-zinc-700",
+                                                ].join(' ')}>
+                                                    {user.role}
                                                 </span>
                                             </CardContent>
                                         </Card>
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* LIST VIEW */}
-                    {viewMode === 'list' && (
-                        <div style={styles.listWrap}>
-                            {/* header row */}
-                            <div style={styles.listHeader}>
-                                <span style={{ ...styles.listCell, flex: 2 }}>USERNAME</span>
-                                <span style={{ ...styles.listCell, flex: 3 }}>EMAIL</span>
-                                <span style={{ ...styles.listCell, flex: 1 }}>ROLE</span>
+                                    );
+                                })}
                             </div>
-                            {allUsers.map((user, i) => (
-                                <div key={i} style={{ ...styles.listRow, background: i % 2 === 0 ? '#1e1e1e' : '#222' }}>
-                                    <div style={{ ...styles.listCellVal, flex: 2, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <div style={styles.listAvatar}>{user.username[0].toUpperCase()}</div>
-                                        <span style={styles.listName}>{user.username}</span>
-                                    </div>
-                                    <span style={{ ...styles.listCellVal, flex: 3, color: '#666' }}>{user.email}</span>
-                                    <span style={{ ...styles.listCellVal, flex: 1, color: roleColor(user.role) }}>
-                                        {user.role}
-                                    </span>
+                        ) : (
+                            <div className="rounded-md border border-zinc-800 bg-zinc-900/60 overflow-hidden">
+                                <div className="grid grid-cols-[2fr_3fr_1fr] gap-2 px-4 py-2 bg-zinc-900 border-b border-zinc-800 text-[10px] uppercase tracking-widest text-zinc-500">
+                                    <span>Username</span>
+                                    <span>Email</span>
+                                    <span>Role</span>
                                 </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
+                                {allUsers.map((user, i) => (
+                                    <div
+                                        key={user._id || user.email || i}
+                                        className={[
+                                            "grid grid-cols-[2fr_3fr_1fr] gap-2 px-4 py-2 items-center border-b border-zinc-800/50",
+                                            i % 2 === 0 ? "bg-zinc-900/30" : "bg-zinc-900/60",
+                                        ].join(' ')}
+                                    >
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            <div className="flex h-7 w-7 items-center justify-center rounded-full border border-red-500 bg-zinc-900 text-red-400 text-xs font-semibold shrink-0">
+                                                {initial(user.username)}
+                                            </div>
+                                            <span className="text-sm text-white truncate">{user.username}</span>
+                                        </div>
+                                        <span className="text-xs text-zinc-400 truncate">{user.email}</span>
+                                        <span className={[
+                                            "text-[10px] uppercase tracking-widest",
+                                            user.role === 'admin' ? "text-red-400" : "text-zinc-500",
+                                        ].join(' ')}>
+                                            {user.role}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </ScrollArea>
+                </CardContent>
+            </Card>
         </div>
     );
-};
-
-const styles = {
-    page:        { minHeight: "100vh", background: "#111", display: "flex", justifyContent: "center" },
-    column:      { width: "100%", maxWidth: "760px", minHeight: "100vh", background: "#1a1a1a", display: "flex", flexDirection: "column", boxShadow: "0 0 60px rgba(0,0,0,0.8)", borderLeft: "1px solid #2a2a2a", borderRight: "1px solid #2a2a2a" },
-    header:      { background: "#322d2d", padding: "40px 32px 28px", borderBottom: "1px solid #3a3a3a", justifyContent: "center", display: "flex", flexDirection: "column" },
-    body:        { padding: "24px 32px" },
-    toolbar:     { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" },
-    count:       { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "3px", color: "#555" },
-    toggleGroup: { display: "flex", gap: "4px", background: "#222", border: "1px solid #333", borderRadius: "6px", padding: "3px" },
-    toggleBtn:   { background: "transparent", border: "none", borderRadius: "4px", padding: "5px 8px", cursor: "pointer", color: "#555", display: "flex", alignItems: "center" },
-    toggleActive:{ background: "#fa4040", color: "#fff" },
-    grid:        { },
-    gridAvatar:  { width: "40px", height: "40px", borderRadius: "50%", background: "#322d2d", border: "2px solid #fa4040", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Georgia', serif", fontSize: "16px", color: "#fa4040", margin: "0 auto 8px auto" },
-    roleBadge:   { fontFamily: "'Courier New', monospace", fontSize: "9px", letterSpacing: "2px", border: "1px solid", borderRadius: "3px", padding: "3px 8px" },
-    listWrap:    { background: "#222", border: "1px solid #2e2e2e", borderRadius: "8px", overflow: "hidden" },
-    listHeader:  { display: "flex", padding: "10px 16px", borderBottom: "1px solid #2a2a2a", background: "#1a1a1a" },
-    listCell:    { fontFamily: "'Courier New', monospace", fontSize: "9px", letterSpacing: "3px", color: "#444" },
-    listRow:     { display: "flex", padding: "10px 16px", alignItems: "center", borderBottom: "1px solid #252525" },
-    listCellVal: { fontFamily: "'Courier New', monospace", fontSize: "12px", color: "#aaa" },
-    listAvatar:  { width: "28px", height: "28px", borderRadius: "50%", background: "#322d2d", border: "1px solid #fa4040", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Georgia', serif", fontSize: "12px", color: "#fa4040", flexShrink: 0 },
-    listName:    { fontFamily: "'Courier New', monospace", fontSize: "12px", color: "#f5f0e8" },
 };
 
 export default ShowUsers;
