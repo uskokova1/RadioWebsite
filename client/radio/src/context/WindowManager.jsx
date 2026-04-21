@@ -57,7 +57,6 @@ const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, grou
                 zIndex: zIndex,
             }}
             className="flex-col relative"
-            onMouseDown={() => bringToFront(id)}
         >
             <motion.div
                 initial={{ scaleY: 0.5, opacity: 0 }}

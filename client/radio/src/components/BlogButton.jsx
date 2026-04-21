@@ -101,17 +101,13 @@ const BlogButton = () => {
     };
 
     return (
-        <div>
-            <video
-                autoPlay={true}
-                muted={true}
-                loop={true}
-                src='/clipboard.webm'
-                onClick={handleToggle}
-                className='absolute left-5 top-75 scale-60
-                hover:scale-65 transition-all spring-duration-300 spring-bounce-60'
-            />
-        </div>
+        <button
+            onClick={handleToggle}
+            title="Blog"
+            className="absolute left-5 top-[300px] z-[200] flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
+        >
+            <Book className="size-6" />
+        </button>
     );
 };
 

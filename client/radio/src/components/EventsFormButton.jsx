@@ -35,7 +35,7 @@ const EventsFormButton = () => {
         <button
             onClick={handleToggle}
             title="Events"
-            className="absolute left-5 top-[660px] flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
+            className="absolute left-5 top-[660px] z-[200] flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
         >
             <CalendarPlus className="size-6" />
         </button>

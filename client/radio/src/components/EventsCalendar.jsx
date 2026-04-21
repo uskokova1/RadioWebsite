@@ -146,43 +146,45 @@ function EventsCalendar() {
         });
     };
 
-    return (
-        <div>
-            <CalendarDays
-                onClick={() => {
-                    if (!openAlready) {
-                        setOpenAlready(true);
+    const handleToggle = () => {
+        if (!openAlready) {
+            setOpenAlready(true);
+            addWindow({
+                windowName: 'Events Calendar',
+                spawnx: 300,
+                spawny: 150,
+                group: 'calendar',
+                content: (
+                    <div className="bg-zinc-900">
+                        <Calendar
+                            mode="multiple"
+                            selected={eventDateObjects}
+                            onSelect={() => {}}
+                            className="rounded-md border-0 text-white"
+                            onDayClick={handleDayClick}
+                            modifiers={eventModifiers}
+                            classNames={{
+                                hasEvent:
+                                    'bg-red-500/30 !text-white font-bold border-2 border-red-500 rounded-full',
+                            }}
+                        />
+                    </div>
+                ),
+            });
+        } else {
+            setOpenAlready(false);
+            closeGroup('calendar');
+        }
+    };
 
-                        addWindow({
-                            windowName: 'Events Calendar',
-                            spawnx: 300,
-                            spawny: 150,
-                            group: 'calendar',
-                            content: (
-                                <div className="bg-zinc-900">
-                                    <Calendar
-                                        mode="multiple"
-                                        selected={eventDateObjects}
-                                        onSelect={() => {}}
-                                        className="rounded-md border-0 text-white"
-                                        onDayClick={handleDayClick}
-                                        modifiers={eventModifiers}
-                                        classNames={{
-                                            hasEvent:
-                                                'bg-red-500/30 !text-white font-bold border-2 border-red-500 rounded-full',
-                                        }}
-                                    />
-                                </div>
-                            ),
-                        });
-                    } else {
-                        setOpenAlready(false);
-                        closeGroup('calendar');
-                    }
-                }}
-                className="absolute left-5 top-35 hover:scale-110 transition-all spring-duration-300 spring-bounce-60"
-            />
-        </div>
+    return (
+        <button
+            onClick={handleToggle}
+            title="Calendar"
+            className="absolute left-5 top-[140px] z-[200] flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
+        >
+            <CalendarDays className="size-6" />
+        </button>
     );
 }
 

@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import axios from "axios";
 import { toast } from "react-toastify";
+import { LogIn } from 'lucide-react';
 import { AppContext } from "@/context/AppContext.jsx";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card.jsx";
 import { useWindowManager } from '@/context/WindowManager.jsx';
@@ -29,17 +30,13 @@ const LoginButton = () => {
     };
 
     return (
-        <div>
-            <video
-                autoPlay={true}
-                muted={true}
-                loop={true}
-                src='/login.webm'
-                onClick={handleToggle}
-                className='absolute left-5 top-105 scale-60
-                hover:scale-65 transition-all spring-duration-300 spring-bounce-60'
-            />
-        </div>
+        <button
+            onClick={handleToggle}
+            title="Login"
+            className="absolute left-5 top-[420px] z-[200] flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
+        >
+            <LogIn className="size-6" />
+        </button>
     );
 };
 

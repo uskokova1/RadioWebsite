@@ -5,6 +5,7 @@ import { Play, Square, Radio as RadioIcon, Users } from "lucide-react";
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const STREAM_URL = "https://broadcast.shoutcheap.com/proxy/wsinradi/stream";
 const POLL_INTERVAL = 30000;
@@ -51,9 +52,9 @@ function Radio() {
     };
 
     return (
-        <div className="w-full h-full bg-zinc-950 text-white">
-            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full">
-                <CardHeader className="border-b border-zinc-800 pb-4">
+        <div className="w-full h-full bg-zinc-950 text-white flex flex-col">
+            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full flex flex-col min-h-0">
+                <CardHeader className="border-b border-zinc-800 pb-4 shrink-0">
                     <CardDescription className="uppercase tracking-widest text-xs text-red-500">
                         WSIN RADIO · 1590 AM
                     </CardDescription>
@@ -61,6 +62,7 @@ function Radio() {
                     <p className="text-xs text-zinc-500 mt-1">Southern Connecticut State University</p>
                 </CardHeader>
 
+                <ScrollArea className="flex-1 min-h-0">
                 <CardContent className="pt-4 space-y-4">
                     {/* Status Row */}
                     <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3">
@@ -141,6 +143,7 @@ function Radio() {
                         </div>
                     </div>
                 </CardContent>
+                </ScrollArea>
             </Card>
 
             <style>{`
