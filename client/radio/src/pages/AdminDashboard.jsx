@@ -1,17 +1,20 @@
-import React, { useContext, useEffect } from 'react';
+import React, { lazy, Suspense, useContext, useEffect } from 'react';
 import { AppContext } from '@/context/AppContext.jsx';
 import { useWindowManager } from '@/context/WindowManager.jsx';
 import { toast } from 'react-toastify';
-import { Users, CalendarPlus, Pencil, Flag, Mail, Image as ImageIcon } from 'lucide-react';
+import { Users, CalendarPlus, Pencil, Flag, Mail, Image as ImageIcon, Layers } from 'lucide-react';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
-import ShowUsers from '@/pages/ShowUsers.jsx';
-import AdminEvents from '@/pages/AdminEvents.jsx';
-import AdminBlog from '@/pages/AdminBlog.jsx';
-import AdminComments from '@/pages/AdminComments.jsx';
-import AdminContacts from '@/pages/AdminContacts.jsx';
-import AdminImages from '@/pages/AdminImages.jsx';
+// Lazy-load every sub-page so the admin window opens instantly and each
+// panel only downloads its code when first opened.
+const ShowUsers     = lazy(() => import('@/pages/ShowUsers.jsx'));
+const AdminEvents   = lazy(() => import('@/pages/AdminEvents.jsx'));
+const AdminBlog     = lazy(() => import('@/pages/AdminBlog.jsx'));
+const AdminComments = lazy(() => import('@/pages/AdminComments.jsx'));
+const AdminContacts = lazy(() => import('@/pages/AdminContacts.jsx'));
+const AdminImages   = lazy(() => import('@/pages/AdminImages.jsx'));
+const AdminBlogs    = lazy(() => import('@/pages/AdminBlogs.jsx'));
 
 const AdminDashboard = () => {
     const { userData, getUserData } = useContext(AppContext);
@@ -39,17 +42,28 @@ const AdminDashboard = () => {
             windowName: name,
             spawnx: 420, spawny: 120,
             group: groupId,
-            content: <div className="w-[640px] h-[560px]">{content}</div>,
+            content: (
+                <div className="w-[680px] h-[580px]">
+                    <Suspense fallback={
+                        <div className="h-full flex items-center justify-center text-zinc-500 text-sm">
+                            Loading…
+                        </div>
+                    }>
+                        {content}
+                    </Suspense>
+                </div>
+            ),
         });
     };
 
     const cards = [
-        { title: 'User Management',    desc: 'View and manage all users',    groupId: 'admin-users',    icon: Users,       Component: ShowUsers },
-        { title: 'Event Management',   desc: 'Create and edit events',        groupId: 'admin-events',   icon: CalendarPlus, Component: AdminEvents },
-        { title: 'Blog Management',    desc: 'Create and edit blog posts',    groupId: 'admin-blog',     icon: Pencil,      Component: AdminBlog },
-        { title: 'Comment Moderation', desc: 'Review and remove comments',    groupId: 'admin-comments', icon: Flag,        Component: AdminComments },
-        { title: 'Manage Contacts',    desc: 'Add, edit and remove contacts', groupId: 'admin-contacts', icon: Mail,        Component: AdminContacts },
-        { title: 'Image Manager',      desc: 'Upload and delete images',      groupId: 'admin-images',   icon: ImageIcon,   Component: AdminImages },
+        { title: 'User Management',    desc: 'View and manage all users',           groupId: 'admin-users',    icon: Users,       Component: ShowUsers },
+        { title: 'Event Management',   desc: 'Create and edit events',               groupId: 'admin-events',   icon: CalendarPlus, Component: AdminEvents },
+        { title: 'Blog Posts',         desc: 'Create and edit individual posts',     groupId: 'admin-blog',     icon: Pencil,      Component: AdminBlog },
+        { title: 'Blog Groups',        desc: 'Manage groups, move posts between them', groupId: 'admin-blogs',  icon: Layers,      Component: AdminBlogs },
+        { title: 'Comment Moderation', desc: 'Review and remove comments',           groupId: 'admin-comments', icon: Flag,        Component: AdminComments },
+        { title: 'Manage Contacts',    desc: 'Add, edit and remove contacts',        groupId: 'admin-contacts', icon: Mail,        Component: AdminContacts },
+        { title: 'Image Manager',      desc: 'Upload and delete images',             groupId: 'admin-images',   icon: ImageIcon,   Component: AdminImages },
     ];
 
     if (!isAdmin) {

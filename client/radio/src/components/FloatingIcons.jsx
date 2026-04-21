@@ -180,8 +180,8 @@ export function FloatingBlog() {
         <DraggableIcon
             src="/clipboard.webm"
             title="Blog — drag me!"
-            initialX={480}
-            initialY={170}
+            initialX={760}
+            initialY={55}
             onActivate={toggle}
         />
     );
@@ -206,8 +206,8 @@ export function FloatingLogin() {
         <DraggableIcon
             src="/login.webm"
             title="Login — drag me!"
-            initialX={700}
-            initialY={130}
+            initialX={920}
+            initialY={55}
             onActivate={toggle}
         />
     );

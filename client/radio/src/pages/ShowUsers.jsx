@@ -38,17 +38,17 @@ const ShowUsers = () => {
     const initial = (name) => (name || '?').charAt(0).toUpperCase();
 
     return (
-        <div className="w-full h-full bg-zinc-950 text-white">
-            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full">
-                <CardHeader className="border-b border-zinc-800 pb-4">
+        <div className="w-full h-full bg-zinc-950 text-white flex flex-col">
+            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full flex flex-col min-h-0">
+                <CardHeader className="border-b border-zinc-800 pb-4 shrink-0">
                     <CardDescription className="uppercase tracking-widest text-xs text-red-500">
                         WSIN Admin
                     </CardDescription>
                     <CardTitle className="text-2xl font-semibold">All Users</CardTitle>
                 </CardHeader>
 
-                <CardContent className="pt-4 space-y-3">
-                    <div className="flex items-center justify-between">
+                <CardContent className="pt-4 flex-1 min-h-0 flex flex-col gap-3">
+                    <div className="flex items-center justify-between shrink-0">
                         <span className="text-xs uppercase tracking-widest text-zinc-500">
                             {allUsers.length} user{allUsers.length !== 1 ? 's' : ''}
                         </span>
@@ -72,7 +72,7 @@ const ShowUsers = () => {
                         </div>
                     </div>
 
-                    <ScrollArea className="h-[400px] pr-3">
+                    <ScrollArea className="flex-1 min-h-0 pr-3">
                         {viewMode === 'grid' ? (
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                 {allUsers.map((user) => {
