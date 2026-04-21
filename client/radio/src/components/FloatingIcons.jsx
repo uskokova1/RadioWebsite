@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
 import MarkdownView from 'react-showdown';
 
 import { AppContext } from '@/context/AppContext.jsx';
@@ -109,16 +108,44 @@ export function FloatingContact() {
 }
 
 // ─── Floating Blog ────────────────────────────────────────────────────────────
+function BlogNavWindow({ post, posts, onNavigate }) {
+    const currentIndex = posts.findIndex(p => p._id === post._id);
+    const hasPrev = currentIndex > 0;
+    const hasNext = currentIndex < posts.length - 1;
+
+    return (
+        <div className="flex items-center gap-4 p-2 bg-zinc-900">
+            <button
+                disabled={!hasPrev}
+                onClick={() => onNavigate(posts[currentIndex - 1])}
+                className={`px-3 py-1 text-sm ${hasPrev ? 'text-zinc-300 hover:text-white' : 'text-zinc-600 cursor-not-allowed'}`}
+            >
+                ← Previous
+            </button>
+            <span className="text-zinc-400 text-sm">{currentIndex + 1} / {posts.length}</span>
+            <button
+                disabled={!hasNext}
+                onClick={() => onNavigate(posts[currentIndex + 1])}
+                className={`px-3 py-1 text-sm ${hasNext ? 'text-zinc-300 hover:text-white' : 'text-zinc-600 cursor-not-allowed'}`}
+            >
+                Next →
+            </button>
+        </div>
+    );
+}
+
 export function FloatingBlog() {
-    const { backendUrl }                     = useContext(AppContext);
+    const { backendUrl, fetchBlogPosts } = useContext(AppContext);
     const { addWindow, closeGroup, windows } = useWindowManager();
 
-    // local ref so openPost doesn't cause stale closure issues
-    const whichPostOpen = useRef(null);
+    const currentPosts = useRef([]);
+    const whichGroupOpen = useRef(null);
 
-    const openPost = (post) => {
-        closeGroup(whichPostOpen.current?._id);
-        whichPostOpen.current = post;
+    const openPost = (post, posts) => {
+        currentPosts.current = posts;
+        closeGroup(whichGroupOpen.current);
+        whichGroupOpen.current = post._id;
+
         addWindow({
             windowName: post.title, spawnx: 200, spawny: 80, group: post._id,
             content: <img className="aspect-square object-cover w-65" draggable={false}
@@ -133,39 +160,39 @@ export function FloatingBlog() {
             windowName: post.title, spawnx: 200, spawny: 350, group: post._id,
             content: <CommentSection targetType="post" targetId={post._id} />,
         });
+        addWindow({
+            windowName: 'Navigation', spawnx: 200, spawny: 530, group: post._id,
+            content: <BlogNavWindow post={post} posts={posts} onNavigate={(p) => openPost(p, posts)} />,
+        });
     };
 
     const handleGroupSelect = async (group) => {
-        closeGroup(whichPostOpen.current?._id);
-        whichPostOpen.current = null;
-        try {
-            const { data } = await axios.get(`${backendUrl}/api/posts/blog/${group._id}`);
-            const posts = data.success ? data.posts : [];
-            closeGroup(BLOGS_GROUP);
-            addWindow({
-                windowName: `${group.name} — Posts`,
-                spawnx: 300, spawny: 200,
-                group: BLOGS_GROUP,
-                content: (
-                    <div className='bg-zinc-900 w-60 min-h-32 max-h-96 overflow-y-auto'>
-                        {posts.length === 0 && <p className="text-zinc-400 text-sm p-3">No posts in this group yet.</p>}
-                        {posts.map((post) => (
-                            <div key={post._id} className="p-1.5">
-                                <Card className="w-full bg-zinc-900 border-zinc-800 text-white cursor-pointer"
-                                      onClick={() => openPost(post)}>
-                                    <Book className='absolute right-5 hover:scale-110 transition-all spring-duration-300 spring-bounce-60' />
-                                    <CardHeader>
-                                        <CardTitle className="text-sm">{post.title}</CardTitle>
-                                    </CardHeader>
-                                </Card>
-                            </div>
-                        ))}
-                    </div>
-                )
-            });
-        } catch (err) {
-            toast.error(err.message);
-        }
+        closeGroup(whichGroupOpen.current);
+        whichGroupOpen.current = null;
+        const posts = await fetchBlogPosts(group._id);
+        currentPosts.current = posts;
+        closeGroup(BLOGS_GROUP);
+        addWindow({
+            windowName: `${group.name} — Posts`,
+            spawnx: 300, spawny: 200,
+            group: BLOGS_GROUP,
+            content: (
+                <div className='bg-zinc-900 w-60 min-h-32 max-h-96 overflow-y-auto'>
+                    {posts.length === 0 && <p className="text-zinc-400 text-sm p-3">No posts in this group yet.</p>}
+                    {posts.map((post) => (
+                        <div key={post._id} className="p-1.5">
+                            <Card className="w-full bg-zinc-900 border-zinc-800 text-white cursor-pointer"
+                                  onClick={() => openPost(post, posts)}>
+                                <Book className='absolute right-5 hover:scale-110 transition-all spring-duration-300 spring-bounce-60' />
+                                <CardHeader>
+                                    <CardTitle className="text-sm">{post.title}</CardTitle>
+                                </CardHeader>
+                            </Card>
+                        </div>
+                    ))}
+                </div>
+            )
+        });
     };
 
     const toggle = () => {

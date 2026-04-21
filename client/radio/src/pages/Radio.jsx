@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useContext } from "react";
 import { AppContext } from "../context/AppContext.jsx";
 import axios from "axios";
-import { Play, Square, Radio as RadioIcon, Users } from "lucide-react";
+import { Play, Square, Radio as RadioIcon, Users, Volume2, VolumeX } from "lucide-react";
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ function Radio() {
     const [listeners, setListeners] = useState(null);
     const [isLive, setIsLive]       = useState(false);
     const [loading, setLoading]     = useState(false);
+    const [volume, setVolume]       = useState(0.7);
+    const [isMuted, setIsMuted]     = useState(false);
 
     const audioRef = useRef(null);
 
@@ -39,16 +41,34 @@ function Radio() {
     const togglePlay = () => {
         const audio = audioRef.current;
         if (!audio) return;
+        audio.volume = isMuted ? 0 : volume;
         if (playing) {
             audio.pause(); audio.src = ""; setLoading(false);
         } else {
             setLoading(true);
             audio.src = STREAM_URL;
+            audio.volume = isMuted ? 0 : volume;
             audio.play()
                 .then(() => setLoading(false))
                 .catch(err => { console.error("Stream error:", err); setLoading(false); });
         }
         setPlaying(!playing);
+    };
+
+    const handleVolumeChange = (e) => {
+        const newVolume = parseFloat(e.target.value);
+        setVolume(newVolume);
+        if (audioRef.current && !isMuted) {
+            audioRef.current.volume = newVolume;
+        }
+    };
+
+    const toggleMute = () => {
+        const newMuted = !isMuted;
+        setIsMuted(newMuted);
+        if (audioRef.current) {
+            audioRef.current.volume = newMuted ? 0 : volume;
+        }
     };
 
     return (
@@ -123,6 +143,24 @@ function Radio() {
                         <p className="text-xs text-zinc-500 text-center">
                             {playing ? "Streaming live · 96kbps AAC" : "Tap to connect to the live stream"}
                         </p>
+                        <div className="flex items-center gap-3 pt-2">
+                            <button
+                                onClick={toggleMute}
+                                className="text-zinc-400 hover:text-white transition-colors"
+                            >
+                                {isMuted || volume === 0 ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}
+                            </button>
+                            <input
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.01"
+                                value={isMuted ? 0 : volume}
+                                onChange={handleVolumeChange}
+                                className="flex-1 h-1.5 bg-zinc-700 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-red-500"
+                            />
+                            <span className="text-xs text-zinc-500 w-8">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
+                        </div>
                     </div>
 
                     {/* Station Info */}

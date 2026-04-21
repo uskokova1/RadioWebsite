@@ -1,22 +1,20 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Radio as RadioIcon } from 'lucide-react';
 import { useWindowManager } from '@/context/WindowManager.jsx';
 import Radio from '@/pages/Radio.jsx';
 
-const RADIO_GROUP = 'radio';
 
 const RadioButton = () => {
     const { addWindow, closeGroup, windows } = useWindowManager();
+    const { open, setOpen } = useState(false);
 
     const handleToggle = () => {
-        const open = windows.some(w => w.group === RADIO_GROUP);
         if (open) {
-            closeGroup(RADIO_GROUP);
+            setOpen(!open);
         } else {
             addWindow({
                 windowName: 'WSIN Radio',
                 spawnx: 400, spawny: 160,
-                group: RADIO_GROUP,
                 content: (
                     <div className="w-[500px] h-[540px]">
                         <Radio />

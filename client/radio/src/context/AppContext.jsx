@@ -12,6 +12,7 @@ export const AppContextProvider = (props) =>{
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [userData, setUserData] = useState(false)
     const [blogGroups, setBlogGroups] = useState([])
+    const [blogPosts, setBlogPosts] = useState({})
 
     const getAuthState = async () => {
         try{
@@ -73,6 +74,21 @@ export const AppContextProvider = (props) =>{
         }
     }
 
+    const fetchBlogPosts = async (groupId) => {
+        if (blogPosts[groupId]) return blogPosts[groupId];
+        try {
+            const { data } = await axios.get(`${backendUrl}/api/posts/blog/${groupId}`);
+            const posts = data.success ? data.posts : [];
+            setBlogPosts(prev => ({ ...prev, [groupId]: posts }));
+            return posts;
+        } catch (e) {
+            console.log('Failed to fetch blog posts:', e.message);
+            return [];
+        }
+    }
+
+    const getBlogPosts = (groupId) => blogPosts[groupId] || []
+
     useEffect(() => {
         axios.defaults.withCredentials = true
         if(!userData) {
@@ -88,7 +104,8 @@ export const AppContextProvider = (props) =>{
         getUserData,
         sendVerificationOtp,
         logout,
-        blogGroups, fetchBlogGroups
+        blogGroups, fetchBlogGroups,
+        fetchBlogPosts, getBlogPosts
     }
 
     return (

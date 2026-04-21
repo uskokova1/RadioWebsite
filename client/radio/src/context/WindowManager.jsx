@@ -14,6 +14,10 @@ export const WindowManagerProvider = ({ children }) => {
     const zCounter = useRef(10);
 
     const addWindow = (windowProps) => {
+        const { group } = windowProps;
+        if (group) {
+            setWindows(prev => prev.filter(w => !w.group || w.group === group));
+        }
         const id     = crypto.randomUUID();
         const zIndex = ++zCounter.current;
         setWindows(prev => [...prev, { id, ...windowProps, zIndex }]);
