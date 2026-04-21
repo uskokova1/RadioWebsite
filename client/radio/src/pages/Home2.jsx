@@ -9,6 +9,7 @@ import LoginButton from '@/components/LoginButton.jsx';
 import RadioButton from '@/components/RadioButton.jsx';
 import AdminButton from '@/components/AdminButton.jsx';
 import AuthButton from '@/components/AuthButton.jsx';
+import { FloatingContact, FloatingBlog, FloatingLogin } from '@/components/FloatingIcons.jsx';
 
 import { WindowManager } from '@/context/WindowManager.jsx';
 import { AppContext } from '@/context/AppContext.jsx';
@@ -50,6 +51,11 @@ const App = () => {
                 <SidebarItem label="Events"><EventsCalendar /></SidebarItem>
                 <SidebarItem label="Admin Dashboard"><AdminButton /></SidebarItem>
             </div>
+
+            {/* ── Freely draggable 3D icons — click to open, drag to reposition ── */}
+            <FloatingContact />
+            <FloatingBlog />
+            <FloatingLogin />
 
             {/* Secondary calendar widget */}
             <EventsCalendar2 />
