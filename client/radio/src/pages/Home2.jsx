@@ -5,6 +5,7 @@ import BlogButton from '@/components/BlogButton.jsx';
 import ContactsButton from '@/components/ContactsButton.jsx';
 import EventsCalendar from '@/components/EventsCalendar.jsx';
 import EventsCalendar2 from '@/components/EventsCalandar2.jsx';
+import LoginButton from '@/components/LoginButton.jsx';
 import ProfileButton from '@/components/ProfileButton.jsx';
 import AccountButton from '@/components/AccountButton.jsx';
 import RadioButton from '@/components/RadioButton.jsx';
@@ -31,18 +32,19 @@ const App = () => {
             </div>
 
             {/* Existing buttons */}
-            <EventsCalendar />     {/* top-35 */}
-            <ContactsButton />     {/* top-45 */}
-            <BlogButton />         {/* top-75 */}
+            <EventsCalendar />     {/* 140px */}
+            <ContactsButton />     {/* 180px */}
+            <BlogButton />         {/* 300px */}
+            <LoginButton />        {/* 420px — opens login/register window */}
 
             {/* New page access buttons (conditional on login) */}
-            <ProfileButton />      {/* top-135 */}
-            <AccountButton />      {/* top-165 */}
-            <RadioButton />        {/* top-195 */}
-            <EventsFormButton />   {/* top-225 */}
+            <ProfileButton />      {/* 480px */}
+            <AccountButton />      {/* 540px */}
+            <RadioButton />        {/* 600px */}
+            <EventsFormButton />   {/* 660px */}
 
             {/* Admin-only */}
-            <AdminButton />        {/* top-255 */}
+            <AdminButton />        {/* 720px */}
 
             {/* Secondary calendar widget */}
             <EventsCalendar2 />

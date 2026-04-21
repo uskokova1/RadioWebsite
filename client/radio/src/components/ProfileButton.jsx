@@ -34,7 +34,7 @@ const ProfileButton = () => {
         <button
             onClick={handleToggle}
             title="Profile"
-            className="absolute left-5 top-[420px] flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
+            className="absolute left-5 top-[480px] flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
         >
             <UserCircle2 className="size-6" />
         </button>

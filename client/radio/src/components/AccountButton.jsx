@@ -34,7 +34,7 @@ const AccountButton = () => {
         <button
             onClick={handleToggle}
             title="Account"
-            className="absolute left-5 top-[480px] flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
+            className="absolute left-5 top-[540px] flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
         >
             <Settings className="size-6" />
         </button>

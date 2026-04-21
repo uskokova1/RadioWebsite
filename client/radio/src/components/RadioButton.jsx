@@ -18,7 +18,7 @@ const RadioButton = () => {
                 spawnx: 400, spawny: 160,
                 group: RADIO_GROUP,
                 content: (
-                    <div className="w-[460px] h-[360px]">
+                    <div className="w-[500px] h-[540px]">
                         <Radio />
                     </div>
                 ),
@@ -30,7 +30,7 @@ const RadioButton = () => {
         <button
             onClick={handleToggle}
             title="Radio"
-            className="absolute left-5 top-[540px] flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
+            className="absolute left-5 top-[600px] flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
         >
             <RadioIcon className="size-6" />
         </button>
