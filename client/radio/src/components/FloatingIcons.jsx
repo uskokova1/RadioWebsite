@@ -12,6 +12,7 @@ import CommentSection from '@/components/CommentSection.jsx';
 import Login from '@/pages/Login.jsx';
 
 import { CONTACTS_GROUP, buildContactWindows } from '@/components/ContactsButton.jsx';
+import {Book} from "lucide-react";
 
 const BLOGS_GROUP = 1;
 const LOGIN_GROUP = 5;
@@ -143,16 +144,16 @@ export function FloatingBlog() {
             closeGroup(BLOGS_GROUP);
             addWindow({
                 windowName: `${group.name} — Posts`,
-                spawnx: 300, spawny: 200, group: BLOGS_GROUP,
+                spawnx: 300, spawny: 200,
+                group: BLOGS_GROUP,
                 content: (
-                    <div className="bg-zinc-900 w-60 min-h-32 max-h-96 overflow-y-auto">
-                        {posts.length === 0 && (
-                            <p className="text-zinc-400 text-sm p-3">No posts in this group yet.</p>
-                        )}
-                        {posts.map(post => (
+                    <div className='bg-zinc-900 w-60 min-h-32 max-h-96 overflow-y-auto'>
+                        {posts.length === 0 && <p className="text-zinc-400 text-sm p-3">No posts in this group yet.</p>}
+                        {posts.map((post) => (
                             <div key={post._id} className="p-1.5">
                                 <Card className="w-full bg-zinc-900 border-zinc-800 text-white cursor-pointer"
                                       onClick={() => openPost(post)}>
+                                    <Book className='absolute right-5 hover:scale-110 transition-all spring-duration-300 spring-bounce-60' />
                                     <CardHeader>
                                         <CardTitle className="text-sm">{post.title}</CardTitle>
                                     </CardHeader>
@@ -160,9 +161,11 @@ export function FloatingBlog() {
                             </div>
                         ))}
                     </div>
-                ),
+                )
             });
-        } catch (err) { toast.error(err.message); }
+        } catch (err) {
+            toast.error(err.message);
+        }
     };
 
     const toggle = () => {

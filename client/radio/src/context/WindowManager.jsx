@@ -44,6 +44,9 @@ const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, grou
     const { closeGroup, bringToFront } = useWindowManager();
     const windowRef = useRef(null);
     const dragHandleRef = useRef(null);
+    const curChildren = useRef(null);
+    const [target, setTarget] = useState(null);
+    const [dragTarget, setDragTarget] = useState(null);
 
     return (
         <div
@@ -55,6 +58,9 @@ const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, grou
                 zIndex: zIndex,
             }}
             className="flex-col relative"
+            onMouseEnter={(e) => {
+                setTarget(e.currentTarget);
+            }}
         >
             <motion.div
                 initial={{ scaleY: 0.5, opacity: 0 }}
@@ -71,27 +77,32 @@ const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, grou
             >
                 <div
                     ref={dragHandleRef}
-                    className="flex items-center justify-between h-8 px-3 cursor-move select-none bg-zinc-900/80 border-b border-zinc-800"
+                    className="flex items-center justify-between h-10 px-3 cursor-move select-none bg-zinc-900/80 border-b border-zinc-800"
+                    onMouseEnter={(e) => {
+                        setDragTarget(e.currentTarget);
+                    }}
                 >
                     <h1 className="text-xs uppercase tracking-widest text-zinc-300 font-medium">
                         {windowName}
                     </h1>
                     <SquareX
-                        className="size-4 text-zinc-400 hover:text-red-500 cursor-pointer transition-colors"
-                        onMouseDown={e => e.stopPropagation()}
+                        className="size-6 text-zinc-400 hover:text-red-500 cursor-pointer transition-colors"
+                        onMouseDown={e => {e.stopPropagation(); closeGroup(group)}}
                         onClick={() => closeGroup(group)}
                     />
                 </div>
-                <div className="flex-col justify-center">{children}</div>
+                <div
+                    ref={curChildren}
+                    className="flex-col justify-center z-50">{children}</div>
             </motion.div>
 
             <Moveable
-                target={windowRef}
+                target={target}
                 dragTarget={dragHandleRef}
                 draggable={true}
                 origin={false}
                 hideDefaultLines={true}
-                onDragStart={() => bringToFront(id)}
+                onDragStart={(e) => bringToFront(id)}
                 onDrag={e => {
                     e.target.style.transform = e.transform;
                 }}

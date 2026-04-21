@@ -38,12 +38,13 @@ const App = () => {
 
             {/* Brand chip top-left */}
             <div className="absolute left-5 top-3 flex items-center gap-2 text-zinc-300 select-none pointer-events-none">
-                <Disc3 className="size-5 text-red-500" />
-                <span className="text-xs uppercase tracking-[0.3em] font-semibold">WSIN</span>
+                <img src={'/shirtlogo.png'} className='h-20'/>
+                {/*<Disc3 className="size-5 text-red-500" />*/}
+                {/*<span className="text-xs uppercase tracking-[0.3em] font-semibold">WSIN</span>*/}
             </div>
 
             {/* ── Left sidebar ── equally spaced, each with a hover label */}
-            <div className="absolute left-5 top-[80px] z-[200] flex flex-col items-start gap-5">
+            <div className="absolute left-5 top-[110px] z-[200] flex flex-col items-start gap-5">
                 <SidebarItem label="About Us"><ContactsButton /></SidebarItem>
                 <SidebarItem label="Blog"><BlogButton /></SidebarItem>
                 <SidebarItem label="User Login"><LoginButton /></SidebarItem>
