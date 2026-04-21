@@ -10,10 +10,13 @@ export const useWindowManager = () => useContext(WindowManagerContext);
 
 export const WindowManagerProvider = ({ children }) => {
     const [windows, setWindows] = useState([]);
+    // Ever-increasing counter so windows always stack above floating 3-D icons (z: 5)
+    const zCounter = useRef(10);
 
     const addWindow = (windowProps) => {
-        const id = crypto.randomUUID();
-        setWindows(prev => [...prev, { id, ...windowProps, zIndex: prev.length + 1 }]);
+        const id     = crypto.randomUUID();
+        const zIndex = ++zCounter.current;
+        setWindows(prev => [...prev, { id, ...windowProps, zIndex }]);
     };
 
     const removeWindow = (id) => {
@@ -21,13 +24,8 @@ export const WindowManagerProvider = ({ children }) => {
     };
 
     const bringToFront = (id) => {
-        setWindows(prev => {
-            const maxZ = prev.length;
-            return prev.map(win => {
-                if (win.id === id) return { ...win, zIndex: maxZ };
-                return { ...win, zIndex: win.zIndex > 0 ? win.zIndex - 1 : 0 };
-            });
-        });
+        const zIndex = ++zCounter.current;
+        setWindows(prev => prev.map(win => win.id === id ? { ...win, zIndex } : win));
     };
 
     const closeGroup = (groupId) => {

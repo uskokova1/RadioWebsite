@@ -61,7 +61,7 @@ function DraggableIcon({ src, title, initialX, initialY, onActivate }) {
         <div
             onMouseDown={onMouseDown}
             title={title}
-            style={{ position: 'absolute', left: pos.x, top: pos.y, zIndex: 150 }}
+            style={{ position: 'absolute', left: pos.x, top: pos.y, zIndex: 5 }}
             className="w-24 h-24 select-none cursor-grab active:cursor-grabbing drop-shadow-2xl
                        transition-filter hover:drop-shadow-[0_0_12px_rgba(244,63,94,0.5)]"
         >
