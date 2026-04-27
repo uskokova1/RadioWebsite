@@ -8,6 +8,13 @@ export const AppContext = createContext()
 export const AppContextProvider = (props) =>{
     const navigate = useNavigate();
 
+    const [introPlayedBefore, setIntroPlayedBefore] = useState(() => {
+        return localStorage.getItem("introPlayed") === "true";
+    });
+    useEffect(() => {
+        localStorage.setItem("introPlayed", introPlayedBefore);
+    }, [introPlayedBefore]);
+
     const backendUrl = import.meta.env.VITE_BACKEND_URL
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [userData, setUserData] = useState(false)
@@ -105,7 +112,8 @@ export const AppContextProvider = (props) =>{
         sendVerificationOtp,
         logout,
         blogGroups, fetchBlogGroups,
-        fetchBlogPosts, getBlogPosts
+        fetchBlogPosts, getBlogPosts,
+        introPlayedBefore, setIntroPlayedBefore,
     }
 
     return (

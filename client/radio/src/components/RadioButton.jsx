@@ -11,7 +11,7 @@ const RadioButton = () => {
 
             addWindow({
                 windowName: 'WSIN Radio',
-                spawnx: 400, spawny: 160,
+                spawnx: window.innerWidth/2 - 200, spawny: window.innerHeight/2 - 200,
                 content: (
                     <div className="w-[500px] h-[540px]">
                         <Radio />

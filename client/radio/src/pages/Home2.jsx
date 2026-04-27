@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 
 import BlogButton from '@/components/BlogButton.jsx';
 import ContactsButton from '@/components/ContactsButton.jsx';
@@ -11,8 +11,9 @@ import AuthButton from '@/components/AuthButton.jsx';
 import {FloatingContact, FloatingBlog, FloatingLogin, FloatingHome} from '@/components/FloatingIcons.jsx';
 import {motion} from "motion/react";
 
-import { WindowManager } from '@/context/WindowManager.jsx';
+import {useWindowManager, WindowManager} from '@/context/WindowManager.jsx';
 import { AppContext } from '@/context/AppContext.jsx';
+import Wigglie from "@/components/Wigglie.jsx";
 
 /** Wraps a sidebar button with a fade-in label that appears to its right on hover */
 const SidebarItem = ({ label, children }) => (
@@ -33,13 +34,88 @@ const SidebarItem = ({ label, children }) => (
 );
 
 const App = () => {
-    const { userData } = useContext(AppContext);
+    const { userData, introPlayedBefore, setIntroPlayedBefore } = useContext(AppContext);
     const isAdmin = userData && userData.role === 'admin';
+    const [introFinished, setIntroFinished] = useState(false);
+    const intro1 = useRef(null);
+    const [firstButton, setFirstButton] = useState(false);
+
+    useEffect(() => {
+        if(introPlayedBefore){
+            setFirstButton(true);
+            setIntroFinished(true);
+        }
+    },  [introPlayedBefore])
+
+    const bgaudio = useRef(null);
+    const bg = useRef(null);
+
+    useEffect(() => {
+        if(bgaudio.current){
+            bgaudio.current.volume = 0.1;
+        }
+    }, [introFinished]);
+
 
     return (
-        <div className='polka relative min-h-screen min-w-screen z-90 overflow-hidden'>
+        <div className="h-screen w-screen flex justify-center items-center">
+            <div className='absolute min-h-screen min-w-screen overflow-hidden bg-black
+            flex items-center justify-center'>
+                {!firstButton && (
+                    <Wigglie speed={300} className='flex w-screen h-screen'>
+                    <button onClick={()=>{
+                        intro1.current.play();
+                        intro1.current.hidden = false;
+                        intro1.current.volume = 0.1
+                        setFirstButton(true)
+                    }}
+                            style={{
+                                boxShadow: "0px 0px 35px 42px #1A1A1A"
+                            }}
+                            className='special-elite justify-center align-middle mx-auto my-auto
+                            hover:scale-105
+                            transition-all spring-bounce-60 spring-duration-300 text-xl
+                            '>
+                        1590AM
+                    </button>
+                    </Wigglie>
+                )}
+                {!introFinished && (
+                    <div className='bg-black w-full h-full contents'>
+                        <video
+                            hidden={true}
+                            ref={intro1}
+                            playsInline
+                            onEnded={() => {
+                                setIntroFinished(true)
+                                setIntroPlayedBefore(true)
+                            }}
+                            className="absolute inset-0 justify-self-center h-full object-cover z-10 scale-50">
+                            <source src="/wsinlogoanim.webm" />
+                        </video>
+                    </div>
+                )}
+                {introFinished && (
+        <div className='bg-black relative min-h-screen min-w-screen z-90 overflow-hidden'>
+            <Wigglie className="absolute inset-0 object-contain z-0 max-w-full max-h-full m-auto align-middle">
+            <audio ref={bgaudio} src='/finalbackground.webm' type="audio/webm" autoPlay={true}>
+            </audio>
+            <video
+                ref={bg}
+                autoPlay={true}
+                muted={true}
+                onEnded={() => {
+                    bg.current.style.brightness = '20%';
+                    console.log("fjeiwo")
+                }}
+                className="absolute inset-0 object-contain z-0 max-w-full max-h-full m-auto align-middle
+                transition-all">
+                <source src="/finalbackground.webm" />
+            </video>
+            </Wigglie>
 
             <WindowManager />
+
 
             {/* Brand chip top-left */}
             <div className="absolute left-5 top-3 flex items-center gap-2 text-zinc-300 select-none pointer-events-none">
@@ -76,7 +152,7 @@ const App = () => {
             <FloatingHome />
 
             {/* Secondary calendar widget */}
-            <EventsCalendar2 />
+            {/*<EventsCalendar2 />*/}
 
             {/* Floating auth button bottom-right */}
             <AuthButton />
@@ -89,6 +165,10 @@ const App = () => {
                     : <span>Not signed in</span>}
             </div>
         </div>
+            ) }
+            </div>
+        </div>
+
     );
 };
 

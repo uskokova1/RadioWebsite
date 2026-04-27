@@ -68,8 +68,8 @@ function DraggableIcon({ src, title, initialX, initialY, onActivate }) {
             onMouseDown={onMouseDown}
             title={title}
             style={{ position: 'absolute', left: pos.x, top: pos.y, zIndex: 5 }}
-            className="w-24 h-24 select-none cursor-grab active:cursor-grabbing drop-shadow-2xl
-                       transition-filter hover:drop-shadow-[0_0_12px_rgba(244,63,94,0.5)]"
+            className="w-44 h-44 select-none cursor-grab active:cursor-grabbing drop-shadow-2xl
+                       transition-filter hover:drop-shadow-[0_0_42px_rgba(244,63,94,0.5)]"
         >
             <motion.div
                 initial={{ scale: 0.5, opacity: 0 }}
@@ -118,8 +118,8 @@ export function FloatingContact() {
         <DraggableIcon
             src="/contact.webm"
             title="About Us — drag me!"
-            initialX={260}
-            initialY={140}
+            initialX={window.innerWidth/2}
+            initialY={window.innerHeight/7 * 5}
             onActivate={toggle}
         />
     );
@@ -236,8 +236,8 @@ export function FloatingBlog() {
         <DraggableIcon
             src="/clipboard.webm"
             title="Blog — drag me!"
-            initialX={760}
-            initialY={55}
+            initialX={window.innerWidth/6}
+            initialY={window.innerHeight/7 * 5}
             onActivate={toggle}
         />
     );
@@ -262,8 +262,8 @@ export function FloatingLogin() {
         <DraggableIcon
             src="/login.webm"
             title="Login — drag me!"
-            initialX={920}
-            initialY={55}
+            initialX={window.innerWidth/8 * 6}
+            initialY={window.innerHeight/5 * 3}
             onActivate={toggle}
         />
     );
@@ -349,8 +349,8 @@ export function FloatingHome() {
         <DraggableIcon
             src="/earth.webm"
             title="Home — drag me!"
-            initialX={920}
-            initialY={355}
+            initialX={window.innerWidth/7}
+            initialY={window.innerHeight/7}
             onActivate={toggle}
         />
     );

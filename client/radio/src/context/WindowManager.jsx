@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { SquareX } from 'lucide-react';
 import useSound from 'use-sound';
 
-import closeSfx from '/flora bubble pop high.ogg'
-import openSfx from '/flora bubble pop low.ogg'
+import closeSfx from '/flora bubble pop low.ogg'
+import openSfx from '/flora bubble pop high.ogg'
 
 // --- CONTEXT SETUP ---
 const WindowManagerContext = createContext();
@@ -49,7 +49,7 @@ export const WindowManagerProvider = ({ children }) => {
     };
 
     return (
-        <WindowManagerContext.Provider value={{ windows, addWindow, removeWindow, bringToFront, closeGroup }}>
+        <WindowManagerContext.Provider value={{ windows, addWindow, removeWindow, bringToFront, closeGroup}}>
             {children}
         </WindowManagerContext.Provider>
     );
@@ -75,7 +75,7 @@ const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, grou
                 left: spawnx,
                 zIndex: zIndex,
             }}
-            className="flex-col relative"
+            className="flex-col relative drop-shadow-2xl drop-shadow-black"
             onMouseEnter={(e) => {
                 setTarget(e.currentTarget);
             }}
@@ -105,7 +105,7 @@ const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, grou
                     </h1>
                     <SquareX
                         className="size-6 text-zinc-400 hover:text-red-500 cursor-pointer transition-colors"
-                        onMouseDown={e => {e.stopPropagation(); closeGroup(group)}}
+                        // onMouseDown={e => {e.stopPropagation(); closeGroup(group)}}
                         onClick={() => {closeGroup(group); playClose()}
                     }
                     />

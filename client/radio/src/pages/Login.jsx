@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import {useNavigate} from "react-router-dom";
 import {AppContext} from "../context/AppContext.jsx";
 import axios from "axios";
@@ -17,13 +17,29 @@ const Login = () => {
 
     const navigate = useNavigate()
 
-    const {backendUrl, setIsLoggedIn, getUserData, sendVerificationOtp} = useContext(AppContext)
+    const {backendUrl, setIsLoggedIn, getUserData, sendVerificationOtp, isLoggedIn} = useContext(AppContext)
     const {addWindow, closeGroup} = useWindowManager()
 
     const [state, setState] = useState("Login")
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+
+    useEffect(() => {
+        if(isLoggedIn) {
+            closeGroup(5);
+            addWindow({
+                spawnx: window.innerWidth / 2, spawny: window.innerHeight / 2,
+                windowName: "login",
+                group: 5,
+                content: (
+                    <p className='p-5'>
+                        already logged in!
+                    </p>
+                )
+            })
+        }
+    }, []);
 
     const onSubmitHandler = async (e) => {
         try {

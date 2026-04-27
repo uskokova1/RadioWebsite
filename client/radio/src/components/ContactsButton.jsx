@@ -11,7 +11,7 @@ export const CONTACTS_GROUP = 2;
 export function buildContactWindows(members, randomY, backendUrl) {
     return members.map((member, index) => ({
         windowName: member.name,
-        spawnx: index * 220 + 70,
+        spawnx: window.innerWidth/members.length * index/2 + window.innerWidth/members.length,
         spawny: randomY[index] + 150,
         group: CONTACTS_GROUP,
         content: (

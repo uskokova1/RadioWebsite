@@ -1,6 +1,6 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
-import { ToastContainer } from "react-toastify";
+import { ToastContainer} from "react-toastify";
 
 import Home from './pages/Home'
 import Home2 from './pages/Home2'
@@ -24,11 +24,14 @@ import AdminBlog from "@/pages/AdminBlog.jsx";
 import AdminEvents from "@/pages/AdminEvents.jsx";
 import { TooltipProvider } from "@/components/ui/tooltip.jsx"
 
+
 const App = () => {
     return (
         <div>
             <TooltipProvider>
-                <ToastContainer/>
+                <ToastContainer
+                    position="bottom-center"
+                    theme="dark"/>
                 <Routes>
                     <Route path='/'                element={<Home2 />}          />
                     <Route path='/Home'            element={<Home />}           />
