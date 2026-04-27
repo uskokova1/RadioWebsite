@@ -13,6 +13,8 @@ const POLL_INTERVAL = 30000;
 function Radio() {
     const { backendUrl } = useContext(AppContext);
 
+    const [metadata,  setMetadata] = useState(null);
+
     const [playing, setPlaying]     = useState(false);
     const [listeners, setListeners] = useState(null);
     const [isLive, setIsLive]       = useState(false);
@@ -73,6 +75,7 @@ function Radio() {
 
     return (
         <div className="w-full h-full bg-zinc-950 text-white flex flex-col">
+            <p>{metadata} </p>
             <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full flex flex-col min-h-0">
                 <CardHeader className="border-b border-zinc-800 pb-4 shrink-0">
                     <CardDescription className="uppercase tracking-widest text-xs text-red-500">

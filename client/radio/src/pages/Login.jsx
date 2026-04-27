@@ -20,7 +20,7 @@ const Login = () => {
     const {backendUrl, setIsLoggedIn, getUserData, sendVerificationOtp} = useContext(AppContext)
     const {addWindow, closeGroup} = useWindowManager()
 
-    const [state, setState] = useState("Sign up")
+    const [state, setState] = useState("Login")
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")

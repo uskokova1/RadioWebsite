@@ -9,10 +9,12 @@ import { Avatar } from '@/components/ui/avatar.jsx';
 import BlogGrid from '@/components/BlogGrid.jsx';
 import CommentSection from '@/components/CommentSection.jsx';
 import Login from '@/pages/Login.jsx';
+import {Home, Instagram} from 'lucide-react';
 
 import { CONTACTS_GROUP, buildContactWindows } from '@/components/ContactsButton.jsx';
 import {Book} from "lucide-react";
 import { motion } from 'motion/react';
+
 
 
 const BLOGS_GROUP = 1;
@@ -24,6 +26,7 @@ const LOGIN_GROUP = 5;
 // Drag  = move freely around the screen
 function DraggableIcon({ src, title, initialX, initialY, onActivate }) {
     const [pos, setPos]   = useState({ x: initialX, y: initialY });
+
     const dragging        = useRef(false);
     const origin          = useRef({ x: 0, y: 0 });
     const startPos        = useRef({ x: 0, y: 0 });
@@ -275,16 +278,68 @@ export function FloatingHome() {
             closeGroup(HOME_GROUP);
         } else {
             addWindow({
-                windowName: 'Home', spawnx: 300, spawny: 200, group: HOME_GROUP,
+                windowName: 'Home', spawnx: window.innerWidth/2.3, spawny: window.innerHeight/5, group: HOME_GROUP,
                 content: (
-                    <div className='w-100'>
-                        <p>
-                            Welcome to <b>WSIN,</b> Southern Connecticut State University's
+                    <p className='prose prose-invert m-5 group-prose-strong:text-red-500 w-100'>
+                        🎶 Love music? We play all genres and are always looking for new recommendations to add to our rotation.
+                        <br/>
+                        🎙 Want to get involved? Record your own podcast or curate a custom playlist to air during select times.
+                        <br/>
+                        📡 Looking for a space to share your voice? WSIN is more than a station—it’s a platform for creativity, conversation, and community.
+                        <br/>
+                        Whether you’re here to listen, create, or connect, WSIN is your place to turn it up and be heard!
+                    </p>
+                )
+            })
+            addWindow({
+                windowName: 'More', spawnx: window.innerWidth/2, spawny: window.innerHeight*2/3, group: HOME_GROUP,
+                content: (
+                    <div className='mx-auto w-full justify-evenly align-middle p-2'>
+                        <a className='flex-row my-2 prose prose-invert flex text-2xl text-blue-400 underline '
+                           href="https://owlconnect.southernct.edu/organization/wsinradio">
+                            owlconnect
+                        </a>
+                        <a className='flex-row my-2 prose prose-invert flex text-2xl text-blue-400 underline '
+                           href="https://radio.garden/listen/wsin-1590-am/UXQb3kOs">
+                            radio.garden
+                        </a>
+                        <a className='text-2xl my-2 text-blue-400 underline flex'
+                            href='https://www.instagram.com/wsinradio/'>
+                            Instagram
+                            <Instagram className='flex-row translate-y-2 flex text-2xl ' />
+                        </a>
+                        {/*<button onClick={() => {*/}
+                        {/*    addWindow({*/}
+                        {/*        windowName: 'Home', spawnx: 900, spawny: 300,*/}
+                        {/*        group: HOME_GROUP,*/}
+                        {/*        content: (*/}
+                        {/*            <div className='w-100 text-xl items-center justify-center m-4'>*/}
+                        {/*                <p className='prose prose-invert'>*/}
+                        {/*                    The primary purpose of WSIN 1590 Radio Station shall be to serve the Southern Connecticut State University community through the broadcast medium. It shall inform the campus of student and University activities and news events; provide entertainment suited to the tastes of the student body as a whole; and promote student participation and unity within the University community. In addition, WSIN Radio Station shall provide practical experience for students planning to enter the fields of radio broadcasting, broadcast news, and sales.*/}
+                        {/*                </p>*/}
+                        {/*            </div>*/}
+                        {/*        ),*/}
+                        {/*    })*/}
+                        {/*}}>*/}
+                        {/*    Our purpose*/}
+                        {/*</button>*/}
+                    </div>
+                )
+            })
+            addWindow({
+                windowName: 'About', spawnx: window.innerWidth/5, spawny: window.innerHeight/5, group: HOME_GROUP,
+                content: (
+                    <div className='w-100 text-xl items-center justify-center'>
+                        <img className='w-100'
+                             src='/homepicture.jpg' />
+                        <div className='prose prose-invert m-5 group-prose-strong:text-red-500'>
+                            <p className='text-2xl text-center'>Welcome to <b>WSIN!</b> </p>
+                            Southern Connecticut State University's
                             student-run radio station, broadcasting straight from Room 210 in the
                             Adanti Student Center! We bring you a <b>diverse mix of music, podcasts,
                             and student-led content,</b> making sure there's always something fresh to tune into.
-                        </p>
-                    </div>
+                        </div>
+                        </div>
                 ),
             });
         }

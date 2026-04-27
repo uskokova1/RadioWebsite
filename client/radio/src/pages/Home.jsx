@@ -95,6 +95,7 @@ function Home() {
                         Adanti Student Center! We bring you a <b>diverse mix of music, podcasts,
                         and student-led content,</b> making sure there's always something fresh to tune into.
                     </p>
+
                 </div>
 
                 {/* LIVE PLAYER */}

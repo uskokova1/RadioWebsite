@@ -1,5 +1,4 @@
 import React, { useContext } from 'react';
-import { Disc3 } from 'lucide-react';
 
 import BlogButton from '@/components/BlogButton.jsx';
 import ContactsButton from '@/components/ContactsButton.jsx';

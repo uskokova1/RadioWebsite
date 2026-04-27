@@ -212,7 +212,7 @@ export default function CommentSection({ targetType, targetId }) {
                     </Button>
                 </form>
             ) : (
-                <p className="text-xs text-zinc-500">Log in to leave a comment.</p>
+                <p className="justify-self-center text-s text-zinc-500">Log in to leave a comment.</p>
             )}
         </div>
     );

@@ -2,6 +2,10 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import Moveable from 'react-moveable';
 import { motion, AnimatePresence } from 'motion/react';
 import { SquareX } from 'lucide-react';
+import useSound from 'use-sound';
+
+import closeSfx from '/flora bubble pop high.ogg'
+import openSfx from '/flora bubble pop low.ogg'
 
 // --- CONTEXT SETUP ---
 const WindowManagerContext = createContext();
@@ -9,13 +13,21 @@ const WindowManagerContext = createContext();
 export const useWindowManager = () => useContext(WindowManagerContext);
 
 export const WindowManagerProvider = ({ children }) => {
+    const [playOpen] = useSound(openSfx, { volume: 0.5 });
+
     const [windows, setWindows] = useState([]);
+    const [groups, setGroups] = useState([]);
     // Ever-increasing counter so windows always stack above floating 3-D icons (z: 5)
     const zCounter = useRef(10);
+
+    useEffect(() => {
+        playOpen();
+    }, [groups])
 
     const addWindow = (windowProps) => {
         const { group } = windowProps;
         if (group) {
+            setGroups((prev) => [...prev, group]);
             setWindows(prev => prev.filter(w => !w.group || w.group === group));
         }
         const id     = crypto.randomUUID();
@@ -45,6 +57,8 @@ export const WindowManagerProvider = ({ children }) => {
 
 // --- WINDOW COMPONENT ---
 const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, group }) => {
+    const [playClose] = useSound(closeSfx, { volume: 0.5 });
+
     const { closeGroup, bringToFront } = useWindowManager();
     const windowRef = useRef(null);
     const dragHandleRef = useRef(null);
@@ -92,7 +106,8 @@ const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, grou
                     <SquareX
                         className="size-6 text-zinc-400 hover:text-red-500 cursor-pointer transition-colors"
                         onMouseDown={e => {e.stopPropagation(); closeGroup(group)}}
-                        onClick={() => closeGroup(group)}
+                        onClick={() => {closeGroup(group); playClose()}
+                    }
                     />
                 </div>
                 <div
