@@ -16,6 +16,7 @@ import {Book} from "lucide-react";
 import { motion } from 'motion/react';
 import {Calendar} from "@/components/ui/calendar.jsx";
 import EventsCalendar from "@/components/EventsCalendar.jsx";
+import RadioButton from "@/components/RadioButton.jsx";
 
 
 
@@ -381,5 +382,30 @@ export function FloatingCalander() {
             onActivate={toggle}
         />
     </>
+    );
+}
+
+export function FloatingRadio() {
+    const { addWindow, closeGroup, windows } = useWindowManager();
+    const [openAlready, setOpenAlready] = useState(false);
+
+    const toggle = () => {
+        if (!openAlready) {
+            setOpenAlready(true);
+        } else {
+            setOpenAlready(false);
+        }
+    };
+    return (
+        <>
+            <RadioButton headless={true} toggle={openAlready}/>
+            <DraggableIcon
+                src="/radio.webm"
+                title="Radio — drag me!"
+                initialX={window.innerWidth/4 * 1}
+                initialY={window.innerHeight/7 * 3}
+                onActivate={toggle}
+            />
+        </>
     );
 }

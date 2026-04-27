@@ -56,7 +56,7 @@ export const WindowManagerProvider = ({ children }) => {
 };
 
 // --- WINDOW COMPONENT ---
-const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, group }) => {
+const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, group, onClose }) => {
     const [playClose] = useSound(closeSfx, { volume: 0.5 });
 
     const { closeGroup, bringToFront } = useWindowManager();
@@ -106,7 +106,13 @@ const Window = ({ id, windowName, children, spawnx = 0, spawny = 0, zIndex, grou
                     <SquareX
                         className="size-6 text-zinc-400 hover:text-red-500 cursor-pointer transition-colors"
                         // onMouseDown={e => {e.stopPropagation(); closeGroup(group)}}
-                        onClick={() => {closeGroup(group); playClose()}
+                        onClick={() => {
+                            closeGroup(group);
+                            playClose()
+                            if(onClose) {
+                                onClose();
+                            }
+                        }
                     }
                     />
                 </div>

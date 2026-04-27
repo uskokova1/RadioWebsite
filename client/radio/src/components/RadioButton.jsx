@@ -1,27 +1,43 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import { Radio as RadioIcon } from 'lucide-react';
 import { useWindowManager } from '@/context/WindowManager.jsx';
 import Radio from '@/pages/Radio.jsx';
 
 
-const RadioButton = () => {
+const RadioButton = ({headless=false, toggle}) => {
     const { addWindow, closeGroup, windows } = useWindowManager();
+    const [open, setOpen] = useState(false);
+
 
     const handleToggle = () => {
-
+        if (!open) {
+            setOpen(true);
             addWindow({
                 windowName: 'WSIN Radio',
                 spawnx: window.innerWidth/2 - 200, spawny: window.innerHeight/2 - 200,
+                onClose: () => {
+                    setOpen(false);
+                },
                 content: (
                     <div className="w-[500px] h-[540px]">
                         <Radio />
                     </div>
                 ),
             });
+        }
 
     };
+    const [skip,setSkip] = useState(false);
+    useEffect(() => {
+        if(skip){
+            handleToggle();
+        }
+        setSkip(true)
+    }, [toggle]);
 
     return (
+        <>
+        {!headless && (
         <button
             onClick={handleToggle}
             title="Radio"
@@ -29,6 +45,9 @@ const RadioButton = () => {
         >
             <RadioIcon className="size-6" />
         </button>
+            )}
+</>
+
     );
 };
 

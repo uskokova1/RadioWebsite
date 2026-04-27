@@ -13,9 +13,10 @@ import {
     FloatingBlog,
     FloatingLogin,
     FloatingHome,
-    FloatingCalander
+    FloatingCalander, FloatingRadio
 } from '@/components/FloatingIcons.jsx';
 import {motion} from "motion/react";
+import {RotateCcw} from "lucide-react";
 
 import {useWindowManager, WindowManager} from '@/context/WindowManager.jsx';
 import { AppContext } from '@/context/AppContext.jsx';
@@ -157,6 +158,7 @@ const App = () => {
             <FloatingLogin />
             <FloatingHome />
             <FloatingCalander />
+            <FloatingRadio />
 
             {/* Secondary calendar widget */}
             {/*<EventsCalendar2 />*/}
@@ -170,6 +172,18 @@ const App = () => {
                 {userData
                     ? <span><span className="text-zinc-300 font-medium">{userData.username || 'User'}</span>{isAdmin && <span className="ml-1 text-red-400">· admin</span>}</span>
                     : <span>Not signed in</span>}
+                <button
+                    onClick={() => {
+                        localStorage.removeItem('introPlayedBefore');
+                        setIntroPlayedBefore(false);
+                        setIntroFinished(false);
+                        setFirstButton(false);
+                    }}
+                    className="ml-2 p-1.5 rounded-md bg-zinc-800/50 border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-700/50 transition-colors"
+                    title="Reset intro and replay"
+                >
+                    <RotateCcw className="size-3" />
+                </button>
             </div>
         </div>
             ) }
