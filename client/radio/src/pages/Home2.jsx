@@ -8,7 +8,13 @@ import LoginButton from '@/components/LoginButton.jsx';
 import RadioButton from '@/components/RadioButton.jsx';
 import AdminButton from '@/components/AdminButton.jsx';
 import AuthButton from '@/components/AuthButton.jsx';
-import {FloatingContact, FloatingBlog, FloatingLogin, FloatingHome} from '@/components/FloatingIcons.jsx';
+import {
+    FloatingContact,
+    FloatingBlog,
+    FloatingLogin,
+    FloatingHome,
+    FloatingCalander
+} from '@/components/FloatingIcons.jsx';
 import {motion} from "motion/react";
 
 import {useWindowManager, WindowManager} from '@/context/WindowManager.jsx';
@@ -150,6 +156,7 @@ const App = () => {
             <FloatingBlog />
             <FloatingLogin />
             <FloatingHome />
+            <FloatingCalander />
 
             {/* Secondary calendar widget */}
             {/*<EventsCalendar2 />*/}

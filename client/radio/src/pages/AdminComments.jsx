@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '@/context/AppContext.jsx';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { Flag, Trash2 } from 'lucide-react';
+import { Flag, Trash2, Check } from 'lucide-react';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,6 +45,16 @@ const AdminComments = () => {
                 setAllComments(prev => prev.filter(c => c._id !== id));
                 setFlaggedComments(prev => prev.filter(c => c._id !== id));
                 toast.success('Comment deleted');
+            } else toast.error(data.message);
+        } catch (err) { toast.error(err.message); }
+    };
+
+    const handleUnflag = async (id) => {
+        try {
+            const { data } = await axios.delete(`${backendUrl}/api/comments/admin/${id}/unflag`, { withCredentials: true });
+            if (data.success) {
+                setFlaggedComments(prev => prev.filter(c => c._id !== id));
+                toast.success('Comment unflagged');
             } else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
     };
@@ -120,14 +130,26 @@ const AdminComments = () => {
                                                     )}
                                                 </div>
                                             </div>
-                                            <Button
-                                                variant="destructive"
-                                                size="icon-xs"
-                                                onClick={() => handleDelete(c._id)}
-                                                title="Delete"
-                                            >
-                                                <Trash2 />
-                                            </Button>
+                                            <div className="flex gap-1 shrink-0">
+                                                {c.flaggedBy?.length > 0 && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon-xs"
+                                                        onClick={() => handleUnflag(c._id)}
+                                                        title="Unflag"
+                                                    >
+                                                        <Check />
+                                                    </Button>
+                                                )}
+                                                <Button
+                                                    variant="destructive"
+                                                    size="icon-xs"
+                                                    onClick={() => handleDelete(c._id)}
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 />
+                                                </Button>
+                                            </div>
                                         </div>
                                         <p className="text-sm text-zinc-200 leading-relaxed break-words">{c.text}</p>
                                         {c.reactions?.some(r => r.users?.length > 0) && (

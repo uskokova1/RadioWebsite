@@ -116,3 +116,17 @@ export const flagComment = async (req, res) => {
         return res.json({ success: false, message: err.message });
     }
 };
+
+// DELETE /api/comments/admin/:id/unflag  — adminAuth
+export const unflagComment = async (req, res) => {
+    try {
+        const comment = await commentModel.findById(req.params.id);
+        if (!comment) return res.json({ success: false, message: 'Comment not found' });
+
+        comment.flaggedBy = [];
+        await comment.save();
+        return res.json({ success: true, message: 'Comment unflagged' });
+    } catch (err) {
+        return res.json({ success: false, message: err.message });
+    }
+};

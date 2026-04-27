@@ -7,11 +7,12 @@ import { Calendar } from '@/components/ui/calendar.jsx';
 import MarkdownView from 'react-showdown';
 import AnalogClock from '@/components/AnalogClock.jsx';
 
-function EventsCalendar() {
+function EventsCalendar( {headless=false, toggle}) {
     const { addWindow, closeGroup } = useWindowManager();
     const { backendUrl } = useContext(AppContext);
     const [events, setEvents] = useState([]);
-    const [openAlready, setOpenAlready] = useState(false);
+    const [openAlready, setOpenAlready] = useState(true);
+
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -176,15 +177,22 @@ function EventsCalendar() {
             closeGroup('calendar');
         }
     };
+    useEffect(() => {
+        handleToggle()
+    }, [toggle]);
 
     return (
-        <button
-            onClick={handleToggle}
-            title="Calendar"
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
-        >
-            <CalendarDays className="size-6" />
-        </button>
+        <div>
+        {!headless && (
+                <button
+                    onClick={handleToggle}
+                    title="Calendar"
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
+                >
+                    <CalendarDays className="size-6" />
+                </button>
+            )}
+        </div>
     );
 }
 

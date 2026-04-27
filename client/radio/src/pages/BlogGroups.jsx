@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { AppContext } from "../context/AppContext.jsx";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -16,10 +16,23 @@ function BlogGroups() {
     const isAdmin = userData && userData.role === 'admin';
     const navigate = useNavigate();
 
+    useEffect(() => {
+        if (isAdmin) fetchImages();
+    }, [userData]);
+
+    const fetchImages = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + '/api/images', { withCredentials: true });
+            if (data.success) setUploadedImages(data.images);
+        } catch (err) { console.error(err.message); }
+    };
+
     const [showForm, setShowForm]     = useState(false);
     const [name, setName]             = useState("");
     const [description, setDescription] = useState("");
+    const [coverImage, setCoverImage] = useState("");
     const [submitting, setSubmitting] = useState(false);
+    const [uploadedImages, setUploadedImages] = useState([]);
 
     const handleSelect = (group) => {
         localStorage.setItem("selectedBlogGroup", JSON.stringify({ _id: group._id, name: group.name }));
@@ -32,17 +45,56 @@ function BlogGroups() {
         try {
             const { data } = await axios.post(
                 `${backendUrl}/api/bloggroup`,
-                { name, description },
+                { name, description, coverImage },
                 { withCredentials: true }
             );
             if (data._id) {
                 toast.success("Blog group created");
-                setName(""); setDescription(""); setShowForm(false);
+                setName(""); setDescription(""); setCoverImage(""); setShowForm(false);
                 fetchBlogGroups();
             } else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
         finally { setSubmitting(false); }
     };
+
+    const ImagePicker = ({ value, onChange }) => (
+        <div className="space-y-2">
+            <p className="text-xs uppercase tracking-widest text-zinc-500">
+                Cover image <span className="text-zinc-600">· optional</span>
+            </p>
+            <div className="flex flex-wrap gap-2">
+                <button
+                    type="button"
+                    onClick={() => onChange(null)}
+                    className={[
+                        "flex h-12 w-12 items-center justify-center rounded-md border text-[10px]",
+                        !value
+                            ? "border-red-500 bg-red-500/15 text-red-400"
+                            : "border-zinc-700 bg-zinc-900 text-zinc-400 hover:border-zinc-600",
+                    ].join(' ')}
+                >
+                    None
+                </button>
+                {uploadedImages.map(img => {
+                    const path = `/uploads/${img.name}`;
+                    const selected = value === path;
+                    return (
+                        <button
+                            type="button"
+                            key={img.name}
+                            onClick={() => onChange(path)}
+                            className={[
+                                "h-12 w-12 overflow-hidden rounded-md border",
+                                selected ? "border-red-500 ring-2 ring-red-500/40" : "border-zinc-700 hover:border-zinc-500",
+                            ].join(' ')}
+                        >
+                            <img src={`${backendUrl}${path}`} alt={img.name} className="h-full w-full object-cover" />
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+    );
 
     return (
         <div className="w-full h-full bg-zinc-950 text-white">
@@ -81,6 +133,7 @@ function BlogGroups() {
                                 onChange={e => setDescription(e.target.value)}
                                 className="min-h-[80px]"
                             />
+                            <ImagePicker value={coverImage} onChange={setCoverImage} />
                             <div className="flex justify-end">
                                 <Button type="submit" disabled={submitting}>
                                     {submitting ? "Creating..." : "Create Group"}

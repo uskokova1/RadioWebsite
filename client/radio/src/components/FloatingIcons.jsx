@@ -14,6 +14,8 @@ import {Home, Instagram} from 'lucide-react';
 import { CONTACTS_GROUP, buildContactWindows } from '@/components/ContactsButton.jsx';
 import {Book} from "lucide-react";
 import { motion } from 'motion/react';
+import {Calendar} from "@/components/ui/calendar.jsx";
+import EventsCalendar from "@/components/EventsCalendar.jsx";
 
 
 
@@ -353,5 +355,31 @@ export function FloatingHome() {
             initialY={window.innerHeight/7}
             onActivate={toggle}
         />
+    );
+}
+
+// ─── Floating Contact ─────────────────────────────────────────────────────────
+export function FloatingCalander() {
+    const { addWindow, closeGroup, windows } = useWindowManager();
+    const [openAlready, setOpenAlready] = useState(false);
+
+    const toggle = () => {
+        if (!openAlready) {
+            setOpenAlready(true);
+        } else {
+            setOpenAlready(false);
+        }
+    };
+    return (
+        <>
+        <EventsCalendar headless={true} toggle={openAlready}/>
+    <DraggableIcon
+            src="/calander.webm"
+            title="Events — drag me!"
+            initialX={window.innerWidth/4 * 3}
+            initialY={window.innerHeight/7 * 3}
+            onActivate={toggle}
+        />
+    </>
     );
 }

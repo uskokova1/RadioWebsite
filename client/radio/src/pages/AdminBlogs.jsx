@@ -212,6 +212,7 @@ function AdminBlogs() {
                         WSIN Admin
                     </CardDescription>
                     <CardTitle className="text-2xl font-semibold">Blog Groups</CardTitle>
+                    <CardDescription className="absolute text-xl right-5 font-semibold">Drag to move blogs</CardDescription>
                 </CardHeader>
 
                 <CardContent className="pt-4 space-y-3">

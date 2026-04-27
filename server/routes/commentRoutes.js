@@ -6,6 +6,7 @@ import {
     deleteComment,
     reactToComment,
     flagComment,
+    unflagComment,
 } from '../controllers/commentController.js';
 import userAuth from '../middleware/userAuth.js';
 import adminAuth from '../middleware/adminAuth.js';
@@ -27,6 +28,9 @@ commentRouter.delete('/admin/:id', adminAuth, (req, res, next) => {
     req.body.isAdmin = true;
     next();
 }, deleteComment);
+
+// admin unflag — before /:id wildcard
+commentRouter.delete('/admin/:id/unflag', adminAuth, unflagComment);
 
 // wildcard GET — public
 commentRouter.get('/:targetType/:targetId', getComments);
