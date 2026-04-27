@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '@/context/AppContext.jsx';
+import { useWindowManager } from '@/context/WindowManager.jsx';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { Upload, Trash2 } from 'lucide-react';
+import { Upload, Trash2, Eye } from 'lucide-react';
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import {ScrollArea} from "@/components/ui/scroll-area.jsx";
 
 const AdminImages = () => {
     const { backendUrl, userData, getUserData } = useContext(AppContext);
+    const { addWindow } = useWindowManager();
 
     const [images, setImages]         = useState([]);
     const [uploading, setUploading]   = useState(false);
@@ -88,8 +90,8 @@ const AdminImages = () => {
     }
 
     return (
-        <div className="w-full h-full bg-zinc-950 text-white">
-            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full">
+        <div className="w-full h-full bg-zinc-950 text-white overflow-hidden">
+            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full flex flex-col">
                 <CardHeader className="border-b border-zinc-800 pb-4">
                     <CardDescription className="uppercase tracking-widest text-xs text-red-500">
                         WSIN Admin
@@ -97,33 +99,30 @@ const AdminImages = () => {
                     <CardTitle className="text-2xl font-semibold">Manage Images</CardTitle>
                 </CardHeader>
 
-                <CardContent className="pt-4 space-y-4">
-                    <form onSubmit={handleUpload} className="space-y-3 rounded-lg border border-zinc-800 bg-zinc-900/60 p-4">
-                        <p className="text-xs uppercase tracking-widest text-zinc-500">Upload Image</p>
+                <CardContent className="space-y-4 flex flex-col h-full overflow-hidden">
+                    <form onSubmit={handleUpload} className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/60 p-3">
                         <input
                             type="file"
                             accept="image/*"
                             onChange={handleFileChange}
-                            className="block w-full text-sm text-zinc-300 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:uppercase file:tracking-widest file:font-medium file:bg-red-500/15 file:text-red-400 hover:file:bg-red-500/25 bg-zinc-900 rounded-md border border-zinc-800 p-2"
+                            className="flex-1 text-sm text-zinc-300 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:uppercase file:tracking-widest file:font-medium file:bg-red-500/15 file:text-red-400 hover:file:bg-red-500/25 bg-zinc-900 rounded-md border border-zinc-800 p-2"
                         />
-                        {previewUrl && (
-                            <div className="rounded-md border border-zinc-800 bg-zinc-900 p-2">
-                                <img src={previewUrl} alt="Preview" className="w-full max-h-44 object-contain rounded" />
-                            </div>
-                        )}
-                        <div className="flex justify-end">
-                            <Button type="submit" disabled={uploading || !selectedFile}>
-                                <Upload className="size-4" />
-                                {uploading ? 'Uploading...' : 'Upload'}
-                            </Button>
-                        </div>
+                        <Button type="submit" disabled={uploading || !selectedFile}>
+                            <Upload className="size-4 mr-2" />
+                            {uploading ? 'Uploading...' : 'Upload'}
+                        </Button>
                     </form>
+                    {previewUrl && (
+                        <div className="rounded-md border border-zinc-800 bg-zinc-900 p-2">
+                            <img src={previewUrl} alt="Preview" className="w-full max-h-32 object-contain rounded" />
+                        </div>
+                    )}
 
-                    <div>
+                    <div className="flex-1 flex flex-col min-h-0">
                         <p className="text-xs uppercase tracking-widest text-zinc-500 mb-2">
                             Uploaded Images ({images.length})
                         </p>
-                        <ScrollArea className="h-[300px] pr-3">
+                        <ScrollArea className="flex-1 overflow-y-auto pr-3 min-h-0">
                             <div className="space-y-2">
                                 {images.length === 0 && (
                                     <p className="text-center text-xs text-zinc-500 py-8">No images uploaded yet.</p>
@@ -144,14 +143,29 @@ const AdminImages = () => {
                                                 {formatSize(img.size)} · {formatDate(img.createdAt)}
                                             </p>
                                         </div>
-                                        <Button
-                                            variant="destructive"
-                                            size="icon-xs"
-                                            onClick={() => handleDelete(img.name)}
-                                            title="Delete"
-                                        >
-                                            <Trash2 />
-                                        </Button>
+                                        <div className="min-w-0 flex gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon-xs"
+                                                onClick={() => addWindow({
+                                                    windowName: img.name,
+                                                    spawnx: window.innerWidth / 4,
+                                                    spawny: window.innerHeight / 4,
+                                                    content: <img src={`${backendUrl}/uploads/${img.name}`} alt={img.name} className="w-65 h-full object-contain" />,
+                                                })}
+                                                title="Preview"
+                                            >
+                                                <Eye />
+                                            </Button>
+                                            <Button
+                                                variant="destructive"
+                                                size="icon-xs"
+                                                onClick={() => handleDelete(img.name)}
+                                                title="Delete"
+                                            >
+                                                <Trash2 />
+                                            </Button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>

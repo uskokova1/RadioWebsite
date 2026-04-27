@@ -151,8 +151,8 @@ function EventsCalendar() {
             setOpenAlready(true);
             addWindow({
                 windowName: 'Events Calendar',
-                spawnx: 300,
-                spawny: 150,
+                spawnx: window.innerWidth/4,
+                spawny: window.innerHeight/4,
                 group: 'calendar',
                 content: (
                     <div className="bg-zinc-900">
@@ -160,7 +160,7 @@ function EventsCalendar() {
                             mode="multiple"
                             selected={eventDateObjects}
                             onSelect={() => {}}
-                            className="rounded-md border-0 text-white"
+                            className="rounded-md border-0 text-white w-70"
                             onDayClick={handleDayClick}
                             modifiers={eventModifiers}
                             classNames={{
