@@ -144,7 +144,8 @@ const App = () => {
                         }
                     }}
                 >
-                    <SidebarItem label="About Us"><ContactsButton /></SidebarItem>
+                    <SidebarItem label="Home"><FloatingHome Button={true} /></SidebarItem>
+                    <SidebarItem label="Contacts"><ContactsButton /></SidebarItem>
                     <SidebarItem label="Blog"><BlogButton /></SidebarItem>
                     <SidebarItem label="User Login"><LoginButton /></SidebarItem>
                     <SidebarItem label="Radio"><RadioButton /></SidebarItem>

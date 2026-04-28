@@ -9,7 +9,7 @@ import { Avatar } from '@/components/ui/avatar.jsx';
 import BlogGrid from '@/components/BlogGrid.jsx';
 import CommentSection from '@/components/CommentSection.jsx';
 import Login from '@/pages/Login.jsx';
-import {Home, Instagram} from 'lucide-react';
+import {Home, Instagram, Radio as RadioIcon} from 'lucide-react';
 
 import { CONTACTS_GROUP, buildContactWindows } from '@/components/ContactsButton.jsx';
 import {Book} from "lucide-react";
@@ -120,7 +120,7 @@ export function FloatingContact() {
     return (
         <DraggableIcon
             src="/contact.webm"
-            title="About Us — drag me!"
+            title="Contacts — drag me!"
             initialX={window.innerWidth/2}
             initialY={window.innerHeight/7 * 5}
             onActivate={toggle}
@@ -273,7 +273,7 @@ export function FloatingLogin() {
 }
 
 // ─── Floating Home ───────────────────────────────────────────────────────────
-export function FloatingHome() {
+export function FloatingHome({Button=false}) {
     const { addWindow, closeGroup, windows } = useWindowManager();
 
     const toggle = () => {
@@ -349,13 +349,25 @@ export function FloatingHome() {
     };
 
     return (
-        <DraggableIcon
-            src="/earth.webm"
-            title="Home — drag me!"
-            initialX={window.innerWidth/7}
-            initialY={window.innerHeight/7}
-            onActivate={toggle}
-        />
+        <>
+        {!Button ?
+                    <DraggableIcon
+                        src="/earth.webm"
+                        title="Home — drag me!"
+                        initialX={window.innerWidth / 7}
+                        initialY={window.innerHeight / 7}
+                        onActivate={toggle}
+                    /> :
+
+                    <button
+                        onClick={toggle}
+                        title="Home"
+                        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
+                    >
+                        <Home className="size-6"/>
+                    </button>
+        }
+        </>
     );
 }
 

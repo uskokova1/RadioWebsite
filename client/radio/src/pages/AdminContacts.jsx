@@ -92,16 +92,17 @@ const AdminContacts = () => {
                         WSIN Admin
                     </CardDescription>
                     <CardTitle className="text-2xl font-semibold">Manage Contacts</CardTitle>
-                </CardHeader>
-
-                <CardContent className="pt-4 space-y-4">
                     <Button
+                        className='absolute right-5 top-15'
                         size="sm"
                         variant={showForm ? "outline" : "default"}
                         onClick={() => showForm ? resetForm() : (setShowForm(true), fetchImages())}
                     >
                         {showForm ? <><X className="size-4" /> Cancel</> : <><Plus className="size-4" /> Add Contact</>}
                     </Button>
+                </CardHeader>
+
+                <CardContent className="pt-4 space-y-4">
 
                     {showForm && (
                         <ScrollArea className="h-[400px] pr-3 rounded-lg border border-zinc-800 bg-zinc-900/60 p-4">

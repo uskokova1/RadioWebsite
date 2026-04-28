@@ -123,7 +123,7 @@ const AdminEvents = () => {
     return (
         <div className="w-full h-full bg-zinc-950 text-white">
             <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full">
-                <CardHeader className="border-b border-zinc-800 pb-4 flex">
+                <CardHeader className="border-b border-zinc-800 flex">
                     <div className='absolute right-0 px-5'>
                     <Button
                         size="sm"
@@ -136,7 +136,7 @@ const AdminEvents = () => {
                     <CardTitle className="text-2xl font-semibold">Event Management</CardTitle>
                 </CardHeader>
 
-                <CardContent className="pt-4 space-y-3">
+                <CardContent className="space-y-3">
 
 
                     {showForm && (
@@ -154,8 +154,36 @@ const AdminEvents = () => {
                                 required
                             />
 
+                            <div className="flex justify-between space-y-2">
+                                <div>
+                                <p className="text-xs uppercase tracking-widest text-zinc-500">
+                                    Repeats
+                                </p>
+                                <Button
+                                    type="button"
+                                    variant={recurrence === 'weekly' ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => setRecurrence(recurrence === 'weekly' ? 'none' : 'weekly')}
+                                >
+                                    Weekly
+                                </Button>
+                                </div>
+
+                                <div>
+                                <p className="text-xs uppercase tracking-widest text-zinc-500">
+                                    Time <span className="text-zinc-600">· optional</span>
+                                </p>
+                                <Input
+                                    type="time"
+                                    value={eventTime}
+                                    onChange={e => setEventTime(e.target.value)}
+                                    className="w-40"
+                                />
+                                </div>
+                            </div>
+
                             <div className="space-y-2">
-                                <p className="text-xs uppercase tracking-widest text-zinc-500">Schedule</p>
+                                <p className="flex-row text-xs uppercase tracking-widest text-zinc-500">Schedule</p>
                                 {recurrence === 'weekly' ? (
                                     <div className="flex flex-wrap gap-1.5">
                                         {DAYS.map(d => {
@@ -193,29 +221,6 @@ const AdminEvents = () => {
                                 )}
                             </div>
 
-                            <div className="space-y-2">
-                                <p className="text-xs uppercase tracking-widest text-zinc-500">Repeats</p>
-                                <Button
-                                    type="button"
-                                    variant={recurrence === 'weekly' ? 'default' : 'outline'}
-                                    size="sm"
-                                    onClick={() => setRecurrence(recurrence === 'weekly' ? 'none' : 'weekly')}
-                                >
-                                    Weekly
-                                </Button>
-                            </div>
-
-                            <div className="space-y-2">
-                                <p className="text-xs uppercase tracking-widest text-zinc-500">
-                                    Time <span className="text-zinc-600">· optional</span>
-                                </p>
-                                <Input
-                                    type="time"
-                                    value={eventTime}
-                                    onChange={e => setEventTime(e.target.value)}
-                                    className="w-40"
-                                />
-                            </div>
 
                             <div className="space-y-2">
                                 <p className="text-xs uppercase tracking-widest text-zinc-500">

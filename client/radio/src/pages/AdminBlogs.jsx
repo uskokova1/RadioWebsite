@@ -207,16 +207,14 @@ function AdminBlogs() {
     return (
         <div className="w-full h-full bg-zinc-950 text-white">
             <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full">
-                <CardHeader className="border-b border-zinc-800 pb-4">
+                <CardHeader className="border-b border-zinc-800">
                     <CardDescription className="uppercase tracking-widest text-xs text-red-500">
                         WSIN Admin
                     </CardDescription>
                     <CardTitle className="text-2xl font-semibold">Blog Groups</CardTitle>
-                    <CardDescription className="absolute text-xl right-5 font-semibold">Drag to move blogs</CardDescription>
-                </CardHeader>
-
-                <CardContent className="pt-4 space-y-3">
+                    <CardDescription className="absolute text-lg right-5">Drag to move blogs</CardDescription>
                     <Button
+                        className='absolute right-5 top-25'
                         size="sm"
                         variant={showNewGroup ? "outline" : "default"}
                         onClick={() => {
@@ -227,6 +225,9 @@ function AdminBlogs() {
                     >
                         {showNewGroup ? <><X className="size-4" /> Cancel</> : <><Plus className="size-4" /> New Group</>}
                     </Button>
+                </CardHeader>
+
+                <CardContent className="space-y-3">
 
                     {showNewGroup && (
                         <form onSubmit={handleCreateGroup} className="space-y-3 rounded-lg border border-zinc-800 bg-zinc-900/60 p-4">
@@ -244,7 +245,7 @@ function AdminBlogs() {
                         </form>
                     )}
 
-                    <ScrollArea className="h-[360px] pr-3">
+                    <ScrollArea className="h-[420px] pr-3">
                         {loading && <p className="text-center text-xs text-zinc-500 py-8">Loading...</p>}
                         {!loading && treeData.length === 0 && (
                             <p className="text-center text-xs text-zinc-500 py-8">No blog groups yet.</p>

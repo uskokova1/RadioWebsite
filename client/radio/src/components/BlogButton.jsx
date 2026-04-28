@@ -54,7 +54,7 @@ const BlogButton = () => {
             windowName: post.title,
             spawnx: window.innerWidth/6, spawny: window.innerHeight/4,
             group: post._id,
-            content: <img className='aspect-square object-cover w-65' draggable={false} src={backendUrl + post.image} />
+            content: <img className='aspect-square object-cover w-72' draggable={false} src={backendUrl + post.image} />
         });
         }
         addWindow({

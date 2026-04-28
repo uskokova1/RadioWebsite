@@ -29,7 +29,7 @@ export function buildContactWindows(members, randomY, backendUrl) {
                 <CardTitle className="flex-row m-auto justify-self-center text-xl font-semibold">{member.name}</CardTitle>
                 <CardHeader className="flex-col text-gray-500">{member.position}</CardHeader>
                 {member.link && (
-                    <CardFooter className="flex flex-col p-3">
+                    <CardFooter className="flex flex-col p">
                         <a href={member.link} target="_blank" rel="noreferrer"
                            className="text-xs text-red-400 hover:text-red-300 transition-colors">
                             &rarr; View Link

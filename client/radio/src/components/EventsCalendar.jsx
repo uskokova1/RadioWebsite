@@ -108,8 +108,8 @@ function EventsCalendar( {headless=false, toggle}) {
                 const [h, m] = ev.time.split(':').map(Number);
                 addWindow({
                     windowName: `${ev.title} - Time`,
-                    spawnx: 150 + idx * 120,
-                    spawny: 50 + idx * 20,
+                    spawnx: window.innerWidth/4,
+                    spawny: window.innerHeight/2,
                     group: groupId,
                     content: (
                         <div className="flex flex-col items-center gap-2 p-3 bg-zinc-900">
@@ -122,8 +122,8 @@ function EventsCalendar( {headless=false, toggle}) {
 
             addWindow({
                 windowName: ev.title,
-                spawnx: 200 + idx * 80,
-                spawny: 150 + idx * 40,
+                spawnx: window.innerWidth/2,
+                spawny: window.innerHeight/4,
                 group: groupId,
                 content: (
                     <MarkdownView
@@ -132,18 +132,20 @@ function EventsCalendar( {headless=false, toggle}) {
                     />
                 ),
             });
-            addWindow({
-                windowName: ev.title,
-                spawnx: 300 + idx * 80,
-                spawny: 250 + idx * 40,
-                group: groupId,
-                content: (
-                    <img
-                        className="aspect-auto object-cover w-55"
-                        src={backendUrl + ev.image}
-                    />
-                ),
-            });
+            if(ev.image){
+                addWindow({
+                    windowName: ev.title,
+                    spawnx: window.innerWidth/4,
+                    spawny: window.innerHeight/5,
+                    group: groupId,
+                    content: (
+                        <img
+                            className="aspect-auto object-cover w-72"
+                            src={backendUrl + ev.image}
+                        />
+                    ),
+                });
+            }
         });
     };
 
