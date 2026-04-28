@@ -39,6 +39,26 @@ export const getAllUsers = async (req, res) => {
     }
 };
 
+export const updateUserRole = async (req, res) => {
+    try {
+        const { userId, newRole } = req.body;
+
+        if (!['user', 'admin'].includes(newRole)) {
+            return res.json({ success: false, message: "Invalid role" });
+        }
+
+        const user = await userModel.findById(userId);
+        if (!user) return res.json({ success: false, message: "User not found" });
+
+        user.role = newRole;
+        await user.save();
+
+        return res.json({ success: true, message: "Role updated successfully" });
+    } catch (err) {
+        return res.status(400).send({ success: false, message: err.message });
+    }
+};
+
 export const updateProfile = async (req, res) => {
     try {
         const { userId, displayName, bio, stickers } = req.body;

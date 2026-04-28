@@ -20,7 +20,7 @@ const EmailVerify = () => {
     const navigate = useNavigate();
     const { backendUrl, isLoggedIn, userData, getUserData } = useContext(AppContext);
 
-    const {addWindoww, closeWindow} = useWindowManager();
+    const {addWindoww, closeWindow, closeGroup} = useWindowManager();
 
     const [otpValue, setOtpValue] = useState("")
 

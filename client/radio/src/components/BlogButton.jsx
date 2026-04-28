@@ -59,9 +59,9 @@ const BlogButton = () => {
         }
         addWindow({
             windowName: post.title,
-            spawnx: window.innerWidth*2/6, spawny: window.innerHeight/4,
+            spawnx: window.innerWidth*2/6-50, spawny: window.innerHeight/4,
             group: post._id,
-            content: <MarkdownView className='prose prose-invert bg-zinc-900 w-70 p-3' markdown={post.description} />
+            content: <MarkdownView className='prose prose-invert bg-zinc-900 w-90 p-3' markdown={post.description} />
         });
         addWindow({
             windowName: post.title,

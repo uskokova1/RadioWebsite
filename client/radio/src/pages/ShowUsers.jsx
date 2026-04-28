@@ -14,6 +14,18 @@ const ShowUsers = () => {
     const [allUsers, setAllUsers] = useState([]);
     const [viewMode, setViewMode] = useState('grid');
     const [searchQuery, setSearchQuery] = useState('');
+    const [updating, setUpdating] = useState(null);
+
+    const updateRole = async (userId, newRole) => {
+        setUpdating(userId);
+        try {
+            await axios.put(backendUrl + '/api/user/role', { userId, newRole }, { withCredentials: true });
+            setAllUsers(prev => prev.map(u => u._id === userId ? { ...u, role: newRole } : u));
+        } catch (err) {
+            console.log(err);
+        }
+        setUpdating(null);
+    };
 
     const filteredUsers = allUsers.filter(user => {
         const query = searchQuery.toLowerCase();
@@ -103,14 +115,20 @@ const ShowUsers = () => {
                                                 </div>
                                                 <p className="text-sm font-medium text-white truncate w-full text-center">{user.username}</p>
                                                 <p className="text-[10px] text-zinc-500 truncate w-full text-center">{user.email}</p>
-                                                <span className={[
-                                                    "inline-block text-[9px] uppercase tracking-widest rounded border px-2 py-0.5",
-                                                    isAdminUser
-                                                        ? "text-red-400 bg-red-500/10 border-red-500/40"
-                                                        : "text-zinc-400 bg-zinc-800 border-zinc-700",
-                                                ].join(' ')}>
-                                                    {user.role}
-                                                </span>
+                                                <select
+                                                     value={user.role}
+                                                     onChange={(e) => updateRole(user._id, e.target.value)}
+                                                     disabled={updating === user._id}
+                                                     className={[
+                                                         "text-[9px] uppercase tracking-widest rounded border px-2 py-0.5 bg-zinc-900 outline-none cursor-pointer",
+                                                         user.role === 'admin'
+                                                             ? "text-red-400 border-red-500/40"
+                                                             : "text-zinc-400 border-zinc-700",
+                                                     ].join(' ')}
+                                                 >
+                                                     <option value="user">User</option>
+                                                     <option value="admin">Admin</option>
+                                                 </select>
                                             </CardContent>
                                         </Card>
                                     );
@@ -138,12 +156,20 @@ const ShowUsers = () => {
                                             <span className="text-sm text-white truncate">{user.username}</span>
                                         </div>
                                         <span className="text-xs text-zinc-400 truncate">{user.email}</span>
-                                        <span className={[
-                                            "text-[10px] uppercase tracking-widest",
-                                            user.role === 'admin' ? "text-red-400" : "text-zinc-500",
-                                        ].join(' ')}>
-                                            {user.role}
-                                        </span>
+                                        <select
+                                             value={user.role}
+                                             onChange={(e) => updateRole(user._id, e.target.value)}
+                                             disabled={updating === user._id}
+                                             className={[
+                                                 "text-[10px] uppercase tracking-widest rounded border px-2 py-0.5 bg-zinc-900 outline-none cursor-pointer",
+                                                 user.role === 'admin'
+                                                     ? "text-red-400 border-red-500/40"
+                                                     : "text-zinc-500 border-zinc-700",
+                                             ].join(' ')}
+                                         >
+                                             <option value="user">User</option>
+                                             <option value="admin">Admin</option>
+                                         </select>
                                     </div>
                                 ))}
                             </div>

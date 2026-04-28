@@ -33,9 +33,41 @@ const Login = () => {
                 windowName: "login",
                 group: 5,
                 content: (
+                    <div>
                     <p className='p-5'>
-                        already logged in!
+                        Already logged in!
                     </p>
+                        <p
+                            onClick={()=> {
+                                addWindow({
+                                    windowName: 'Reset Password',
+                                    spawnx: 600, spawny: 500,
+                                    group: 5, //hardcoded login group xd
+                                    content: (
+                                        <ResetPassword />
+                                    )
+                                });
+                            }}
+                            className="text-sm text-blue-400 cursor-pointer justify-self-center mx-auto"
+                        >
+                            Forgot password?
+                        </p>
+                        <p
+                            onClick={()=> {
+                                addWindow({
+                                    windowName: 'EmailVerify',
+                                    spawnx: 600, spawny: 500,
+                                    group: 5, //hardcoded login group xd
+                                    content: (
+                                        <EmailVerify />
+                                    )
+                                });
+                            }}
+                            className="text-sm text-blue-400 cursor-pointer justify-self-center mx-auto"
+                        >
+                            Send verify email
+                        </p>
+                    </div>
                 )
             })
         }

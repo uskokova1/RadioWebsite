@@ -14,11 +14,13 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 const AdminBlog = () => {
     const { backendUrl, userData, getUserData } = useContext(AppContext);
 
-const [posts, setPosts]             = useState([]);
+    const [posts, setPosts]             = useState([]);
     const [loading, setLoading]         = useState(true);
     const [title, setTitle]             = useState('');
     const [description, setDescription] = useState('');
     const [image, setImage]             = useState('');
+    const [blogGroups, setBlogGroups]   = useState([]);
+    const [selectedGroup, setSelectedGroup] = useState('');
     const [editingId, setEditingId]    = useState(null);
     const [showForm, setShowForm]       = useState(false);
     const [submitting, setSubmitting]   = useState(false);
@@ -31,6 +33,7 @@ const [posts, setPosts]             = useState([]);
         if (userData && userData.role === 'admin') {
             fetchPosts();
             fetchImages();
+            fetchBlogGroups();
         }
     }, [userData]);
 
@@ -38,6 +41,13 @@ const [posts, setPosts]             = useState([]);
         try {
             const { data } = await axios.get(backendUrl + '/api/images', { withCredentials: true });
             if (data.success) setUploadedImages(data.images);
+        } catch (err) { console.error(err.message); }
+    };
+
+    const fetchBlogGroups = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + '/api/bloggroup', { withCredentials: true });
+            setBlogGroups(data);
         } catch (err) { console.error(err.message); }
     };
 
@@ -49,18 +59,19 @@ const [posts, setPosts]             = useState([]);
         finally { setLoading(false); }
     };
 
-    const resetForm = () => { setTitle(''); setDescription(''); setImage(''); setEditingId(null); setShowForm(false); };
+    const resetForm = () => { setTitle(''); setDescription(''); setImage(''); setSelectedGroup(''); setEditingId(null); setShowForm(false); };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
         try {
+            const payload = { title, description, image, blogGroupId: selectedGroup };
             if (editingId) {
-                const { data } = await axios.put(`${backendUrl}/api/posts/${editingId}`, { title, description, image }, { withCredentials: true });
+                const { data } = await axios.put(`${backendUrl}/api/posts/${editingId}`, payload, { withCredentials: true });
                 if (data.success) { setPosts(posts.map(p => p._id === editingId ? data.post : p)); toast.success('Post updated'); resetForm(); }
                 else toast.error(data.message);
             } else {
-                const { data } = await axios.post(`${backendUrl}/api/posts`, { title, description, image }, { withCredentials: true });
+                const { data } = await axios.post(`${backendUrl}/api/posts`, payload, { withCredentials: true });
                 if (data.success) { setPosts([data.post, ...posts]); toast.success('Post created'); resetForm(); }
                 else toast.error(data.message);
             }
@@ -71,6 +82,7 @@ const [posts, setPosts]             = useState([]);
     const handleEdit = (post) => {
         setTitle(post.title); setDescription(post.description);
         setImage(post.image || '');
+        setSelectedGroup(post.blogGroup?._id || post.blogGroup || '');
         setEditingId(post._id); setShowForm(true); setExpandedId(null);
     };
 
@@ -159,6 +171,22 @@ const [posts, setPosts]             = useState([]);
                                 onChange={e => setTitle(e.target.value)}
                                 required
                             />
+                            <div>
+                                <p className="text-xs uppercase tracking-widest text-zinc-500 mb-1">
+                                    Blog Group <span className="text-zinc-600">· required</span>
+                                </p>
+                                <select
+                                    value={selectedGroup}
+                                    onChange={e => setSelectedGroup(e.target.value)}
+                                    required
+                                    className="w-full rounded-md border border-zinc-800 bg-zinc-900 text-sm text-white px-3 py-2 outline-none focus:border-red-500"
+                                >
+                                    <option value="">Select a group...</option>
+                                    {blogGroups.map(group => (
+                                        <option key={group._id} value={group._id}>{group.name}</option>
+                                    ))}
+                                </select>
+                            </div>
                             <div>
                                 <p className="text-xs uppercase tracking-widest text-zinc-500">
                                     Content <span className="text-zinc-600">· Markdown supported</span>
