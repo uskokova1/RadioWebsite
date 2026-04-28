@@ -1,4 +1,9 @@
 import dns from "node:dns/promises";
+import https from 'https';
+import fs from 'fs';
+import { Server as SocketIOServer } from 'socket.io';
+import jwt from 'jsonwebtoken';
+
 dns.setServers(["1.1.1.1"]);
 
 import './config/dotenv.js'
@@ -6,6 +11,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import connectDB from "./config/mongodb.js";
+import userModel from './models/userModel.js';
 import authRouter from './routes/authRoutes.js';
 import userRouter from "./routes/userRoutes.js";
 import postRouter from './routes/postRoutes.js';
@@ -53,12 +59,54 @@ app.get('/api/stream/status', async (req, res) => {
   }
 });
 
-import https from 'https';
-import fs from 'fs';
-
 const privateKey = fs.readFileSync('./server/localhost+1-key.pem', 'utf8');
 const certificate = fs.readFileSync('./server/localhost+1.pem', 'utf8');
-https.createServer({
+const httpsServer = https.createServer({
   key: privateKey,
   cert: certificate
-}, app).listen(8443);
+}, app);
+
+const io = new SocketIOServer(httpsServer, {
+  cors: {
+    origin: ['https://localhost:5173'],
+    credentials: true
+  }
+});
+
+const chatMessages = [];
+const MAX_MESSAGES = 10;
+
+const authenticateSocket = async (socket) => {
+  const token = socket.handshake.auth.token || socket.handshake.headers.cookie?.match(/token=([^;]+)/)?.[1];
+  if (!token) return null;
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const user = await userModel.findById(decoded.id).select('username');
+    return user ? { id: user._id, username: user.username } : null;
+  } catch {
+    return null;
+  }
+};
+
+io.on('connection', async (socket) => {
+  socket.user = await authenticateSocket(socket);
+  socket.emit('chat-history', chatMessages);
+
+  socket.on('chat-message', (text) => {
+    if (!socket.user || !text?.trim()) return;
+    const message = {
+      id: Date.now(),
+      userId: socket.user.id,
+      username: socket.user.username,
+      text: text.trim(),
+      timestamp: new Date().toISOString()
+    };
+    chatMessages.push(message);
+    if (chatMessages.length > MAX_MESSAGES) chatMessages.shift();
+    io.emit('chat-message', message);
+  });
+
+  socket.on('disconnect', () => {});
+});
+
+httpsServer.listen(8443);

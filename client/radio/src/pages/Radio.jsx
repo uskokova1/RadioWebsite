@@ -1,17 +1,20 @@
 import { useState, useEffect, useRef, useContext } from "react";
 import { AppContext } from "../context/AppContext.jsx";
 import axios from "axios";
-import { Play, Square, Radio as RadioIcon, Users, Volume2, VolumeX } from "lucide-react";
+import { io } from "socket.io-client";
+import { Play, Square, Radio as RadioIcon, Users, Volume2, VolumeX, Send } from "lucide-react";
+import { format } from "date-fns";
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const STREAM_URL = "https://broadcast.shoutcheap.com/proxy/wsinradi/stream";
 const POLL_INTERVAL = 30000;
 
 function Radio() {
-    const { backendUrl } = useContext(AppContext);
+    const { backendUrl, userData } = useContext(AppContext);
 
     const [metadata,  setMetadata] = useState(null);
 
@@ -22,6 +25,10 @@ function Radio() {
     const [volume, setVolume]       = useState(0.7);
     const [isMuted, setIsMuted]     = useState(false);
 
+    const [chatMessages, setChatMessages] = useState([]);
+    const [chatInput, setChatInput]       = useState('');
+    const [socket, setSocket]             = useState(null);
+    const chatEndRef = useRef(null);
     const audioRef = useRef(null);
 
     const fetchStatus = async () => {
@@ -39,6 +46,32 @@ function Radio() {
         const interval = setInterval(fetchStatus, POLL_INTERVAL);
         return () => clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        const s = io(backendUrl, {
+            auth: { token: document.cookie.match(/token=([^;]+)/)?.[1] },
+            withCredentials: true,
+            transports: ['websocket', 'polling']
+        });
+
+        s.on('connect', () => console.log('Socket connected:', s.id));
+        s.on('connect_error', (err) => console.error('Socket connection error:', err.message));
+        s.on('chat-history', (messages) => setChatMessages(messages));
+        s.on('chat-message', (msg) => setChatMessages(prev => [...prev, msg]));
+
+        setSocket(s);
+        return () => { s.disconnect(); };
+    }, [backendUrl]);
+
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [chatMessages]);
+
+    const sendMessage = () => {
+        if (!chatInput.trim() || !socket || !userData) return;
+        socket.emit('chat-message', chatInput.trim());
+        setChatInput('');
+    };
 
     const togglePlay = () => {
         const audio = audioRef.current;
@@ -77,16 +110,17 @@ function Radio() {
         <div className="w-full h-full bg-zinc-950 text-white flex flex-col">
             <p>{metadata} </p>
             <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full flex flex-col min-h-0">
-                <CardHeader className="border-b border-zinc-800 pb-4 shrink-0">
+                <CardHeader className="border-b border-zinc-800 shrink-0">
                     <CardDescription className="uppercase tracking-widest text-xs text-red-500">
                         WSIN RADIO · 1590 AM
                     </CardDescription>
                     <CardTitle className="text-2xl font-semibold">Live Stream</CardTitle>
-                    <p className="text-xs text-zinc-500 mt-1">Southern Connecticut State University</p>
+                    <p className="text-xs text-zinc-500">Southern Connecticut State University</p>
                 </CardHeader>
 
-                <ScrollArea className="flex-1 min-h-0">
-                <CardContent className="pt-4 space-y-4">
+                <ScrollArea className="flex-1">
+                <CardContent className="flex space-y-4">
+                    <div className='flex-row'>
                     {/* Status Row */}
                     <div className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3">
                         <div className="flex items-center gap-2">
@@ -115,10 +149,10 @@ function Radio() {
                             {Array.from({ length: 24 }).map((_, i) => (
                                 <div
                                     key={i}
-                                    className="w-1.5 bg-red-500 rounded-t transition-all duration-300"
+                                    className="w-[50%] bg-red-500 rounded-t transition-all duration-300"
                                     style={{
                                         animation: playing
-                                            ? `barPulse 0.9s ease-in-out ${(i * 0.06) % 1}s infinite`
+                                            ? `barPulse 1s ease-in-out ${(i * 0.06) % 1}s infinite`
                                             : 'none',
                                         height: playing ? undefined : '4px',
                                         opacity: playing ? 1 : 0.25,
@@ -165,23 +199,43 @@ function Radio() {
                             <span className="text-xs text-zinc-500 w-8">{Math.round((isMuted ? 0 : volume) * 100)}%</span>
                         </div>
                     </div>
-
-                    {/* Station Info */}
-                    <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-4 space-y-3">
-                        <p className="text-xs uppercase tracking-widest text-zinc-500">Station Info</p>
-                        <div className="grid grid-cols-2 gap-3">
-                            {[
-                                ['Frequency', '1590 AM'],
-                                ['Format', 'College Radio'],
-                                ['Bitrate', '96 kbps'],
-                                ['Location', 'New Haven, CT'],
-                            ].map(([label, value]) => (
-                                <div key={label} className="flex flex-col gap-0.5">
-                                    <span className="text-[10px] uppercase tracking-widest text-zinc-600">{label}</span>
-                                    <span className="text-sm text-zinc-200 font-medium">{value}</span>
+                    </div>
+                    {/* Live Chat */}
+                    <div className="flex-row rounded-lg border border-zinc-800 bg-zinc-900/60 p-4 space-y-3">
+                        <p className="text-xs uppercase tracking-widest text-zinc-500">Live Chat</p>
+                        <ScrollArea className="h-48 pr-2">
+                            {chatMessages.length === 0 && (
+                                <p className="text-xs text-zinc-600 italic text-center py-4">No messages yet</p>
+                            )}
+                            {chatMessages.map((msg) => (
+                                <div key={msg.id} className="mb-2 last:mb-0">
+                                    <div className="flex items-baseline gap-1.5">
+                                        <span className="text-xs font-semibold text-red-400 truncate">{msg.username}</span>
+                                        <span className="text-[9px] text-zinc-600 shrink-0">
+                                            {format(new Date(msg.timestamp), 'h:mm a')}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-zinc-300 break-words">{msg.text}</p>
                                 </div>
                             ))}
-                        </div>
+                            <div ref={chatEndRef} />
+                        </ScrollArea>
+                        {userData ? (
+                            <div className="flex gap-2">
+                                <textarea
+                                    placeholder="Type a message..."
+                                    value={chatInput}
+                                    onChange={(e) => setChatInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                                    className="flex-1 bg-zinc-900 text-zinc-100 border border-zinc-700 rounded-md px-3 py-2 text-sm resize-none focus:ring-1 focus:ring-red-600"
+                                />
+                                <Button size="icon-xs" onClick={sendMessage} disabled={!chatInput.trim()}>
+                                    <Send className="size-3" />
+                                </Button>
+                            </div>
+                        ) : (
+                            <p className="text-[10px] text-zinc-500 text-center">Sign in to join the chat</p>
+                        )}
                     </div>
                 </CardContent>
                 </ScrollArea>
