@@ -52,16 +52,24 @@ export const createComment = async (req, res) => {
 // DELETE /api/comments/:id  — userAuth (own) or adminAuth
 export const deleteComment = async (req, res) => {
     try {
-        const { userId } = req.body;
-        const comment = await commentModel.findById(req.params.id).populate('author', 'username');
+        const comment = await commentModel
+            .findById(req.params.id)
+            .populate('author', 'username');
 
         if (!comment) return res.json({ success: false, message: 'Comment not found' });
 
-        const isOwn   = comment.author._id.toString() === userId.toString();
-        const isAdmin = req.body.isAdmin;
+        const isAdmin = req.body.isAdmin === true;
 
-        if (!isOwn && !isAdmin) {
-            return res.json({ success: false, message: 'Not authorized' });
+        // Admins can delete anything; otherwise the requester must own the comment
+        if (!isAdmin) {
+            const { userId } = req.body;
+            if (!userId) {
+                return res.json({ success: false, message: 'Not authorized' });
+            }
+            const isOwn = comment.author && comment.author._id.toString() === userId.toString();
+            if (!isOwn) {
+                return res.json({ success: false, message: 'Not authorized' });
+            }
         }
 
         await commentModel.findByIdAndDelete(req.params.id);
