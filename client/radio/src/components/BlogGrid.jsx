@@ -36,7 +36,7 @@ const BlogGrid = ({ onVariableChange }) => {
     }
 
     return (
-        <div className="grid grid-cols-3 gap-2 p-3 bg-zinc-900 h-50 w-70 overflow-auto">
+        <div className="grid grid-cols-3 gap-2 p-3 bg-zinc-900 h-80 w-100 overflow-auto">
             {blogGroups.map((group) => (
                 <div
                     key={group._id}

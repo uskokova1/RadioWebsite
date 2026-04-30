@@ -75,14 +75,15 @@ const io = new SocketIOServer(httpsServer, {
 
 const chatMessages = [];
 const MAX_MESSAGES = 10;
+let hostActive = false;
 
 const authenticateSocket = async (socket) => {
   const token = socket.handshake.auth.token || socket.handshake.headers.cookie?.match(/token=([^;]+)/)?.[1];
   if (!token) return null;
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const user = await userModel.findById(decoded.id).select('username');
-    return user ? { id: user._id, username: user.username } : null;
+    const user = await userModel.findById(decoded.id).select('username role');
+    return user ? { id: user._id, username: user.username, role: user.role } : null;
   } catch {
     return null;
   }
@@ -91,6 +92,7 @@ const authenticateSocket = async (socket) => {
 io.on('connection', async (socket) => {
   socket.user = await authenticateSocket(socket);
   socket.emit('chat-history', chatMessages);
+  if (hostActive) socket.emit('host-status', true);
 
   socket.on('chat-message', (text) => {
     if (!socket.user || !text?.trim()) return;
@@ -104,6 +106,21 @@ io.on('connection', async (socket) => {
     chatMessages.push(message);
     if (chatMessages.length > MAX_MESSAGES) chatMessages.shift();
     io.emit('chat-message', message);
+  });
+
+  socket.on('toggle-host', () => {
+    if (socket.user?.role !== 'admin') return;
+    hostActive = !hostActive;
+    io.emit('host-status', hostActive);
+  });
+
+  socket.on('delete-message', ({ id }) => {
+    if (socket.user?.role !== 'admin') return;
+    const idx = chatMessages.findIndex(m => m.id === id);
+    if (idx !== -1) {
+      chatMessages.splice(idx, 1);
+      io.emit('delete-message', { id });
+    }
   });
 
   socket.on('disconnect', () => {});

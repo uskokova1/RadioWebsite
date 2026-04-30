@@ -73,14 +73,14 @@ const AdminComments = () => {
     return (
         <div className="w-full h-full bg-zinc-950 text-white">
             <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full">
-                <CardHeader className="border-b border-zinc-800 pb-4">
+                <CardHeader className="border-b border-zinc-800">
                     <CardDescription className="uppercase tracking-widest text-xs text-red-500">
                         WSIN Admin
                     </CardDescription>
                     <CardTitle className="text-2xl font-semibold">Comment Moderation</CardTitle>
                 </CardHeader>
 
-                <CardContent className="pt-4 space-y-3">
+                <CardContent className="space-y-3">
                     <div className="flex gap-2">
                         <Button
                             size="sm"
