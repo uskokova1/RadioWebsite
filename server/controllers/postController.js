@@ -76,10 +76,10 @@ export const updatePost = async (req, res) => {
         const post = await postModel.findById(req.params.id);
         if (!post) return res.json({ success: false, message: 'Post not found' });
 
-        if (title) post.title = title;
-        if (description) post.description = description;
-        post.image = image;
-        if (blogGroupId) post.blogGroup = blogGroupId;
+        if (title)               post.title       = title;
+        if (description)         post.description = description;
+        if (image !== undefined) post.image       = image;          // only update when explicitly sent
+        if (blogGroupId)         post.blogGroup   = blogGroupId;
 
         await post.save();
         await post.populate('author', 'username');
