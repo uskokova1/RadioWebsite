@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import userModel from "../models/userModel.js";
-import { sendMail, mailerConfigured } from "../config/nodemailer.js";
+import transporter from "../config/nodemailer.js";
 
 export const register = async (req, res) => {
     const {username,email,password} = req.body;
@@ -34,15 +34,13 @@ export const register = async (req, res) => {
             maxAge: 3*24*60*60*1000
         })
 
-        // Best-effort welcome email — don't fail registration if mail is
-        // misconfigured or the SMTP server is unreachable. The account is
-        // already saved above; the user can still log in.
-        await sendMail({
+        const mailOptions = {
             from: process.env.EMAIL,
             to: email,
             subject: "Welcome to WSIN!",
             text: `Welcome to WSIN's website, Your account has been created with email id: ${email}`,
-        });
+        }
+        await transporter.sendMail(mailOptions);
 
         return res.json({success: true})
 
@@ -117,24 +115,19 @@ export const sendVerifyOtp = async (req, res) => {
             return res.json({success:false, message:"Account already verified"});
         }
 
-        if (!mailerConfigured) {
-            return res.json({success:false, message:"Email not configured on the server. Set EMAIL and EMAIL_PWD in server/.env."});
-        }
-
         const otp = String(Math.floor(100000+ Math.random() * 900000))
         user.verifyOtp = otp
         user.verifyOtpExpiredAt = Date.now() + 10*60*1000
         await user.save();
 
-        const sent = await sendMail({
+        //console.log(transporter);
+        const mailOptions = {
             from: process.env.EMAIL,
             to: user.email,
             subject: "WSIN Account Verification",
             text: `Your code is ${otp}. Verify your account using this code`
-        });
-        if (!sent) {
-            return res.json({success:false, message:"Failed to send verification email. Check server logs."});
         }
+        await transporter.sendMail(mailOptions);
 
         return res.json({success:true, message:"Verification sent"});
 
@@ -196,25 +189,19 @@ export const sendResetOtp = async (req, res) => {
             return res.json({success:false, message:"user not found"});
         }
 
-        if (!mailerConfigured) {
-            return res.json({success:false, message:"Email not configured on the server. Set EMAIL and EMAIL_PWD in server/.env."});
-        }
-
         const otp = String(Math.floor(100000+ Math.random() * 900000))
         user.resetOtp = otp
         user.resetOtpExpiredAt = Date.now() + 15*60*1000
 
         await user.save();
 
-        const sent = await sendMail({
+        const mailOptions = {
             from: process.env.EMAIL,
             to: user.email,
             subject: "WSIN Password Reset",
             text: `Your code for resetting your password is ${otp}. Use this code to reset your password`
-        });
-        if (!sent) {
-            return res.json({success:false, message:"Failed to send reset email. Check server logs."});
         }
+        await transporter.sendMail(mailOptions);
 
         return res.json({success:true, message:"Code sent to email"})
 
