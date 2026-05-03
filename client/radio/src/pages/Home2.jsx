@@ -104,20 +104,18 @@ const App = () => {
                 )}
                 {introFinished && (
         <div className='bg-black relative min-h-screen min-w-screen z-90 overflow-hidden'>
-            <Wigglie className="absolute inset-0 object-contain z-0 max-w-full max-h-full m-auto align-middle">
+            <Wigglie className="absolute inset-0 z-0">
             <audio ref={bgaudio} src='/finalbackground.webm' type="audio/webm" autoPlay={true}>
             </audio>
             <video
                 ref={bg}
-                autoPlay={true}
-                muted={true}
-                onEnded={() => {
-                    bg.current.style.brightness = '20%';
-                    console.log("fjeiwo")
-                }}
-                className="absolute inset-0 object-contain z-0 max-w-full max-h-full m-auto align-middle
-                transition-all">
-                <source src="/finalbackground.webm" />
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                className="absolute inset-0 w-full h-full object-cover z-0">
+                <source src="/finalbackground.webm" type="video/webm" />
             </video>
             </Wigglie>
 
