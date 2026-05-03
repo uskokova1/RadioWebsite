@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useMemo } from 'react';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, Check } from 'lucide-react';
 import axios from 'axios';
 import { AppContext } from '@/context/AppContext.jsx';
 import { useWindowManager } from '@/context/WindowManager.jsx';
@@ -187,8 +187,6 @@ function CalendarWindowContent() {
             });
         });
     };
-
-    const eventModifiers = { hasEvent: eventDateObjects };
 
     return (
         <div className="bg-zinc-900">
