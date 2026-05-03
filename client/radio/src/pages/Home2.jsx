@@ -104,7 +104,10 @@ const App = () => {
                 )}
                 {introFinished && (
         <div className='bg-black relative min-h-screen min-w-screen z-90 overflow-hidden'>
-            <Wigglie className="absolute inset-0 z-0">
+            {/* Background video — kept OUTSIDE Wigglie. Wigglie re-seeds its
+                SVG displacement filter every ~1s, and re-applying an SVG filter
+                to a <video> element forces the browser to re-paint the frame,
+                which interrupts playback and looked like the bg was resetting. */}
             <audio ref={bgaudio} src='/finalbackground.webm' type="audio/webm" autoPlay={true}>
             </audio>
             <video
@@ -117,7 +120,6 @@ const App = () => {
                 className="absolute inset-0 w-full h-full object-cover z-0">
                 <source src="/finalbackground.webm" type="video/webm" />
             </video>
-            </Wigglie>
 
             <WindowManager />
 
