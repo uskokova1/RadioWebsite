@@ -8,6 +8,7 @@ import LoginButton from '@/components/LoginButton.jsx';
 import RadioButton from '@/components/RadioButton.jsx';
 import AdminButton from '@/components/AdminButton.jsx';
 import AuthButton from '@/components/AuthButton.jsx';
+import HomeButton from '@/components/HomeButton.jsx';
 import {
     FloatingContact,
     FloatingBlog,
@@ -144,7 +145,7 @@ const App = () => {
                         }
                     }}
                 >
-                    <SidebarItem label="Home"><FloatingHome Button={true} /></SidebarItem>
+                    <SidebarItem label="Home"><HomeButton /></SidebarItem>
                     <SidebarItem label="Contacts"><ContactsButton /></SidebarItem>
                     <SidebarItem label="Blog"><BlogButton /></SidebarItem>
                     <SidebarItem label="User Login"><LoginButton /></SidebarItem>

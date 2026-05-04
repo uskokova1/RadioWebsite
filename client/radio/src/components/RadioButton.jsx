@@ -5,9 +5,9 @@ import Radio from '@/pages/Radio.jsx';
 
 
 const RadioButton = ({headless=false, toggle}) => {
-    const { addWindow, closeGroup, windows } = useWindowManager();
+    const { addWindow, closeGroup } = useWindowManager();
     const [open, setOpen] = useState(false);
-
+    const firstRun = useRef(true);
 
     const handleToggle = () => {
         if (!open) {
@@ -24,15 +24,14 @@ const RadioButton = ({headless=false, toggle}) => {
                     </div>
                 ),
             });
+        } else {
+            setOpen(false);
         }
-
     };
-    const [skip,setSkip] = useState(false);
+
     useEffect(() => {
-        if(skip){
-            handleToggle();
-        }
-        setSkip(true)
+        if (firstRun.current) { firstRun.current = false; return; }
+        handleToggle();
     }, [toggle]);
 
     return (
@@ -46,7 +45,7 @@ const RadioButton = ({headless=false, toggle}) => {
             <RadioIcon className="size-6" />
         </button>
             )}
-</>
+        </>
 
     );
 };

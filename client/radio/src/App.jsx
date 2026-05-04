@@ -35,24 +35,24 @@ const App = () => {
                 <Routes>
                     <Route path='/'                element={<Home2 />}          />
                     <Route path='/Home'            element={<Home />}           />
-                    <Route path='/login'           element={<Login />}          />
-                    <Route path='/email-verify'    element={<EmailVerify />}    />
-                    <Route path='/reset-password'  element={<ResetPassword />}  />
-                    <Route path='/Account'         element={<Account />}        />
-                    <Route path='/Blog'            element={<Blog />}           />
-                    <Route path='/BlogGroups'      element={<BlogGroups />}     />
-                    <Route path='/Events'          element={<Events />}         />
-                    <Route path='/Contact'         element={<Contact />}        />
-                    <Route path='/Radio'           element={<Radio />}          />
-                    <Route path='/Profile'         element={<Profile />}        />
-                    <Route path='/admin'           element={<AdminDashboard />} />
-                    <Route path='/admin/users'     element={<ShowUsers />}      />
-                    <Route path='/admin/comments'  element={<AdminComments />}  />
-                    <Route path='/admin/contacts'  element={<AdminContacts />}  />
-                    <Route path='/admin/images'    element={<AdminImages />}    />
-                    <Route path='/admin/blogs'     element={<AdminBlogs />}     />
-                    <Route path='/admin/blog'      element={<AdminBlog />}      />
-                    <Route path='/admin/events'    element={<AdminEvents />}    />
+                    {/*<Route path='/login'           element={<Login />}          />*/}
+                    {/*<Route path='/email-verify'    element={<EmailVerify />}    />*/}
+                    {/*<Route path='/reset-password'  element={<ResetPassword />}  />*/}
+                    {/*<Route path='/Account'         element={<Account />}        />*/}
+                    {/*<Route path='/Blog'            element={<Blog />}           />*/}
+                    {/*<Route path='/BlogGroups'      element={<BlogGroups />}     />*/}
+                    {/*<Route path='/Events'          element={<Events />}         />*/}
+                    {/*<Route path='/Contact'         element={<Contact />}        />*/}
+                    {/*<Route path='/Radio'           element={<Radio />}          />*/}
+                    {/*<Route path='/Profile'         element={<Profile />}        />*/}
+                    {/*<Route path='/admin'           element={<AdminDashboard />} />*/}
+                    {/*<Route path='/admin/users'     element={<ShowUsers />}      />*/}
+                    {/*<Route path='/admin/comments'  element={<AdminComments />}  />*/}
+                    {/*<Route path='/admin/contacts'  element={<AdminContacts />}  />*/}
+                    {/*<Route path='/admin/images'    element={<AdminImages />}    />*/}
+                    {/*<Route path='/admin/blogs'     element={<AdminBlogs />}     />*/}
+                    {/*<Route path='/admin/blog'      element={<AdminBlog />}      />*/}
+                    {/*<Route path='/admin/events'    element={<AdminEvents />}    />*/}
                 </Routes>
             </TooltipProvider>
         </div>

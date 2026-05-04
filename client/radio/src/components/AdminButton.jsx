@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useRef, useEffect} from 'react';
 import { ShieldCheck } from 'lucide-react';
 import { AppContext } from '@/context/AppContext.jsx';
 import { useWindowManager } from '@/context/WindowManager.jsx';
@@ -6,9 +6,15 @@ import AdminDashboard from '@/pages/AdminDashboard.jsx';
 
 const ADMIN_GROUP = 'admin';
 
-const AdminButton = () => {
+const AdminButton = ({ headless = false, toggle }) => {
     const { addWindow, closeGroup, windows } = useWindowManager();
     const { userData } = useContext(AppContext);
+    const firstRun = useRef(true);
+
+    useEffect(() => {
+        if (firstRun.current) { firstRun.current = false; return; }
+        handleToggle();
+    }, [toggle]);
 
     const isAdmin = userData && userData.role === 'admin';
     if (!isAdmin) return null;
@@ -31,14 +37,19 @@ const AdminButton = () => {
         }
     };
 
+
     return (
-        <button
-            onClick={handleToggle}
-            title="Admin Dashboard"
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-red-500/50 bg-red-500/10 text-red-400 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-400 hover:bg-red-500/20 hover:text-red-300"
-        >
-            <ShieldCheck className="size-6" />
-        </button>
+        <>
+            {!headless && (
+                <button
+                    onClick={handleToggle}
+                    title="Admin Dashboard"
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-red-500/50 bg-red-500/10 text-red-400 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-400 hover:bg-red-500/20 hover:text-red-300"
+                >
+                    <ShieldCheck className="size-6" />
+                </button>
+            )}
+        </>
     );
 };
 

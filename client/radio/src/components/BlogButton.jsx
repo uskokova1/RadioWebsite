@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef } from 'react';
+import React, { useContext, useState, useRef, useEffect } from 'react';
 import { Book } from 'lucide-react';
 import { AppContext } from "@/context/AppContext.jsx";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card.jsx";
@@ -36,10 +36,11 @@ const BlogNavWindow = ({ post, posts, onNavigate }) => {
     );
 };
 
-const BlogButton = () => {
+const BlogButton = ({ headless = false, toggle }) => {
     const { addWindow, closeGroup, windows } = useWindowManager();
     const { backendUrl, fetchBlogPosts } = useContext(AppContext);
     const [lastGroup, setLastGroup] = useState(null);
+    const firstRun = useRef(true);
 
     const currentPosts = useRef([]);
     const whichPostOpen = useRef(null);
@@ -124,14 +125,23 @@ const BlogButton = () => {
         }
     };
 
+    useEffect(() => {
+        if (firstRun.current) { firstRun.current = false; return; }
+        handleToggle();
+    }, [toggle]);
+
     return (
-        <button
-            onClick={handleToggle}
-            title="Blog"
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
-        >
-            <Book className="size-6" />
-        </button>
+        <>
+            {!headless && (
+                <button
+                    onClick={handleToggle}
+                    title="Blog"
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
+                >
+                    <Book className="size-6" />
+                </button>
+            )}
+        </>
     );
 };
 

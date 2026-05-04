@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import { Contact } from 'lucide-react';
 import axios from "axios";
 import { AppContext } from "@/context/AppContext.jsx";
@@ -41,11 +41,12 @@ export function buildContactWindows(members, randomY, backendUrl) {
     }));
 }
 
-const ContactsButton = () => {
+const ContactsButton = ({ headless = false, toggle }) => {
     const { backendUrl } = useContext(AppContext);
     const { addWindow, closeGroup, windows } = useWindowManager();
     const [members, setMembers] = useState([]);
     const [randomY, setRandomY] = useState([]);
+    const firstRun = useRef(true);
 
     useEffect(() => {
         axios.get(`${backendUrl}/api/contacts`)
@@ -57,7 +58,7 @@ const ContactsButton = () => {
         setRandomY(members.map(() => Math.random() * 300));
     }, [members]);
 
-    const toggleContacts = () => {
+    const handleToggle = () => {
         if (!members.length) return;
         if (windows.some(w => w.group === CONTACTS_GROUP)) {
             closeGroup(CONTACTS_GROUP);
@@ -66,14 +67,23 @@ const ContactsButton = () => {
         }
     };
 
+    useEffect(() => {
+        if (firstRun.current) { firstRun.current = false; return; }
+        handleToggle();
+    }, [toggle]);
+
     return (
-        <button
-            onClick={toggleContacts}
-            title="Contacts"
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
-        >
-            <Contact className="size-6" />
-        </button>
+        <>
+            {!headless && (
+                <button
+                    onClick={handleToggle}
+                    title="Contacts"
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900/70 text-zinc-300 shadow-lg backdrop-blur transition-all hover:scale-110 hover:border-red-500 hover:text-red-400"
+                >
+                    <Contact className="size-6" />
+                </button>
+            )}
+        </>
     );
 };
 
