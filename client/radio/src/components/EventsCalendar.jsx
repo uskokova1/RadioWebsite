@@ -153,9 +153,9 @@ function CalendarWindowContent() {
                     spawny: window.innerHeight/2,
                     group: groupId,
                     content: (
-                        <div className="flex flex-col items-center gap-2 p-3 bg-zinc-900">
+                        <div className="flex flex-col items-center p-5 bg-zinc-900">
                             <AnalogClock hours={h} minutes={m} />
-                            <p className="text-zinc-400 text-xs font-mono tracking-wider">{ev.time}</p>
+                            <p className="text-zinc-400 mt-5 text-xs font-mono tracking-wider">{ev.time}</p>
                         </div>
                     ),
                 });
