@@ -110,7 +110,7 @@ export default function CommentSection({ targetType, targetId }) {
             </p>
 
 
-            <ScrollArea className="h-[300px] w-[20vw] rounded-md border border-zinc-800 p-2">
+            <ScrollArea className="h-[300px] rounded-md border border-zinc-800 p-2">
                 {comments.length === 0 && (
                     <p className="text-center text-xs text-zinc-500 py-8">
                         No comments yet. Be the first.

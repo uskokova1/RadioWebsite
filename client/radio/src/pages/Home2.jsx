@@ -113,7 +113,7 @@ const App = () => {
                 muted={true}
                 onEnded={() => {
                     bg.current.style.brightness = '20%';
-                    console.log("fjeiwo")
+                    //console.log("fjeiwo")
                 }}
                 className="absolute inset-0 object-contain z-0 max-w-full max-h-full m-auto align-middle
                 transition-all">
