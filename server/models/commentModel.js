@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const reactionSchema = new mongoose.Schema({
     emoji: { type: String, required: true },       // '👍' '❤️' etc.
     users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-}, { _id: false });
+}, { _id: false })
 
 const commentSchema = new mongoose.Schema({
     text:       { type: String, required: true, maxlength: 500 },
