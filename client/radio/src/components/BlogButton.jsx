@@ -66,13 +66,13 @@ const BlogButton = ({ headless = false, toggle }) => {
         });
         addWindow({
             windowName: post.title,
-            spawnx: window.innerWidth*3/6, spawny: window.innerHeight*2/5,
+            spawnx: window.innerWidth*3/6 + 80, spawny: window.innerHeight*2/5,
             group: post._id,
             content: <CommentSection targetType="post" targetId={post._id} />
         });
         addWindow({
             windowName: 'Navigation',
-            spawnx: window.innerWidth*3/6, spawny: window.innerHeight/4,
+            spawnx: window.innerWidth*3/6 + 80, spawny: window.innerHeight/4,
             group: post._id,
             content: <BlogNavWindow post={post} posts={posts} onNavigate={(p) => openPost(p, posts)} />
         });

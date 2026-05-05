@@ -8,23 +8,41 @@ import { Avatar } from "@/components/ui/avatar.jsx";
 
 export const CONTACTS_GROUP = 2;
 
+function MemberAvatar({ member, backendUrl }) {
+    const [imgError, setImgError] = useState(false);
+
+    return (
+        <>
+            {!imgError && member.image ? (
+                <img
+                    className="aspect-square object-cover w-80"
+                    src={`${backendUrl}${member.image}`}
+                    alt={member.name || member.initials || "Avatar"}
+                    onError={() => setImgError(true)}
+                />
+            ) : (
+                <Avatar className="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center">
+                    <p className="text-lg font-semibold text-white m-auto">
+                        {member.initials || "?"}
+                    </p>
+                </Avatar>
+            )}
+        </>
+    );
+}
+
 export function buildContactWindows(members, randomY, backendUrl) {
     return members.map((member, index) => ({
         windowName: member.name,
-        spawnx: window.innerWidth/members.length * index/2 + window.innerWidth/members.length,
-        spawny: randomY[index] + 150,
+        spawnx: window.innerWidth/members.length * index*3/4 - 50 + window.innerWidth/members.length,
+        spawny: randomY[index]*1.5 + 20,
         group: CONTACTS_GROUP,
         content: (
             <Card className="flex flex-col px-2 rounded-none w-50">
                 <div className="flex m-auto justify-center">
-                    {member.image ? (
-                        <img className="aspect-square object-cover w-80"
-                             src={`${backendUrl}${member.image}`} alt={member.name} />
-                    ) : (
-                        <Avatar className="w-16 h-16 rounded-full bg-zinc-900 flex-row m-auto justify-center">
-                            <p className="text-lg font-semibold text-white m-auto">{member.initials || '?'}</p>
-                        </Avatar>
-                    )}
+
+                    <MemberAvatar key={member.id} member={member} backendUrl={backendUrl} />
+                    
                 </div>
                 <CardTitle className="flex-row m-auto justify-self-center text-xl font-semibold">{member.name}</CardTitle>
                 <CardHeader className="flex-col text-gray-500">{member.position}</CardHeader>

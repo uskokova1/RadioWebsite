@@ -110,8 +110,10 @@ const App = () => {
             </audio>
             <video
                 ref={bg}
+                controls={false}
                 autoPlay={true}
                 muted={true}
+                onContextMenu={(e) => e.preventDefault()} // Prevents right-click menu
                 onEnded={() => {
                     bg.current.style.brightness = '20%';
                     //console.log("fjeiwo")

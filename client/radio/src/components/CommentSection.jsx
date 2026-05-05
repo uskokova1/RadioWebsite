@@ -94,7 +94,7 @@ export default function CommentSection({ targetType, targetId }) {
         userData && c.author?._id && userData._id?.toString() === c.author._id.toString();
 
     return (
-        <div className="mt-4 border-t border-zinc-800 pt-4 space-y-3">
+        <div className="mt-4 border-t border-zinc-800 pt-4 space-y-3 w-[23vw]">
             <style>{`
                 @keyframes pop {
                     0%   { transform: scale(1); }
