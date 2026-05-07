@@ -1,119 +1,184 @@
-import React, {useState, useContext, useEffect} from 'react'
-import {AppContext} from '@/context/AppContext.jsx';
-import {useNavigate} from "react-router-dom";
-import {toast} from "react-toastify";
-import axios from "axios";
-import { ArrowLeft } from 'lucide-react';
+import React, { useState, useContext, useEffect } from 'react';
+import { AppContext } from '@/context/AppContext.jsx';
+import axios from 'axios';
+import { LayoutGrid, List } from 'lucide-react';
 
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription
-} from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 const ShowUsers = () => {
-    const {backendUrl, userData, getUserData} = useContext(AppContext)
+    const { backendUrl, userData, getUserData } = useContext(AppContext);
     const [allUsers, setAllUsers] = useState([]);
+    const [viewMode, setViewMode] = useState('grid');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [updating, setUpdating] = useState(null);
 
-    const navigate = useNavigate()
+    const updateRole = async (userId, newRole) => {
+        setUpdating(userId);
+        try {
+            await axios.put(backendUrl + '/api/user/role', { userId, newRole }, { withCredentials: true });
+            setAllUsers(prev => prev.map(u => u._id === userId ? { ...u, role: newRole } : u));
+        } catch (err) {
+            console.log(err);
+        }
+        setUpdating(null);
+    };
+
+    const filteredUsers = allUsers.filter(user => {
+        const query = searchQuery.toLowerCase();
+        return user.username.toLowerCase().includes(query) || 
+               user.email.toLowerCase().includes(query);
+    });
+
+    useEffect(() => { if (!userData) getUserData(); }, []);
 
     useEffect(() => {
-        if(!userData){
-            getUserData()
-        }
-    }, [])
-
-    useEffect(() => {
-        if (userData && userData.role !== 'admin') {
-            navigate('/')
-            toast.error('Not an admin')
-        }else{
-            getUsers()
-        }
-    }, [userData])
+        if (userData && userData.role === 'admin') getUsers();
+    }, [userData]);
 
     const getUsers = async () => {
-        axios.defaults.withCredentials = true
-        try{
-            const {data} = await axios.get(backendUrl+'/api/user/all')
-            setAllUsers(data)
-        }catch(err){
-            console.log(err)
-        }
+        axios.defaults.withCredentials = true;
+        try {
+            const { data } = await axios.get(backendUrl + '/api/user/all');
+            setAllUsers(data);
+        } catch (err) { console.log(err); }
+    };
+
+    const isAdmin = userData && userData.role === 'admin';
+    if (!isAdmin) {
+        return (
+            <div className="w-full h-full bg-zinc-950 text-white p-4 text-sm text-zinc-400">
+                Admins only.
+            </div>
+        );
     }
 
+    const initial = (name) => (name || '?').charAt(0).toUpperCase();
+
     return (
-        <div style={styles.page}>
-            <div style={styles.column}>
-                <div style={styles.header}>
-                    <p className='flex text-red-500 text-xl font-bold'>WSIN RADIO</p>
-                    <button onClick={() => navigate('/admin')}
-                            className='flex left-0 rounded-3xl p-1 px-2 m-1 bg-red-500 w-fit align-middle'>
-                        <ArrowLeft />
-                        Back</button>
-                    <h2 className='m-auto p-5 flex text-white text-6xl font-bold'>All Users</h2>
-                    <div style={styles.titleLine} />
-                </div>
+        <div className="w-full h-full bg-zinc-950 text-white flex flex-col">
+            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full flex flex-col min-h-0">
+                <CardHeader className="border-b border-zinc-800 pb-4 shrink-0">
+                    <CardDescription className="uppercase tracking-widest text-xs text-red-500">
+                        WSIN Admin
+                    </CardDescription>
+                    <CardTitle className="text-2xl font-semibold">All Users</CardTitle>
+                </CardHeader>
 
-                <div className="p-8 space-y-4">
-                    {Array.from({ length: Math.ceil(allUsers.length / 3) }).map((_, rowIndex) => (
-                        <div key={rowIndex} className="flex gap-4">
-                            {allUsers.slice(rowIndex * 3, rowIndex * 3 + 3).map((user, index) => (
-                                <Card
-                                    key={index}
-                                    className="flex-1 bg-zinc-900 border-zinc-800 text-white
-          transition-all duration-300 ease-in-out
-          hover:flex-[1.1] cursor-pointer"
-                                >
-                                    <CardHeader className='flex-col justify-center'>
-                                        <CardTitle className='m-auto'>{user.username}</CardTitle>
-                                        <CardDescription className="text-zinc-400">
-                                            {user.email}
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className='flex justify-center'>
-                                        <p className="text-sm m-auto">
-                                            Role: <span className="font-semibold">{user.role}</span>
-                                        </p>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                <CardContent className="pt-4 flex-1 min-h-0 flex flex-col gap-3">
+                    <div className="flex items-center justify-between shrink-0 gap-2">
+                        <div className="relative flex-1 max-w-xs">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-500" />
+                            <Input
+                                placeholder="Search users..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-9 h-8 bg-zinc-900 border-zinc-800 text-xs"
+                            />
                         </div>
-                    ))}
-                </div>
-            </div>
+                        <span className="text-xs uppercase tracking-widest text-zinc-500">
+                            {filteredUsers.length} user{filteredUsers.length !== 1 ? 's' : ''}
+                        </span>
+                        <div className="flex gap-1 rounded-md border border-zinc-800 bg-zinc-900 p-1">
+                            <Button
+                                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                                size="icon-xs"
+                                onClick={() => setViewMode('grid')}
+                                title="Grid view"
+                            >
+                                <LayoutGrid />
+                            </Button>
+                            <Button
+                                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                                size="icon-xs"
+                                onClick={() => setViewMode('list')}
+                                title="List view"
+                            >
+                                <List />
+                            </Button>
+                        </div>
+                    </div>
+
+                    <ScrollArea className="flex-1 min-h-0 pr-3">
+                        {viewMode === 'grid' ? (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                {filteredUsers.map((user) => {
+                                    const isAdminUser = user.role === 'admin';
+                                    return (
+                                        <Card key={user._id || user.email} size="sm" className="bg-zinc-900/60 ring-zinc-800">
+                                            <CardContent className="p-4 flex flex-col items-center gap-2">
+                                                <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-red-500 bg-zinc-900 text-red-400 font-semibold">
+                                                    {initial(user.username)}
+                                                </div>
+                                                <p className="text-sm font-medium text-white truncate w-full text-center">{user.username}</p>
+                                                <p className="text-[10px] text-zinc-500 truncate w-full text-center">{user.email}</p>
+                                                <select
+                                                     value={user.role}
+                                                     onChange={(e) => updateRole(user._id, e.target.value)}
+                                                     disabled={updating === user._id}
+                                                     className={[
+                                                         "text-[9px] uppercase tracking-widest rounded border px-2 py-0.5 bg-zinc-900 outline-none cursor-pointer",
+                                                         user.role === 'admin'
+                                                             ? "text-red-400 border-red-500/40"
+                                                             : "text-zinc-400 border-zinc-700",
+                                                     ].join(' ')}
+                                                 >
+                                                     <option value="user">User</option>
+                                                     <option value="admin">Admin</option>
+                                                 </select>
+                                            </CardContent>
+                                        </Card>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="rounded-md border border-zinc-800 bg-zinc-900/60 overflow-hidden">
+                                <div className="grid grid-cols-[2fr_3fr_1fr] gap-2 px-4 py-2 bg-zinc-900 border-b border-zinc-800 text-[10px] uppercase tracking-widest text-zinc-500">
+                                    <span>Username</span>
+                                    <span>Email</span>
+                                    <span>Role</span>
+                                </div>
+                                {filteredUsers.map((user, i) => (
+                                    <div
+                                        key={user._id || user.email || i}
+                                        className={[
+                                            "grid grid-cols-[2fr_3fr_1fr] gap-2 px-4 py-2 items-center border-b border-zinc-800/50",
+                                            i % 2 === 0 ? "bg-zinc-900/30" : "bg-zinc-900/60",
+                                        ].join(' ')}
+                                    >
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            <div className="flex h-7 w-7 items-center justify-center rounded-full border border-red-500 bg-zinc-900 text-red-400 text-xs font-semibold shrink-0">
+                                                {initial(user.username)}
+                                            </div>
+                                            <span className="text-sm text-white truncate">{user.username}</span>
+                                        </div>
+                                        <span className="text-xs text-zinc-400 truncate">{user.email}</span>
+                                        <select
+                                             value={user.role}
+                                             onChange={(e) => updateRole(user._id, e.target.value)}
+                                             disabled={updating === user._id}
+                                             className={[
+                                                 "text-[10px] uppercase tracking-widest rounded border px-2 py-0.5 bg-zinc-900 outline-none cursor-pointer",
+                                                 user.role === 'admin'
+                                                     ? "text-red-400 border-red-500/40"
+                                                     : "text-zinc-500 border-zinc-700",
+                                             ].join(' ')}
+                                         >
+                                             <option value="user">User</option>
+                                             <option value="admin">Admin</option>
+                                         </select>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </ScrollArea>
+                </CardContent>
+            </Card>
         </div>
-    )
-}
+    );
+};
 
-const styles = {
-    page: {
-        minHeight: "100vh",
-        background: "#111",
-        display: "flex",
-        justifyContent: "center",
-    },
-    column: {
-        width: "100%",
-        maxWidth: "760px",
-        minHeight: "100vh",
-        background: "#1a1a1a",
-        display: "flex",
-        flexDirection: "column",
-        boxShadow: "0 0 60px rgba(0,0,0,0.8)",
-        borderLeft: "1px solid #2a2a2a",
-        borderRight: "1px solid #2a2a2a",
-    },
-    header: {
-        background: "#322d2d",
-        padding: "40px 32px 28px",
-        borderBottom: "1px solid #3a3a3a",
-        justifyContent: "center",
-        display: "flex",
-        flexDirection: "column",
-    },
-}
-
-export default ShowUsers
+export default ShowUsers;

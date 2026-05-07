@@ -1,28 +1,24 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '@/context/AppContext.jsx';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { ArrowLeft } from 'lucide-react';
+import { Flag, Trash2, Check } from 'lucide-react';
+
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const AdminComments = () => {
     const { backendUrl, userData, getUserData } = useContext(AppContext);
-    const navigate = useNavigate();
 
-    const [allComments,     setAllComments]     = useState([]);
+    const [allComments, setAllComments]         = useState([]);
     const [flaggedComments, setFlaggedComments] = useState([]);
-    const [showFlagged,     setShowFlagged]     = useState(false);
+    const [showFlagged, setShowFlagged]         = useState(false);
+
+    useEffect(() => { if (!userData) getUserData(); }, []);
 
     useEffect(() => {
-        if (!userData) getUserData();
-    }, []);
-
-    useEffect(() => {
-        if (userData && userData.role !== 'admin') {
-            navigate('/');
-            toast.error('Not an admin');
-        } else if (userData) {
+        if (userData && userData.role === 'admin') {
             fetchAll();
             fetchFlagged();
         }
@@ -49,9 +45,17 @@ const AdminComments = () => {
                 setAllComments(prev => prev.filter(c => c._id !== id));
                 setFlaggedComments(prev => prev.filter(c => c._id !== id));
                 toast.success('Comment deleted');
-            } else {
-                toast.error(data.message);
-            }
+            } else toast.error(data.message);
+        } catch (err) { toast.error(err.message); }
+    };
+
+    const handleUnflag = async (id) => {
+        try {
+            const { data } = await axios.delete(`${backendUrl}/api/comments/admin/${id}/unflag`, { withCredentials: true });
+            if (data.success) {
+                setFlaggedComments(prev => prev.filter(c => c._id !== id));
+                toast.success('Comment unflagged');
+            } else toast.error(data.message);
         } catch (err) { toast.error(err.message); }
     };
 
@@ -60,91 +64,115 @@ const AdminComments = () => {
     });
 
     const displayed = showFlagged ? flaggedComments : allComments;
+    const isAdmin = userData && userData.role === 'admin';
 
-    const CommentRow = ({ c }) => (
-        <div style={styles.comment}>
-            <div style={styles.commentHeader}>
-                <div>
-                    <span style={styles.commentMeta}>
-                        {c.author?.username || 'User'} · {formatDate(c.createdAt)}
-                    </span>
-                    <span style={styles.targetBadge}> [{c.targetType}]</span>
-                    {c.flaggedBy?.length > 0 && (
-                        <span style={styles.flagBadge}> ⚑ {c.flaggedBy.length} flag(s)</span>
-                    )}
-                </div>
-                <button onClick={() => handleDelete(c._id)} style={styles.deleteBtn}>Delete</button>
-            </div>
-            <p style={styles.commentText}>{c.text}</p>
-            <div style={styles.reactions}>
-                {c.reactions?.filter(r => r.users?.length > 0).map(r => (
-                    <span key={r.emoji} style={styles.reactionChip}>{r.emoji} {r.users.length}</span>
-                ))}
-            </div>
-        </div>
-    );
+    if (!isAdmin) {
+        return <div className="w-full h-full bg-zinc-950 text-zinc-400 p-4 text-sm">Admins only.</div>;
+    }
 
     return (
-        <div style={styles.page}>
-            <div style={styles.column}>
-                <div style={styles.header}>
-                    <p className='flex text-red-500 text-xl font-bold'>WSIN RADIO</p>
-                    <button onClick={() => navigate('/admin')}
-                            className='flex rounded-3xl p-1 px-2 m-1 bg-red-500 w-fit align-middle'>
-                        <ArrowLeft /> Back
-                    </button>
-                    <h2 className='m-auto p-5 flex text-white text-6xl font-bold'>Comment Moderation</h2>
-                </div>
+        <div className="w-full h-full bg-zinc-950 text-white">
+            <Card className="w-full max-w-none rounded-none border-0 ring-0 bg-zinc-950 h-full">
+                <CardHeader className="border-b border-zinc-800">
+                    <CardDescription className="uppercase tracking-widest text-xs text-red-500">
+                        WSIN Admin
+                    </CardDescription>
+                    <CardTitle className="text-2xl font-semibold">Comment Moderation</CardTitle>
+                </CardHeader>
 
-                <div style={styles.body}>
-                    {/* toggle */}
-                    <div style={styles.toggleRow}>
-                        <button
+                <CardContent className="space-y-3">
+                    <div className="flex gap-2">
+                        <Button
+                            size="sm"
+                            variant={showFlagged ? 'outline' : 'default'}
                             onClick={() => setShowFlagged(false)}
-                            style={{ ...styles.toggleBtn, ...(showFlagged ? {} : styles.toggleActive) }}
                         >
-                            All Comments ({allComments.length})
-                        </button>
-                        <button
+                            All ({allComments.length})
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant={showFlagged ? 'default' : 'outline'}
                             onClick={() => setShowFlagged(true)}
-                            style={{ ...styles.toggleBtn, ...(showFlagged ? styles.toggleActive : {}) }}
+                            className={showFlagged ? "bg-red-500 hover:bg-red-600" : ""}
                         >
-                            ⚑ Flagged ({flaggedComments.length})
-                        </button>
+                            <Flag className="size-4" /> Flagged ({flaggedComments.length})
+                        </Button>
                     </div>
 
-                    <ScrollArea className="h-[600px] rounded-md border border-zinc-700 p-4 mt-4">
-                        {displayed.length === 0 && (
-                            <p style={styles.empty}>
+                    <ScrollArea className="h-[420px] pr-3">
+                        {displayed.length === 0 ? (
+                            <p className="text-center text-xs text-zinc-500 py-8">
                                 {showFlagged ? 'No flagged comments.' : 'No comments yet.'}
                             </p>
+                        ) : (
+                            <div className="space-y-2">
+                                {displayed.map(c => (
+                                    <div
+                                        key={c._id}
+                                        className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 space-y-2"
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <span className="text-xs text-zinc-300 font-medium">
+                                                        {c.author?.username || 'User'}
+                                                    </span>
+                                                    <span className="text-[10px] text-zinc-500">
+                                                        {formatDate(c.createdAt)}
+                                                    </span>
+                                                    <span className="text-[9px] uppercase tracking-widest text-zinc-400 bg-zinc-800 border border-zinc-700 rounded px-1.5 py-0.5">
+                                                        {c.targetType}
+                                                    </span>
+                                                    {c.flaggedBy?.length > 0 && (
+                                                        <span className="inline-flex items-center gap-1 text-[10px] text-red-400 bg-red-500/10 border border-red-500/30 rounded px-1.5 py-0.5">
+                                                            <Flag className="size-3" /> {c.flaggedBy.length}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-1 shrink-0">
+                                                {c.flaggedBy?.length > 0 && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon-xs"
+                                                        onClick={() => handleUnflag(c._id)}
+                                                        title="Unflag"
+                                                    >
+                                                        <Check />
+                                                    </Button>
+                                                )}
+                                                <Button
+                                                    variant="destructive"
+                                                    size="icon-xs"
+                                                    onClick={() => handleDelete(c._id)}
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <p className="text-sm text-zinc-200 leading-relaxed break-words">{c.text}</p>
+                                        {c.reactions?.some(r => r.users?.length > 0) && (
+                                            <div className="flex flex-wrap gap-1">
+                                                {c.reactions.filter(r => r.users?.length > 0).map(r => (
+                                                    <span
+                                                        key={r.emoji}
+                                                        className="inline-flex items-center gap-1 text-xs text-zinc-400 bg-zinc-900 border border-zinc-700 rounded-full px-2 py-0.5"
+                                                    >
+                                                        {r.emoji} {r.users.length}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         )}
-                        {displayed.map(c => <CommentRow key={c._id} c={c} />)}
                     </ScrollArea>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
         </div>
     );
-};
-
-const styles = {
-    page:         { minHeight: "100vh", background: "#111", display: "flex", justifyContent: "center" },
-    column:       { width: "100%", maxWidth: "760px", minHeight: "100vh", background: "#1a1a1a", display: "flex", flexDirection: "column", boxShadow: "0 0 60px rgba(0,0,0,0.8)", borderLeft: "1px solid #2a2a2a", borderRight: "1px solid #2a2a2a" },
-    header:       { background: "#322d2d", padding: "40px 32px 28px", borderBottom: "1px solid #3a3a3a", display: "flex", flexDirection: "column" },
-    body:         { padding: "24px 32px" },
-    toggleRow:    { display: "flex", gap: "10px" },
-    toggleBtn:    { fontFamily: "'Courier New', monospace", fontSize: "11px", letterSpacing: "2px", color: "#888", background: "#222", border: "1px solid #333", borderRadius: "4px", padding: "8px 16px", cursor: "pointer" },
-    toggleActive: { color: "#fa4040", borderColor: "#fa404055", background: "#241212" },
-    empty:        { fontFamily: "'Courier New', monospace", fontSize: "11px", color: "#444", letterSpacing: "2px", textAlign: "center", padding: "40px 0" },
-    comment:      { background: "#222", border: "1px solid #2e2e2e", borderRadius: "6px", padding: "14px", marginBottom: "10px" },
-    commentHeader:{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "6px" },
-    commentMeta:  { fontFamily: "'Courier New', monospace", fontSize: "9px", letterSpacing: "2px", color: "#555" },
-    targetBadge:  { fontFamily: "'Courier New', monospace", fontSize: "9px", color: "#888", letterSpacing: "1px" },
-    flagBadge:    { fontFamily: "'Courier New', monospace", fontSize: "9px", color: "#fa4040" },
-    commentText:  { fontFamily: "'Georgia', serif", fontSize: "13px", color: "#bbb", margin: "4px 0 8px 0", lineHeight: "1.5" },
-    reactions:    { display: "flex", gap: "6px", flexWrap: "wrap" },
-    reactionChip: { fontFamily: "'Courier New', monospace", fontSize: "10px", color: "#888", background: "#1a1a1a", border: "1px solid #333", borderRadius: "20px", padding: "2px 8px" },
-    deleteBtn:    { fontFamily: "'Courier New', monospace", fontSize: "10px", letterSpacing: "2px", color: "#fa4040", background: "transparent", border: "1px solid #fa404044", borderRadius: "3px", padding: "4px 10px", cursor: "pointer" },
 };
 
 export default AdminComments;

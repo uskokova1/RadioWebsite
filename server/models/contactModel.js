@@ -5,7 +5,8 @@ const contactSchema = new mongoose.Schema({
     position: { type: String, required: true },
     email:    { type: String, required: true },
     link:     { type: String, default: null },
-    initials: { type: String, required: true },
+    image:    { type: String, default: null },
+    initials: { type: String, default: null },
 }, { timestamps: true });
 
 const contactModel = mongoose.models.Contact || mongoose.model('Contact', contactSchema);

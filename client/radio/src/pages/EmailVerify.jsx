@@ -12,17 +12,23 @@ import {
     InputOTPSeparator,
     InputOTPSlot,
 } from "@/components/ui/input-otp"
+import login from "@/pages/Login.jsx";
+import {useWindowManager} from "@/context/WindowManager.jsx";
 
 const EmailVerify = () => {
     axios.defaults.withCredentials = true;
     const navigate = useNavigate();
     const { backendUrl, isLoggedIn, userData, getUserData } = useContext(AppContext);
 
+    const {addWindoww, closeWindow, closeGroup} = useWindowManager();
+
     const [otpValue, setOtpValue] = useState("")
 
     useEffect(() => {
         if (isLoggedIn && userData && userData.isAccountVerified) {
             //navigate('/')
+            toast.success('Already Verified!');
+            closeGroup(5)
         }
     }, [isLoggedIn, userData])
 
@@ -43,15 +49,7 @@ const EmailVerify = () => {
     }
 
     return (
-        <div style={styles.page}>
-            <div style={styles.column}>
-                <div style={styles.header}>
-                    <p className='text-red-500 text-xl font-bold'>WSIN RADIO</p>
-                    <h2 className='m-auto p-5 text-white text-5xl font-bold'>Email Verification</h2>
-                </div>
-
-                <div className="flex justify-center p-10">
-
+        <div className='bg-zinc-950 w-full h-full'>
                     <Card className="w-full max-w-md bg-zinc-900 border-zinc-800 text-white">
                         <CardHeader>
                             <CardTitle className="text-center">Verify Email</CardTitle>
@@ -91,8 +89,6 @@ const EmailVerify = () => {
 
                 </div>
 
-            </div>
-        </div>
     )
 }
 

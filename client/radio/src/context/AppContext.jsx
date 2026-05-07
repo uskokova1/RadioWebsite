@@ -8,9 +8,18 @@ export const AppContext = createContext()
 export const AppContextProvider = (props) =>{
     const navigate = useNavigate();
 
+    const [introPlayedBefore, setIntroPlayedBefore] = useState(() => {
+        return localStorage.getItem("introPlayed") === "true";
+    });
+    useEffect(() => {
+        localStorage.setItem("introPlayed", introPlayedBefore);
+    }, [introPlayedBefore]);
+
     const backendUrl = import.meta.env.VITE_BACKEND_URL
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [userData, setUserData] = useState(false)
+    const [blogGroups, setBlogGroups] = useState([])
+    const [blogPosts, setBlogPosts] = useState({})
 
     const getAuthState = async () => {
         try{
@@ -63,11 +72,36 @@ export const AppContextProvider = (props) =>{
         }
     }
 
+    const fetchBlogGroups = async () => {
+        try {
+            const { data } = await axios.get(backendUrl + '/api/bloggroup')
+            data.length > 0 && setBlogGroups(data)
+        } catch (e) {
+            console.log('Failed to fetch blog groups:', e.message)
+        }
+    }
+
+    const fetchBlogPosts = async (groupId) => {
+        if (blogPosts[groupId]) return blogPosts[groupId];
+        try {
+            const { data } = await axios.get(`${backendUrl}/api/posts/blog/${groupId}`);
+            const posts = data.success ? data.posts : [];
+            setBlogPosts(prev => ({ ...prev, [groupId]: posts }));
+            return posts;
+        } catch (e) {
+            console.log('Failed to fetch blog posts:', e.message);
+            return [];
+        }
+    }
+
+    const getBlogPosts = (groupId) => blogPosts[groupId] || []
+
     useEffect(() => {
         axios.defaults.withCredentials = true
         if(!userData) {
             getAuthState()
         }
+        fetchBlogGroups()
     }, [])
 
     const value ={
@@ -76,7 +110,10 @@ export const AppContextProvider = (props) =>{
         userData, setUserData,
         getUserData,
         sendVerificationOtp,
-        logout
+        logout,
+        blogGroups, fetchBlogGroups,
+        fetchBlogPosts, getBlogPosts,
+        introPlayedBefore, setIntroPlayedBefore,
     }
 
     return (

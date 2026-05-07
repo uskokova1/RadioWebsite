@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import {useNavigate} from "react-router-dom";
 import {AppContext} from "../context/AppContext.jsx";
 import axios from "axios";
@@ -9,17 +9,69 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
 import { User, Mail, Lock } from "lucide-react"
+import {useWindowManager} from "@/context/WindowManager.jsx";
+import EmailVerify from "@/pages/EmailVerify.jsx";
+import ResetPassword from "@/pages/ResetPassword.jsx";
 
 const Login = () => {
 
     const navigate = useNavigate()
 
-    const {backendUrl, setIsLoggedIn, getUserData, sendVerificationOtp} = useContext(AppContext)
+    const {backendUrl, setIsLoggedIn, getUserData, sendVerificationOtp, isLoggedIn} = useContext(AppContext)
+    const {addWindow, closeGroup} = useWindowManager()
 
-    const [state, setState] = useState("Sign up")
+    const [state, setState] = useState("Login")
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+
+    useEffect(() => {
+        if(isLoggedIn) {
+            closeGroup(5);
+            addWindow({
+                spawnx: window.innerWidth / 2, spawny: window.innerHeight / 2,
+                windowName: "login",
+                group: 5,
+                content: (
+                    <div>
+                    <p className='p-5'>
+                        Already logged in!
+                    </p>
+                        <p
+                            onClick={()=> {
+                                addWindow({
+                                    windowName: 'Reset Password',
+                                    spawnx: 600, spawny: 500,
+                                    group: 5, //hardcoded login group xd
+                                    content: (
+                                        <ResetPassword />
+                                    )
+                                });
+                            }}
+                            className="text-sm text-blue-400 cursor-pointer justify-self-center mx-auto"
+                        >
+                            Forgot password?
+                        </p>
+                        <p
+                            onClick={()=> {
+                                addWindow({
+                                    windowName: 'EmailVerify',
+                                    spawnx: 600, spawny: 500,
+                                    group: 5, //hardcoded login group xd
+                                    content: (
+                                        <EmailVerify />
+                                    )
+                                });
+                            }}
+                            className="text-sm text-blue-400 cursor-pointer justify-self-center mx-auto"
+                        >
+                            Send verify email
+                        </p>
+                    </div>
+                )
+            })
+        }
+    }, []);
 
     const onSubmitHandler = async (e) => {
         try {
@@ -38,6 +90,15 @@ const Login = () => {
                     getUserData()
                     sendVerificationOtp()
                     navigate('/email-verify')
+                    addWindow({
+                        windowName: 'Verify Email',
+                        spawnx: 500,
+                        spawny: 500,
+                            group: 'calendar',
+                            content: (
+                                    <EmailVerify />
+                                )}
+                    )
                 }else{
                     toast.error(data.message)
                 }
@@ -52,7 +113,15 @@ const Login = () => {
                 if(data.success){
                     setIsLoggedIn(true)
                     getUserData()
-                    navigate('/')
+                    addWindow({
+                        windowName: 'Login',
+                        spawnx: 500,
+                        spawny: 500,
+                        content: (
+                            <div className='p-5 bg-zinc-900' > login successful! </div>
+                        )}
+                    )
+                    closeGroup(5)
                 }else{
                     toast.error(data.message)
                 }
@@ -64,18 +133,7 @@ const Login = () => {
     }
 
     return (
-        <div style={styles.page}>
-            <div style={styles.column}>
-
-                <div style={styles.header}>
-                    <p className='text-red-500 text-xl font-bold'>WSIN RADIO</p>
-                    <h2 className='m-auto p-5 text-white text-5xl font-bold'>
-                        {state === "Sign up" ? "Create Account" : "Login"}
-                    </h2>
-                </div>
-
-                <div className="flex justify-center p-10">
-
+        <div className='bg-zinc-950 w-full h-full'>
                     <Card className="w-full max-w-md bg-zinc-900 border-zinc-800 text-white">
 
                         <CardHeader>
@@ -128,7 +186,16 @@ const Login = () => {
                                 </div>
 
                                 <p
-                                    onClick={()=> navigate('/reset-password')}
+                                    onClick={()=> {
+                                        addWindow({
+                                            windowName: 'Reset Password',
+                                            spawnx: 600, spawny: 500,
+                                            group: 5, //hardcoded login group xd
+                                            content: (
+                                                <ResetPassword />
+                                            )
+                                        });
+                                }}
                                     className="text-sm text-blue-400 cursor-pointer"
                                 >
                                     Forgot password?
@@ -168,41 +235,9 @@ const Login = () => {
                         </CardContent>
 
                     </Card>
-
-                </div>
-
-            </div>
         </div>
     )
 }
 
-const styles = {
-    page: {
-        minHeight: "100vh",
-        background: "#111",
-        display: "flex",
-        justifyContent: "center",
-    },
-    column: {
-        width: "100%",
-        maxWidth: "760px",
-        minHeight: "100vh",
-        background: "#1a1a1a",
-        display: "flex",
-        flexDirection: "column",
-        boxShadow: "0 0 60px rgba(0,0,0,0.8)",
-        borderLeft: "1px solid #2a2a2a",
-        borderRight: "1px solid #2a2a2a",
-    },
-    header: {
-        background: "#322d2d",
-        padding: "40px 32px 28px",
-        borderBottom: "1px solid #3a3a3a",
-        justifyContent: "center",
-        display: "flex",
-        flexDirection: "column",
-        textAlign: "center"
-    },
-}
 
 export default Login
