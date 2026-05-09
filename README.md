@@ -28,9 +28,9 @@ The interface is built around a draggable "desktop" aesthetic: each section (Blo
 
 | GitHub | Contributions |
 |--------|---------------|
-| **uskokova1** | Project lead — initial scaffolding, blog system, contacts, events, RSVP, admin dashboard backbone |
-| **munkE-dev** | Live chat (Socket.IO), background animations, intro video, calendar widget, UI polish |
-| **stonedscone** | Sidebar + draggable window system, comment moderation, blog groups, admin sub-pages, server-side bug fixes |
+| **Francesco** | Project lead — initial scaffolding, blog system, contacts, events, RSVP, admin dashboard backbone |
+| **Angel** | Live chat (Socket.IO), background animations, intro video, calendar widget, UI polish |
+| **Samuel** | Sidebar + draggable window system, comment moderation, blog groups, admin sub-pages, server-side bug fixes |
 
 ---
 
