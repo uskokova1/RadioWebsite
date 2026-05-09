@@ -147,10 +147,10 @@ Socket.IO requires that the deployment host supports WebSocket upgrades; all the
 ## 7. Screenshots
 
 ### Home — draggable windowed interface
-![Home page with sidebar and floating icons](./screenshot1.png)
+![Home page with sidebar and floating icons](./screenshot3.png)
 
 ### Blog reader with comments
 ![Blog group view showing a post and its comments](./screenshot2.png)
 
 ### Admin dashboard
-![Admin moderation panel](./screenshot3.png)
+![Admin moderation panel](./screenshot1.png)
